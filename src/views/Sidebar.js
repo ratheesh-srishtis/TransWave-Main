@@ -16,12 +16,12 @@ const Sidebar = () => {
   const [lastPath, setLastPath] = useState("");
   const [currentPath, setCurrentPath] = useState("");
 
-  useEffect(() => {
-    const path = window.location.pathname;
-    console.log(path, "current_path");
-    const lastSegment = path.substring(path.lastIndexOf("/") + 1);
-    setLastPath(lastSegment);
-  }, []);
+  // useEffect(() => {
+  //   const path = window.location.pathname;
+  //   console.log(path, "current_path");
+  //   const lastSegment = path.substring(path.lastIndexOf("/") + 1);
+  //   setLastPath(lastSegment);
+  // }, []);
 
   const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState("");
@@ -32,7 +32,9 @@ const Sidebar = () => {
   const userSettingsPermissions = loginResponse?.submenuPermission || [];
   const menuArr = [
     "profile",
+    "Profile", // Added uppercase version
     "leave",
+    "Leave", // Added uppercase version
     "dashboard",
     "quotations",
     "jobs",
@@ -42,34 +44,36 @@ const Sidebar = () => {
     "leave reports",
     "report",
     "General Documents",
-    "Employee Details Modifications",
+    "Update Employee Info",
     "Leave Requests",
   ];
   const handleNavigation = (menuItem) => {
     console.log(menuItem, "menuItem");
-    if (menuArr.includes(menuItem)) {
-      setShowSubmenu(false);
-      setActiveSubMenu("");
-    } else {
-      setShowSubmenu((prev) => !prev);
-      if (menuItem != "settings") setActiveSubMenu(menuItem);
-    }
-    if (lastPath == menuItem) {
-      setActiveMenu(lastPath);
-    } else if (lastPath != menuItem) {
-      setActiveMenu(menuItem);
-    }
-    setActiveMenu(menuItem); // Update the active menu item
-    console.log(menuItem, "handleNavigation");
+  if (menuArr.includes(menuItem)) {
+    setShowSubmenu(false);
+    setActiveSubMenu("");
+  } else {
+    setShowSubmenu((prev) => !prev);
+    if (menuItem != "settings") setActiveSubMenu(menuItem);
+  }
+  
+  // Only set active menu for settings submenu items, let useEffect handle route-based activation
+  if (!menuArr.includes(menuItem)) {
+    setActiveMenu(menuItem);
+  }
+  
+  console.log(menuItem, "handleNavigation");
 
     switch (menuItem) {
       case "dashboard":
         navigate("/dashboard"); // Replace with your actual route
         break;
       case "profile":
+      case "Profile": // Handle uppercase version
         navigate("/profile"); // Replace with your actual route
         break;
       case "leave":
+      case "Leave": // Handle uppercase version
         navigate("/leave"); // Replace with your actual route
         break;
       case "quotations":
@@ -144,8 +148,8 @@ const Sidebar = () => {
       case "General Documents":
         navigate("/general-documents");
         break;
-      case "Employee Details Modifications":
-        navigate("/employee-details-modifications");
+      case "Update Employee Info":
+        navigate("/update-employee-info");
         break;
       case "anchorage-stay-charges":
         navigate("/anchorage-stay-charges");
@@ -153,8 +157,8 @@ const Sidebar = () => {
       case "aed-conversion-rate":
         navigate("/aed-conversion-rate");
         break;
-      case "company-bank-details":
-        navigate("/company-bank-details");
+      case "company-bank-info":
+        navigate("/company-bank-info");
         break;
       case "media-settings":
         navigate("/media-settings");
@@ -179,16 +183,51 @@ const Sidebar = () => {
     setCurrentPath(formattedPath);
     console.log(formattedPath, "formatted_path"); // Output: /jobs
 
-    if (formattedPath == "/chats") {
-      setActiveMenu("");
+      // Map route paths to menu keys
+  const routeToMenuMap = {
+    '/dashboard': 'dashboard',
+    '/quotations': 'quotations', 
+    '/jobs': 'jobs',
+    '/payments': 'payments',
+    '/soa': 'soa',
+    '/profile': 'profile',
+    '/leave': 'leave',
+    '/employee': 'employee',
+    '/leavereports': 'leave reports',
+    '/reports': 'report',
+    '/general-documents': 'General Documents',
+    '/update-employee-info': 'Update Employee Info',
+    '/leave-requests': 'Leave Requests'
+  };
+
+
+     // Set active menu based on current route
+  const currentRoute = formattedPath;
+  const menuKey = routeToMenuMap[currentRoute];
+  
+  if (menuKey) {
+    setActiveMenu(menuKey);
+    // If it's a settings route, also handle submenu
+    if (currentRoute.includes('-settings') || currentRoute.includes('anchorage-locations') || 
+        currentRoute.includes('password-requests') || currentRoute.includes('anchorage-stay-charges') || 
+        currentRoute.includes('aed-conversion-rate') || currentRoute.includes('company-bank-info') || 
+        currentRoute.includes('media-settings')) {
+      setActiveMenu('settings');
+      setActiveSubMenu(finalPart);
+      setShowSubmenu(true);
     }
+  }
+
+  if (formattedPath === "/chats") {
+    setActiveMenu("");
+  }
   }, [location.pathname]); // Run effect whenever path changes
 
-  useEffect(() => {
-    if (lastPath) {
-      setActiveMenu(lastPath);
-    }
-  }, [lastPath]);
+  // useEffect(() => {
+  //   if (lastPath) {
+  //     setActiveMenu(lastPath);
+  //   }
+  // }, [lastPath]);
 
   useEffect(() => {
     console.log(menuList, "menuList");
@@ -199,7 +238,9 @@ const Sidebar = () => {
   const menuItems = {
     dashboard: { label: "Dashboard", icon: "bi bi-pie-chart" },
     profile: { label: "Profile", icon: "bi bi-people" },
+    Profile: { label: "Profile", icon: "bi bi-people" }, // Added uppercase version
     leave: { label: "Leave", icon: "bi bi-bar-chart" },
+    Leave: { label: "Leave", icon: "bi bi-bar-chart" }, // Added uppercase version
     quotations: { label: "Quotations", icon: "bi bi-receipt-cutoff" },
     jobs: { label: "Jobs", icon: "bi bi-briefcase" },
     payments: { label: "Payments", icon: "bi bi-cash-stack" },
@@ -212,8 +253,8 @@ const Sidebar = () => {
       label: "General Documents",
       icon: "bi bi-bar-chart",
     },
-    "Employee Details Modifications": {
-      label: "Employee Details Modifications",
+    "Update Employee Info": {
+      label: "Update Employee Info",
       icon: "bi bi-people",
     },
     "Leave Requests": {
@@ -222,15 +263,16 @@ const Sidebar = () => {
     },
   };
 
-  useEffect(() => {
-    console.log(userPermissions, "userPermissions");
-    if (userPermissions.length > 0) {
-      setActiveMenu(userPermissions[0]); // Set the first permissible menu item as active
-    }
-  }, [userPermissions]);
+  // useEffect(() => {
+  //   console.log(userPermissions, "userPermissions");
+  //   if (userPermissions.length > 0) {
+  //     setActiveMenu(userPermissions[0]); // Set the first permissible menu item as active
+  //   }
+  // }, [userPermissions]);
   useEffect(() => {
     console.log(userSettingsPermissions, "userSettingsPermissions");
-  }, [userSettingsPermissions]);
+    console.log(menuItems, "menuItems");
+  }, [userSettingsPermissions, menuItems]);
 
   return (
     <>
@@ -295,8 +337,7 @@ const Sidebar = () => {
                                   "Anchorage Stay Charges":
                                     "anchorage-stay-charges",
                                   "AED Conversion Rate": "aed-conversion-rate",
-                                  "Company Bank Details":
-                                    "company-bank-details",
+                                  "Company Bank Info": "company-bank-info",
                                   "Company Media": "media-settings",
                                 };
                                 const submenuKey = submenuMap[item.submenu];

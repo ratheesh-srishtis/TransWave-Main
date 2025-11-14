@@ -22,6 +22,8 @@ const Outward_Clearance_Letter_Clean = ({
   const [openPopUp, setOpenPopUp] = useState(false);
   const [message, setMessage] = useState("");
 
+   const heading = "Outward Clearance Letter - Clean";
+
   const handleClose = (event, reason) => {
     if (reason === "backdropClick") {
       return; // Prevent closing on backdrop click

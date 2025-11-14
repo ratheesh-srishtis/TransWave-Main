@@ -46,6 +46,8 @@ const ProformaInvoice = ({
   const [attn, setAttn] = React.useState("");
   const [subject, setSubject] = React.useState("");
 
+   const heading = "Proforma invoice";
+
   React.useEffect(() => {
     if (!dataFromAPI) return; // Prevent running if data is not loaded
 
@@ -196,7 +198,7 @@ const ProformaInvoice = ({
         <DialogContent>
           <div className="mainoktb ">
             <div className=" d-flex justify-content-center">
-              <h5 className="twoktbsubhead"> PROFORMA INVOICE </h5>
+              <h5 className="twoktbsubhead">  {heading.toUpperCase()} </h5>
             </div>
             <div className="cont row d-flex justify-content-between ">
               <div className="col-6 queheading">

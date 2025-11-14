@@ -12,20 +12,20 @@ import {
   deleteVisaDocument,
   deleteContractDocument,
   deletePassportDocument,
-} from "../../services/apiEmployee";
-import "../../css/payment.css";
+} from "../services/apiEmployee";
+import { editEmployeeProfile } from "../services/apiSettings";
+import "../css/payment.css";
 import Swal from "sweetalert2";
-import PopUp from "../PopUp";
-import Loader from "../Loader";
-const AddEmployee = () => {
+import PopUp from "../pages/PopUp";
+import Loader from "../pages/Loader";
+const EditProfile = ({ employeeObject }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const isEditing = location.state?.isEditing || false;
+  const isEditing = true;
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
   const [EmployeeList, setEmployeeList] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // Loader state
-  const [isSuccess, setIsSuccess] = useState(false); // Track if it's a success response
 
   const [passportName, setpassportName] = useState(null);
   const [passportUrl, setpassportUrl] = useState(null);
@@ -46,30 +46,31 @@ const AddEmployee = () => {
   const fileInputRefLicence = useRef(null);
   const fileInputRefs = useRef({});
   const documentUrl = process.env.REACT_APP_ASSET_URL + "/";
+  console.log(employeeObject, "employeeObject_editprofile");
   const [uploadedFiles, setUploadedFiles] = useState({
     passportupload:
-      location.state?.passportDetails &&
-      location.state.passportDetails.length > 0
-        ? location.state.passportDetails[0].document
+      employeeObject?.passportDetails &&
+      employeeObject.passportDetails.length > 0
+        ? employeeObject.passportDetails[0].document
         : null,
     contractupload:
-      location.state?.contractDetails &&
-      location.state.contractDetails.length > 0
-        ? location.state.contractDetails[0].document
+      employeeObject?.contractDetails &&
+      employeeObject.contractDetails.length > 0
+        ? employeeObject.contractDetails[0].document
         : null,
     visaupload:
-      location.state?.visaDetails && location.state.visaDetails.length > 0
-        ? location.state.visaDetails[0].document
+      employeeObject?.visaDetails && employeeObject.visaDetails.length > 0
+        ? employeeObject.visaDetails[0].document
         : null,
 
     licenseupload:
-      location.state?.licenseDetails && location.state.licenseDetails.length > 0
-        ? location.state.licenseDetails[0].document
+      employeeObject?.licenseDetails && employeeObject.licenseDetails.length > 0
+        ? employeeObject.licenseDetails[0].document
         : null,
   });
   const initialFields =
-    location.state?.isEditing && location.state?.medicalRecordDetails?.length
-      ? location.state.medicalRecordDetails
+    employeeObject?.isEditing && employeeObject?.medicalRecordDetails?.length
+      ? employeeObject.medicalRecordDetails
       : [{ id: 1, description: "", relationship: "", medicalrord: "" }];
   // console.log('EW::',initialFields);
   const [fields, setFields] = useState(initialFields);
@@ -84,8 +85,8 @@ const AddEmployee = () => {
   };
 
   const certificateInitialFields =
-    location.state?.isEditing && location.state?.certificationDetails?.length
-      ? location.state.certificationDetails
+    employeeObject?.isEditing && employeeObject?.certificationDetails?.length
+      ? employeeObject.certificationDetails
       : [{ id: 1, description: "", relationship: "", certificatesRecord: "" }];
   // console.log('EW::',initialFields);
   const [certificateFields, setCertificateFields] = useState(
@@ -101,11 +102,10 @@ const AddEmployee = () => {
     setCertificateFields([...certificateFields, newField]);
   };
 
-  const existpassort = location.state?.passportDetails[0]?.document || "";
-  const existcontract = location.state?.contractDetails[0]?.document || "";
-  const existvisa = location.state?.visaDetails[0]?.document || "";
-
-  const existlicense = location.state?.licenseDetails[0]?.document || "";
+  const existpassort = employeeObject?.passportDetails?.[0]?.document || null;
+  const existcontract = employeeObject?.contractDetails?.[0]?.document || null;
+  const existvisa = employeeObject?.visaDetails?.[0]?.document || null;
+  const existlicense = employeeObject?.licenseDetails?.[0]?.document || null;
   const [desiginationlist, setDesiginations] = useState([]);
   const fetchAllDesignations = async () => {
     let listdesiginations = await getAllDesignations();
@@ -137,14 +137,30 @@ const AddEmployee = () => {
       });
       setUploadedMedicalFiles(initialFiles);
       setUploadedCertificateFiles(initialCertificateFiles);
-      setpassportUrl(existpassort.url);
-      setpassportName(existpassort.originalName);
-      setcontractUrl(existcontract.url);
-      setcontractName(existcontract.originalName);
-      setvisaUrl(existvisa.url);
-      setvisaName(existvisa.originalName);
-      setlicenseUrl(existlicense.url);
-      setlicenseName(existlicense.originalName);
+
+      // Initialize passport document state
+      if (existpassort && existpassort.url) {
+        setpassportUrl(existpassort.url);
+        setpassportName(existpassort.originalName);
+      }
+
+      // Initialize contract document state
+      if (existcontract && existcontract.url) {
+        setcontractUrl(existcontract.url);
+        setcontractName(existcontract.originalName);
+      }
+
+      // Initialize visa document state
+      if (existvisa && existvisa.url) {
+        setvisaUrl(existvisa.url);
+        setvisaName(existvisa.originalName);
+      }
+
+      // Initialize license document state
+      if (existlicense && existlicense.url) {
+        setlicenseUrl(existlicense.url);
+        setlicenseName(existlicense.originalName);
+      }
     }
   }, [
     fields,
@@ -156,78 +172,73 @@ const AddEmployee = () => {
     certificateFields,
   ]);
   const [formData, setFormData] = useState({
-    employeeName: location.state?.employeeName || "",
+    employeeName: employeeObject?.employeeName || "",
     username: "",
     password: "",
-    employeeLastName: location.state?.employeeLastName || "",
-    dob: location.state?.dob || "",
-    address: location.state?.address || "",
-    nationality: location.state?.nationality || "",
-    city: location.state?.city || "",
-    state: location.state?.state || "",
-    postcode: location.state?.postcode || "",
-    contactNumber: location.state?.contactNumber || "",
-    email: location.state?.email || "",
-    passportNumber: location.state?.passportNumber || "",
-    iqamaNumber: location.state?.iqamaNumber || "",
-    dateOfJoining: location.state?.dateOfJoining || "",
-    designation: location.state?.designation._id || "",
+    employeeLastName: employeeObject?.employeeLastName || "",
+    dob: employeeObject?.dob || "",
+    address: employeeObject?.address || "",
+    nationality: employeeObject?.nationality || "",
+    city: employeeObject?.city || "",
+    state: employeeObject?.state || "",
+    postcode: employeeObject?.postcode || "",
+    contactNumber: employeeObject?.contactNumber || "",
+    email: employeeObject?.email || "",
+    passportNumber: employeeObject?.passportNumber || "",
+    iqamaNumber: employeeObject?.iqamaNumber || "",
+    dateOfJoining: employeeObject?.dateOfJoining || "",
+    designation: employeeObject?.designation || "",
     //department:location.state?.department || '',
-    officialEmail: location.state?.officialEmail || "",
-    profession: location.state?.profession || "",
-    passportDetails: location.state?.passportDetails || [],
+    officialEmail: employeeObject?.officialEmail || "",
+    profession: employeeObject?.profession || "",
+    passportDetails: employeeObject?.passportDetails || [],
     passportdetail_number:
-      location.state?.passportDetails[0]?.passportNumber || "",
+      employeeObject?.passportDetails?.[0]?.passportNumber || "",
     passportdetail_expiry:
-      location.state?.passportDetails[0]?.dateOfExpiry || "",
+      employeeObject?.passportDetails?.[0]?.dateOfExpiry || "",
     passportupload: uploadedFiles.passportupload
       ? uploadedFiles.passportupload.originalName
       : "",
-    contractDetails: location.state?.contractDetails || [],
-    contractdetail_name: location.state?.contractDetails[0]?.contractName || "",
+    contractDetails: employeeObject?.contractDetails || [],
+    contractdetail_name:
+      employeeObject?.contractDetails?.[0]?.contractName || "",
     contractdetail_expiry:
-      location.state?.contractDetails[0]?.dateOfExpiry || "",
+      employeeObject?.contractDetails?.[0]?.dateOfExpiry || "",
     contractupload: uploadedFiles.contractupload
       ? uploadedFiles.contractupload.originalName
       : "",
-    visaDetails: location.state?.visaDetails || [],
-    visa_number: location.state?.visaDetails[0]?.visaNumber || "",
-    visa_expiry: location.state?.visaDetails[0]?.dateOfExpiry || "",
+    visaDetails: employeeObject?.visaDetails || [],
+    visa_number: employeeObject?.visaDetails?.[0]?.visaNumber || "",
+    visa_expiry: employeeObject?.visaDetails?.[0]?.dateOfExpiry || "",
     visaupload: uploadedFiles.visaupload
       ? uploadedFiles.visaupload.originalName
       : "",
 
-    licenseDetails: location.state?.licenseDetails || [],
-    license_number: location.state?.licenseDetails[0]?.licenseNumber || "",
-    license_date: location.state?.licenseDetails[0]?.dateOfExpiry || "",
+    licenseDetails: employeeObject?.licenseDetails || [],
+    license_number: employeeObject?.licenseDetails?.[0]?.licenseNumber || "",
+    license_date: employeeObject?.licenseDetails?.[0]?.dateOfExpiry || "",
     licenseupload: uploadedFiles.licenseupload
       ? uploadedFiles.licenseupload.originalName
       : "",
-    medicalRecordDetails: location.state?.medicalRecordDetails || [],
+    medicalRecordDetails: employeeObject?.medicalRecordDetails || [],
     medical_description: "",
     relationship: "",
 
-    certificationDetails: location.state?.certificationDetails || [],
+    certificationDetails: employeeObject?.certificationDetails || [],
     certification: "",
     certificateDescription: "",
-    reportingTo: location.state?.reportingTo || "",
-    reportingHead: location.state?.reportingHead || "",
+    reportingTo: employeeObject?.reportingTo || "",
+    reportingHead: employeeObject?.reportingHead || "",
   });
   const reloadpage = () => {
-    navigate("/employee");
-    //window.location.reload();
-  };
-
-  const handlePopupClose = () => {
-    setOpenPopUp(false);
-    if (isSuccess) {
-      reloadpage(); // Only reload if it's a success scenario
-    }
+    // navigate("/profile");
+    window.location.reload();
   };
 
   useEffect(() => {
     console.log(location.state, "location.state");
-  }, [location.state]);
+    console.log(employeeObject, "employeeObject");
+  }, [location.state, employeeObject]);
   const validateForm = () => {
     const newErrors = {};
     if (!formData.employeeName)
@@ -251,14 +262,11 @@ const AddEmployee = () => {
       newErrors.dateOfJoining = "Date of joining is required";
     if (!formData.designation)
       newErrors.designation = "Desigination is required";
-    // if (!formData.username) newErrors.username = "User Name is required";
-    // // Password validation
-    // if (!isEditing && !formData.password) {
-    //   newErrors.password = "Password is required";
-    // }
+
     // if (!formData.department) newErrors.department = "Department is required";
     // if (!formData.officialEmail)
     //   newErrors.officialEmail = "Official Email is required";
+    // passport Detail Validation
 
     setErrors(newErrors);
 
@@ -275,6 +283,7 @@ const AddEmployee = () => {
 
     setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
+
   const handleDeleteFile = (fieldName, passed_id) => {
     console.log(fieldName, "fieldName");
     console.log(passed_id, "passed_id_handleDeleteFile");
@@ -307,11 +316,11 @@ const AddEmployee = () => {
         switch (fieldName) {
           case "passportupload":
             // Delete from database if in edit mode and employeeId exists
-            if (isEditing && location.state?.employeeId) {
+            if (isEditing && employeeObject.employeeId) {
               try {
                 const deletePayload = {
-                  employeeId: location.state.employeeId,
-                  documentId: location.state.passportDetails[0]._id,
+                  employeeId: employeeObject.employeeId,
+                  documentId: employeeObject.passportDetails[0]._id,
                 };
                 await deletePassportDocument(deletePayload);
                 console.log(
@@ -339,11 +348,11 @@ const AddEmployee = () => {
             break;
           case "contractupload":
             // Delete from database if in edit mode and employeeId exists
-            if (isEditing && location.state?.employeeId) {
+            if (isEditing && employeeObject.employeeId) {
               try {
                 const deletePayload = {
-                  employeeId: location.state.employeeId,
-                  documentId: location.state.contractDetails[0]._id,
+                  employeeId: employeeObject.employeeId,
+                  documentId: employeeObject.contractDetails[0]._id,
                 };
                 await deleteContractDocument(deletePayload);
                 console.log(
@@ -371,11 +380,11 @@ const AddEmployee = () => {
             break;
           case "visaupload":
             // Delete from database if in edit mode and employeeId exists
-            if (isEditing && location.state?.employeeId) {
+            if (isEditing && employeeObject.employeeId) {
               try {
                 const deletePayload = {
-                  employeeId: location.state.employeeId,
-                  documentId: location.state.visaDetails[0]._id,
+                  employeeId: employeeObject.employeeId,
+                  documentId: employeeObject.visaDetails[0]._id,
                 };
                 await deleteVisaDocument(deletePayload);
                 console.log("Visa document deleted from database successfully");
@@ -401,11 +410,11 @@ const AddEmployee = () => {
             break;
           case "licenseupload":
             // Delete from database if in edit mode and employeeId exists
-            if (isEditing && location.state?.employeeId) {
+            if (isEditing && employeeObject.employeeId) {
               try {
                 const deletePayload = {
-                  employeeId: location.state.employeeId,
-                  documentId: location.state.licenseDetails[0]._id,
+                  employeeId: employeeObject.employeeId,
+                  documentId: employeeObject.licenseDetails[0]._id,
                 };
                 await deleteLicenseDocument(deletePayload);
                 console.log(
@@ -432,309 +441,109 @@ const AddEmployee = () => {
             }
             break;
 
-          // case "certificatesRecord":
-          //   // Delete from database if in edit mode and has _id
-          //   if (isEditing && passed_id && location.state?.employeeId) {
-          //     try {
-          //       const deletePayload = {
-          //         employeeId: location.state.employeeId,
-          //         documentId: passed_id,
-          //       };
-          //       await deleteCertificationDocument(deletePayload);
-          //       console.log("Certificate deleted from database successfully");
-          //     } catch (error) {
-          //       console.error(
-          //         "Error deleting certificate from database:",
-
-          //         error
-          //       );
-          //       Swal.fire(
-          //         "Error",
-          //         "Failed to delete certificate from database",
-          //         "error"
-          //       );
-          //       return; // Exit if database deletion fails
-          //     }
-          //   }
-
-          //   // Update uploaded medical files
-          //   setUploadedCertificateFiles((prevFiles) => {
-          //     //console.log('Before delete:', prevFiles);
-          //     const { [passed_id]: deleted, ...updatedFiles } = prevFiles; // destructuring to remove the field
-          //     //console.log('After delete:', updatedFiles);
-          //     let updatedData = [];
-          //     if (isEditing)
-          //       updatedData = certificateFields.filter(
-          //         (item) => (item._id || item.id) !== passed_id
-          //       );
-          //     else
-          //       updatedData = certificateFields.filter(
-          //         (item) => item.id !== passed_id
-          //       );
-          //     //console.log("HERR::",updatedData);
-          //     setCertificateFields(updatedData);
-          //     return { ...updatedFiles };
-          //   });
-
-          //   // Clear file input
-          //   setFormData((prevData) => ({
-          //     ...prevData,
-          //     [passed_id]: {
-          //       certification: "",
-          //       certificateDescription: "",
-          //       certificatesRecord: null,
-          //     },
-          //   }));
-          //   if (fileInputRefs.current[passed_id]) {
-          //     fileInputRefs.current[passed_id].value = null;
-          //   }
-
-          //   break;
-
-          case "certificatesRecord": {
-            // Find the certificate object by either _id (DB) or id (local temporary)
-            const certItem = certificateFields.find(
-              (item) => (item._id ?? item.id) === passed_id
-            );
-
-            // Was this persisted to DB? (we call API only if a DB _id exists)
-            const isPersistedInDb = Boolean(certItem && certItem._id);
-
-            // If editing an existing certificate with a DB id -> delete the document on backend
-            if (isEditing && isPersistedInDb && location.state?.employeeId) {
-              try {
-                const deletePayload = {
-                  employeeId: location.state.employeeId,
-                  documentId: passed_id, // backend expects certificate _id
-                };
-                await deleteCertificationDocument(deletePayload);
-                console.log(
-                  "Certificate document deleted from database successfully"
-                );
-              } catch (error) {
-                console.error(
-                  "Error deleting certificate document from database:",
-                  error
-                );
-                Swal.fire(
-                  "Error",
-                  "Failed to delete certificate document from database",
-                  "error"
-                );
-                return; // don't proceed with local state changes if server delete failed
-              }
+          case "certificatesRecord":
+            // Delete from database if in edit mode and has _id
+            try {
+              const deletePayload = {
+                employeeId: employeeObject.employeeId,
+                documentId: passed_id,
+              };
+              await deleteCertificationDocument(deletePayload);
+              console.log("Certificate deleted from database successfully");
+            } catch (error) {
+              console.error("Error deleting certificate from database:", error);
+              Swal.fire(
+                "Error",
+                "Failed to delete certificate from database",
+                "error"
+              );
+              return; // Exit if database deletion fails
             }
 
-            // 1) Update uploadedCertificateFiles — remove file info locally.
+            // Only remove the document from the object, not the entire object
             setUploadedCertificateFiles((prevFiles) => {
-              const updatedFiles = { ...prevFiles };
-
-              // If there's an entry for this id, remove file-specific properties
-              if (updatedFiles[passed_id]) {
-                const entry = { ...updatedFiles[passed_id] };
-
-                // Remove common file fields used in your app
-                if ("document" in entry) delete entry.document;
-                if ("certificatesRecord" in entry)
-                  entry.certificatesRecord = null;
-                if ("url" in entry) delete entry.url;
-                if ("originalName" in entry) delete entry.originalName;
-                if ("file" in entry) delete entry.file;
-
-                // If entry is empty (no meaningful keys), remove the whole key
-                const isEmpty = Object.keys(entry).every(
-                  (k) =>
-                    entry[k] === null ||
-                    entry[k] === undefined ||
-                    entry[k] === ""
-                );
-
-                if (isEmpty) {
-                  delete updatedFiles[passed_id];
-                } else {
-                  updatedFiles[passed_id] = entry;
-                }
-              }
-
-              return updatedFiles;
+              const { [passed_id]: deleted, ...updatedFiles } = prevFiles;
+              return { ...updatedFiles };
             });
 
-            // 2) Update certificateFields — keep object, remove only document / file refs
-            setCertificateFields((prev) =>
-              prev.map((item) => {
-                const id = item._id ?? item.id;
-                if (id !== passed_id) return item;
-
-                const updatedItem = { ...item };
-
-                // Delete or null only the file-related fields
-                if ("document" in updatedItem) delete updatedItem.document;
-                if ("certificatesRecord" in updatedItem)
-                  updatedItem.certificatesRecord = null;
-                if ("file" in updatedItem) delete updatedItem.file;
-                if ("url" in updatedItem) delete updatedItem.url;
-                if ("originalName" in updatedItem)
-                  delete updatedItem.originalName;
-
-                return updatedItem;
+            setCertificateFields((prevFields) =>
+              prevFields.map((item) => {
+                if ((item._id || item.id) === passed_id) {
+                  // Remove only the document property
+                  return { ...item, document: null };
+                }
+                return item;
               })
             );
 
-            // 3) Update formData — clear only file-related values for this id, keep form text
-            setFormData((prevData) => {
-              const existing = prevData[passed_id] || {};
-              const newEntry = { ...existing };
-
-              if ("certificatesRecord" in newEntry)
-                newEntry.certificatesRecord = null;
-              if ("document" in newEntry) delete newEntry.document;
-              if ("file" in newEntry) delete newEntry.file;
-              if ("url" in newEntry) delete newEntry.url;
-              if ("originalName" in newEntry) delete newEntry.originalName;
-
-              return {
-                ...prevData,
-                [passed_id]: newEntry,
-              };
-            });
-
-            // 4) Clear the actual file input element safely
-            if (
-              fileInputRefs &&
-              fileInputRefs.current &&
-              fileInputRefs.current[passed_id]
-            ) {
-              try {
-                fileInputRefs.current[passed_id].value = null;
-              } catch (e) {
-                // Some browsers may throw — ignore safely
-                console.warn("Could not reset file input ref:", e);
-              }
+            // Clear file input
+            setFormData((prevData) => ({
+              ...prevData,
+              [passed_id]: {
+                ...prevData[passed_id],
+                certificatesRecord: null,
+              },
+            }));
+            if (fileInputRefs.current[passed_id]) {
+              fileInputRefs.current[passed_id].value = null;
             }
 
-            console.log(
-              "Certificate file removed (local state updated). DB call used only when item had _id."
-            );
             break;
-          }
-          default: {
-            // Find the record by _id or id
-            const recordItem = fields.find(
-              (item) => (item._id ?? item.id) === passed_id
-            );
 
-            // Determine if this record exists in DB
-            const isPersistedInDb = Boolean(recordItem && recordItem._id);
-
-            // 1️⃣ Delete file from backend only if record exists in DB
-            if (isEditing && isPersistedInDb && location.state?.employeeId) {
+          default:
+            // Delete from database if in edit mode and has _id
+            if (isEditing && passed_id && employeeObject.employeeId) {
               try {
                 const deletePayload = {
-                  employeeId: location.state.employeeId,
-                  documentId: passed_id, // backend expects medical record _id
+                  employeeId: employeeObject.employeeId,
+                  documentId: passed_id,
                 };
                 await deleteMedicalRecordDocument(deletePayload);
                 console.log(
-                  "Medical record document deleted from database successfully"
+                  "Medical record deleted from database successfully"
                 );
               } catch (error) {
                 console.error(
-                  "Error deleting medical record document from database:",
+                  "Error deleting medical record from database:",
                   error
                 );
                 Swal.fire(
                   "Error",
-                  "Failed to delete medical record document from database",
+                  "Failed to delete medical record from database",
                   "error"
                 );
-                return; // stop further local updates if API fails
+                return; // Exit if database deletion fails
               }
             }
 
-            // 2️⃣ Update uploaded medical files — clear only file info
+            // Only remove the document from the object, not the entire object
             setUploadedMedicalFiles((prevFiles) => {
-              const updatedFiles = { ...prevFiles };
-
-              if (updatedFiles[passed_id]) {
-                const entry = { ...updatedFiles[passed_id] };
-
-                // Remove/clear common file-related fields
-                if ("document" in entry) delete entry.document;
-                if ("medicalrord" in entry) entry.medicalrord = null;
-                if ("file" in entry) delete entry.file;
-                if ("url" in entry) delete entry.url;
-                if ("originalName" in entry) delete entry.originalName;
-
-                // Remove entry completely if it becomes empty
-                const isEmpty = Object.keys(entry).every(
-                  (k) =>
-                    entry[k] === null ||
-                    entry[k] === undefined ||
-                    entry[k] === ""
-                );
-                if (isEmpty) delete updatedFiles[passed_id];
-                else updatedFiles[passed_id] = entry;
-              }
-
-              return updatedFiles;
+              const { [passed_id]: deleted, ...updatedFiles } = prevFiles;
+              return { ...updatedFiles };
             });
 
-            // 3️⃣ Update fields — keep record but remove file/document only
-            setFields((prev) =>
-              prev.map((item) => {
-                const id = item._id ?? item.id;
-                if (id !== passed_id) return item;
-
-                const updatedItem = { ...item };
-
-                // Delete file-related properties only
-                if ("document" in updatedItem) delete updatedItem.document;
-                if ("medicalrord" in updatedItem)
-                  updatedItem.medicalrord = null;
-                if ("file" in updatedItem) delete updatedItem.file;
-                if ("url" in updatedItem) delete updatedItem.url;
-                if ("originalName" in updatedItem)
-                  delete updatedItem.originalName;
-
-                return updatedItem;
+            setFields((prevFields) =>
+              prevFields.map((item) => {
+                if ((item._id || item.id) === passed_id) {
+                  // Remove only the document property
+                  return { ...item, document: null };
+                }
+                return item;
               })
             );
 
-            // 4️⃣ Update formData — clear only file field, keep other values
-            setFormData((prevData) => {
-              const existing = prevData[passed_id] || {};
-              const newEntry = { ...existing };
-
-              if ("medicalrord" in newEntry) newEntry.medicalrord = null;
-              if ("document" in newEntry) delete newEntry.document;
-              if ("file" in newEntry) delete newEntry.file;
-              if ("url" in newEntry) delete newEntry.url;
-              if ("originalName" in newEntry) delete newEntry.originalName;
-
-              return {
-                ...prevData,
-                [passed_id]: newEntry,
-              };
-            });
-
-            // 5️⃣ Clear file input ref
-            if (
-              fileInputRefs &&
-              fileInputRefs.current &&
-              fileInputRefs.current[passed_id]
-            ) {
-              try {
-                fileInputRefs.current[passed_id].value = null;
-              } catch (e) {
-                console.warn("Could not reset file input ref:", e);
-              }
+            // Clear file input
+            setFormData((prevData) => ({
+              ...prevData,
+              [passed_id]: {
+                ...prevData[passed_id],
+                medicalrord: null,
+              },
+            }));
+            if (fileInputRefs.current[passed_id]) {
+              fileInputRefs.current[passed_id].value = null;
             }
-
-            console.log(
-              "Medical record file removed (local + API if applicable)"
-            );
             break;
-          }
         }
       }
     });
@@ -742,46 +551,56 @@ const AddEmployee = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!validateForm()) {
-      setOpenPopUp(true);
-      setMessage("Please fill all required fields");
-      setIsSuccess(false); // Not a success scenario
-      return;
-    }
+    if (!validateForm()) return;
+    console.log(formData, "formData_handleSubmit");
     try {
+      // Handle passport details - use existing document if no new file uploaded
+      const existingPassportDoc =
+        employeeObject?.passportDetails?.[0]?.document || null;
       const newPassportDetail = {
         passportNumber: formData.passportdetail_number,
         dateOfExpiry: formData.passportdetail_expiry,
         document: {
-          url: passportUrl,
-          originalName: passportName,
+          url: passportUrl || existingPassportDoc?.url || null,
+          originalName:
+            passportName || existingPassportDoc?.originalName || null,
         },
       };
 
+      // Handle contract details - use existing document if no new file uploaded
+      const existingContractDoc =
+        employeeObject?.contractDetails?.[0]?.document || null;
       const newContractDetail = {
         contractName: formData.contractdetail_name,
         dateOfExpiry: formData.contractdetail_expiry,
         document: {
-          url: contractUrl,
-          originalName: contractName,
+          url: contractUrl || existingContractDoc?.url || null,
+          originalName:
+            contractName || existingContractDoc?.originalName || null,
         },
       };
 
+      // Handle visa details - use existing document if no new file uploaded
+      const existingVisaDoc =
+        employeeObject?.visaDetails?.[0]?.document || null;
       const newVisaDetail = {
         visaNumber: formData.visa_number,
         dateOfExpiry: formData.visa_expiry,
         document: {
-          url: visaUrl,
-          originalName: visaName,
+          url: visaUrl || existingVisaDoc?.url || null,
+          originalName: visaName || existingVisaDoc?.originalName || null,
         },
       };
 
+      // Handle license details - use existing document if no new file uploaded
+      const existingLicenseDoc =
+        employeeObject?.licenseDetails?.[0]?.document || null;
       const newLicenceDetail = {
         licenseNumber: formData.license_number,
         dateOfExpiry: formData.license_date,
         document: {
-          url: licenseUrl,
-          originalName: licenseName,
+          url: licenseUrl || existingLicenseDoc?.url || null,
+          originalName: licenseName || existingLicenseDoc?.originalName || null,
         },
       };
 
@@ -855,14 +674,14 @@ const AddEmployee = () => {
       }
 
       //if(passportUrl)
-      formData.passportDetails = newPassportDetail;
+      formData.passportDetails = [newPassportDetail];
       //if(contractUrl)
-      formData.contractDetails = newContractDetail;
+      formData.contractDetails = [newContractDetail];
       //(visaUrl)
-      formData.visaDetails = newVisaDetail;
+      formData.visaDetails = [newVisaDetail];
 
       //if(licenseUrl)
-      formData.licenseDetails = newLicenceDetail;
+      formData.licenseDetails = [newLicenceDetail];
       if (isEditing) formData.medicalRecordDetails = editmedicalRecordDetails;
       else formData.medicalRecordDetails = medicalRecordDetails;
 
@@ -870,18 +689,19 @@ const AddEmployee = () => {
       else formData.certificationDetails = certificationDetails;
       let response;
       if (isEditing) {
-        formData.employeeId = location.state?.employeeId;
+        formData.employeeId = employeeObject?.employeeId;
         // If password field is empty, send empty string
         formData.password = formData.password ? formData.password : "";
-        response = await editEmployee(formData);
+        response = await editEmployeeProfile(formData);
       } else {
         response = await saveEmployee(formData);
       }
 
       if (response.status === true) {
         setOpenPopUp(true);
-        setMessage(response.message);
-        setIsSuccess(true); // Success scenario
+        setMessage(
+          "Update successful. The changes will reflect in your profile once approved by HR."
+        );
         fileInputRefPassport.current.value = "";
         fileInputRefContract.current.value = "";
         fileInputRefVisa.current.value = "";
@@ -907,22 +727,37 @@ const AddEmployee = () => {
           designation: "",
           // department:"",
           officialEmail: "",
+          passportDetails: [],
           passportdetail_number: "",
           passportdetail_expiry: "",
+          passportupload: "",
+          contractDetails: [],
+          contractdetail_name: "",
+          contractdetail_expiry: "",
+          contractupload: "",
+          visaDetails: [],
+          visa_number: "",
+          visa_expiry: "",
+          visaupload: "",
+          licenseDetails: [],
+          license_number: "",
+          license_date: "",
+          licenseupload: "",
+          medicalRecordDetails: [],
+          medical_description: "",
+          relationship: "",
+          certificationDetails: [],
+          certification: "",
+          certificateDescription: "",
           reportingTo: "",
           reportingHead: "",
         });
-      } else {
-        setOpenPopUp(true);
-        setMessage(response.message);
-        setIsSuccess(false); // Error scenario
       }
     } catch (error) {
       setMessage(error);
-      setOpenPopUp(true);
-      setIsSuccess(false); // Error scenario
     }
   };
+
   const handleFileChange = async (event) => {
     const imageData = event.target.files[0];
     if (!imageData) return;
@@ -1153,11 +988,13 @@ const AddEmployee = () => {
         <div className="pleaseinfo mb-3">
           {!isEditing ? "Please fill out your informations below" : null}
         </div>
-        <div className="Personal mb-3">Personal Information</div>
+        <div className="Personal mb-3" style={{ fontWeight: "bold" }}>
+          Personal Information
+        </div>
         <form onSubmit={handleSubmit}>
           <div className="row mb-2">
             <div className="col-4">
-              <label htmlFor="employeeName" className="form-label">
+              <label htmlFor="employeeName" className="form-label-for-profile">
                 First Name:
                 <span className="required"> * </span>
               </label>
@@ -1168,14 +1005,17 @@ const AddEmployee = () => {
                 placeholder=""
                 name="employeeName"
                 onChange={handleChange}
-                value={formData.employeeName}
+                value={formData?.employeeName}
               />
-              {errors.employeeName && (
-                <span className="invalid">{errors.employeeName}</span>
+              {errors?.employeeName && (
+                <span className="invalid">{errors?.employeeName}</span>
               )}
             </div>
             <div className="col-4">
-              <label htmlFor="employeeLastName" className="form-label">
+              <label
+                htmlFor="employeeLastName"
+                className="form-label-for-profile"
+              >
                 Last Name:
                 <span className="required"> * </span>
               </label>
@@ -1193,12 +1033,12 @@ const AddEmployee = () => {
               )}
             </div>
             <div className="col-4">
-              <label htmlFor="dob" className="form-label">
+              <label htmlFor="dob" className="form-label-for-profile">
                 Date of Birth :<span className="required"> * </span>
               </label>
               <input
                 type="date"
-                className="form-control custom-picker-styles"
+                className="form-control vessel-voyage"
                 id="dob"
                 placeholder=""
                 name="dob"
@@ -1212,7 +1052,7 @@ const AddEmployee = () => {
             <div className="col">
               <div className="mb-3">
                 <div className="col">
-                  <label htmlFor="adddress" className="form-label">
+                  <label htmlFor="adddress" className="form-label-for-profile">
                     Address:
                   </label>
                   <textarea
@@ -1230,7 +1070,7 @@ const AddEmployee = () => {
           </div>
           <div className="row mb-2">
             <div className="col-4">
-              <label htmlFor="city" className="form-label">
+              <label htmlFor="city" className="form-label-for-profile">
                 City:
                 {/* <span className="required"> * </span> */}
               </label>
@@ -1246,7 +1086,7 @@ const AddEmployee = () => {
               {errors.city && <span className="invalid">{errors.city}</span>}
             </div>
             <div className="col-4">
-              <label htmlFor="state" className="form-label">
+              <label htmlFor="state" className="form-label-for-profile">
                 State:
                 {/* <span className="required"> * </span> */}
               </label>
@@ -1262,7 +1102,7 @@ const AddEmployee = () => {
               {errors.state && <span className="invalid">{errors.state}</span>}
             </div>
             <div className="col-4">
-              <label htmlFor="postcode" className="form-label">
+              <label htmlFor="postcode" className="form-label-for-profile">
                 Post Code:
                 {/* <span className="required"> * </span> */}
               </label>
@@ -1282,7 +1122,7 @@ const AddEmployee = () => {
           </div>
           <div className="row mb-2">
             <div className="col-4">
-              <label htmlFor="nationality" className="form-label">
+              <label htmlFor="nationality" className="form-label-for-profile">
                 Nationality:
                 {/* <span className="required"> * </span> */}
               </label>
@@ -1300,7 +1140,7 @@ const AddEmployee = () => {
               )}
             </div>
             <div className="col-4">
-              <label htmlFor="contactnumber" className="form-label">
+              <label htmlFor="contactnumber" className="form-label-for-profile">
                 Contact Number:
                 {/* <span className="required"> * </span> */}
               </label>
@@ -1318,7 +1158,7 @@ const AddEmployee = () => {
               )}
             </div>
             <div className="col-4">
-              <label htmlFor="email" className="form-label">
+              <label htmlFor="email" className="form-label-for-profile">
                 Email ID:
                 {/* <span className="required"> * </span> */}
               </label>
@@ -1336,7 +1176,10 @@ const AddEmployee = () => {
           </div>
           <div className="row mb-2">
             <div className="col-4">
-              <label htmlFor="passportnumber" className="form-label">
+              <label
+                htmlFor="passportnumber"
+                className="form-label-for-profile"
+              >
                 Passport Number:
                 {/* <span className="required"> * </span> */}
               </label>
@@ -1354,7 +1197,7 @@ const AddEmployee = () => {
               )}
             </div>
             <div className="col-4">
-              <label htmlFor="iqamanumber" className="form-label">
+              <label htmlFor="iqamanumber" className="form-label-for-profile">
                 Civil ID:
                 {/* <span className="required"> * </span> */}
               </label>
@@ -1372,7 +1215,7 @@ const AddEmployee = () => {
               )}
             </div>
             {/* <div className="col-4">
-              <label htmlFor="username" className="form-label">
+              <label htmlFor="username" className="form-label-for-profile">
                 User Name:
               </label>
               <input
@@ -1389,7 +1232,7 @@ const AddEmployee = () => {
               )}
             </div>
             <div className="col-4 position-relative">
-              <label htmlFor="password" className="form-label">
+              <label htmlFor="password" className="form-label-for-profile">
                 Password:
               </label>
               <input
@@ -1414,16 +1257,15 @@ const AddEmployee = () => {
               )}
             </div> */}
           </div>
-          <div className="Personal mt-3 mb-3">Official Information</div>
-          <div className="row">
+          {/* <div className="Personal mt-3 mb-3">Official Information</div> */}
+          {/* <div className="row">
             <div className="col-2">
-              <label htmlFor="dateofjoining" className="form-label">
+              <label htmlFor="dateofjoining" className="form-label-for-profile">
                 Date of Joining:
-                <span className="required"> * </span>
               </label>
               <input
                 type="date"
-                className="form-control custom-picker-styles"
+                className="form-control vessel-voyage"
                 id="dateofjoining"
                 placeholder=""
                 name="dateOfJoining"
@@ -1435,9 +1277,8 @@ const AddEmployee = () => {
               )}
             </div>
             <div className="col-3">
-              <label htmlFor="desigination" className="form-label">
+              <label htmlFor="desigination" className="form-label-for-profile">
                 Designation:
-                <span className="required"> * </span>
               </label>
               <select
                 name="designation"
@@ -1460,9 +1301,8 @@ const AddEmployee = () => {
             </div>
 
             <div className="col-4">
-              <label htmlFor="officialemail" className="form-label">
+              <label htmlFor="officialemail" className="form-label-for-profile">
                 Email ID:
-                {/* <span className="required"> * </span> */}
               </label>
               <input
                 type="email"
@@ -1479,7 +1319,7 @@ const AddEmployee = () => {
               )}
             </div>
             <div className="col-3">
-              <label htmlFor="officialemail" className="form-label">
+              <label htmlFor="officialemail" className="form-label-for-profile">
                 Profession Title:
               </label>
               <input
@@ -1492,11 +1332,11 @@ const AddEmployee = () => {
                 value={formData.profession}
               />
             </div>
-          </div>
+          </div> */}
 
-          <div className="row py-4">
+          {/* <div className="row py-4">
             <div className="col-6">
-              <label htmlFor="reportingTo" className="form-label">
+              <label htmlFor="reportingTo" className="form-label-for-profile">
                 Reporting Person:
               </label>
               <select
@@ -1516,7 +1356,7 @@ const AddEmployee = () => {
               </select>
             </div>
             <div className="col-6">
-              <label htmlFor="reportingHead" className="form-label">
+              <label htmlFor="reportingHead" className="form-label-for-profile">
                 Reporting Head:
               </label>
               <select
@@ -1535,16 +1375,21 @@ const AddEmployee = () => {
                 ))}
               </select>
             </div>
-          </div>
+          </div> */}
 
-          <div className="Personal mt-3 mb-3">Documents</div>
+          <div className="Personal mt-3 mb-3" style={{ fontWeight: "bold" }}>
+            Documents
+          </div>
           {/* passport */}
           <div className="documentnewstyle shadow p-3 mb-4 bg-body-tertiary rounded">
             <div className="passport">Passport Details</div>
             <div>
               <div className="row mb-2">
                 <div className="col-4">
-                  <label htmlFor="passportdetail_number" className="form-label">
+                  <label
+                    htmlFor="passportdetail_number"
+                    className="form-label-for-profile"
+                  >
                     Passport Number:
                     {/* <span className="required"> * </span> */}
                   </label>
@@ -1559,13 +1404,16 @@ const AddEmployee = () => {
                   />
                 </div>
                 <div className="col-3">
-                  <label htmlFor="passportdetail_expiry" className="form-label">
+                  <label
+                    htmlFor="passportdetail_expiry"
+                    className="form-label-for-profile"
+                  >
                     Date of Expiry:
                     {/* <span className="required"> * </span> */}
                   </label>
                   <input
                     type="date"
-                    className="form-control custom-picker-styles"
+                    className="form-control vessel-voyage"
                     id="passportdetail_expiry"
                     placeholder=""
                     name="passportdetail_expiry"
@@ -1574,7 +1422,10 @@ const AddEmployee = () => {
                   />
                 </div>
                 <div className="col-5">
-                  <label htmlFor="portofolio" className="form-label">
+                  <label
+                    htmlFor="portofolio"
+                    className="form-label-for-profile"
+                  >
                     Document Upload:
                   </label>
                   <input
@@ -1630,7 +1481,10 @@ const AddEmployee = () => {
             <div>
               <div className="row mb-2">
                 <div className="col-4">
-                  <label htmlFor="contractdetail_name" className="form-label">
+                  <label
+                    htmlFor="contractdetail_name"
+                    className="form-label-for-profile"
+                  >
                     Contract Name:
                     {/* <span className="required"> * </span> */}
                   </label>
@@ -1645,13 +1499,16 @@ const AddEmployee = () => {
                   />
                 </div>
                 <div className="col-3">
-                  <label htmlFor="contractdetail_expiry" className="form-label">
+                  <label
+                    htmlFor="contractdetail_expiry"
+                    className="form-label-for-profile"
+                  >
                     Date of Expiry:
                     {/* <span className="required"> * </span> */}
                   </label>
                   <input
                     type="date"
-                    className="form-control custom-picker-styles"
+                    className="form-control vessel-voyage"
                     id="contractdetail_expiry"
                     placeholder=""
                     name="contractdetail_expiry"
@@ -1660,7 +1517,10 @@ const AddEmployee = () => {
                   />
                 </div>
                 <div className="col-5">
-                  <label htmlFor="portofolio1" className="form-label">
+                  <label
+                    htmlFor="portofolio1"
+                    className="form-label-for-profile"
+                  >
                     Document Upload:
                   </label>
                   <input
@@ -1716,7 +1576,10 @@ const AddEmployee = () => {
             <div>
               <div className="row mb-2">
                 <div className="col-4">
-                  <label htmlFor="visa_number" className="form-label">
+                  <label
+                    htmlFor="visa_number"
+                    className="form-label-for-profile"
+                  >
                     Visa Number:
                     {/* <span className="required"> * </span> */}
                   </label>
@@ -1731,13 +1594,16 @@ const AddEmployee = () => {
                   />
                 </div>
                 <div className="col-3">
-                  <label htmlFor="visa_expiry" className="form-label">
+                  <label
+                    htmlFor="visa_expiry"
+                    className="form-label-for-profile"
+                  >
                     Date of Expiry:
                     {/* <span className="required"> * </span> */}
                   </label>
                   <input
                     type="date"
-                    className="form-control custom-picker-styles"
+                    className="form-control vessel-voyage"
                     id="visa_expiry"
                     placeholder=""
                     name="visa_expiry"
@@ -1749,7 +1615,10 @@ const AddEmployee = () => {
                   <div className="alert alert-danger">{errors.message}</div>
                 )}
                 <div className="col-5">
-                  <label htmlFor="visaupload" className="form-label">
+                  <label
+                    htmlFor="visaupload"
+                    className="form-label-for-profile"
+                  >
                     Document Upload:
                   </label>
                   <input
@@ -1805,7 +1674,10 @@ const AddEmployee = () => {
             <div>
               <div className="row mb-2     ">
                 <div className="col-4">
-                  <label htmlFor="license_number" className="form-label">
+                  <label
+                    htmlFor="license_number"
+                    className="form-label-for-profile"
+                  >
                     License Number:
                     {/* <span className="required"> * </span> */}
                   </label>
@@ -1820,13 +1692,16 @@ const AddEmployee = () => {
                   />
                 </div>
                 <div className="col-3">
-                  <label htmlFor="license_date" className="form-label">
+                  <label
+                    htmlFor="license_date"
+                    className="form-label-for-profile"
+                  >
                     Date of Expiry:
                     {/* <span className="required"> * </span> */}
                   </label>
                   <input
                     type="date"
-                    className="form-control custom-picker-styles"
+                    className="form-control vessel-voyage"
                     id="license_date"
                     placeholder=""
                     name="license_date"
@@ -1835,7 +1710,10 @@ const AddEmployee = () => {
                   />
                 </div>
                 <div className="col-5">
-                  <label htmlFor="licenseupload" className="form-label">
+                  <label
+                    htmlFor="licenseupload"
+                    className="form-label-for-profile"
+                  >
                     Document Upload:
                   </label>
                   <input
@@ -1888,9 +1766,6 @@ const AddEmployee = () => {
           {/* certificate */}
           <div className="documentnewstyle shadow p-3 mb-4 bg-body-tertiary rounded">
             <div className="contract">Certificate Details</div>
-            {certificateFields?.length == 0 && (
-              <div className="text-center">No Certificate Records Added</div>
-            )}
             <div>
               {/* Add more certificate reord */}
               {certificateFields.map((field) => (
@@ -1901,7 +1776,7 @@ const AddEmployee = () => {
                   <div className="col-4">
                     <label
                       htmlFor={`certificate_name_${field._id || field.id}`}
-                      className="form-label"
+                      className="form-label-for-profile"
                     >
                       Certificate Name:
                     </label>
@@ -1931,7 +1806,7 @@ const AddEmployee = () => {
                       htmlFor={`certificate_description_${
                         field._id || field.id
                       }`}
-                      className="form-label"
+                      className="form-label-for-profile"
                     >
                       Certificate Description:
                     </label>
@@ -1964,7 +1839,7 @@ const AddEmployee = () => {
                   <div className="col-4">
                     <label
                       htmlFor={`certificatesRecord_${field._id || field.id}`}
-                      className="form-label"
+                      className="form-label-for-profile"
                     >
                       Document Upload:
                     </label>
@@ -2047,9 +1922,6 @@ const AddEmployee = () => {
             <div className="contract">Medical Details</div>
             <div>
               {/* Add more medical reord */}
-              {fields?.length == 0 && (
-                <div className="text-center">No Medical Records Added</div>
-              )}
               {fields.map((field) => (
                 <div
                   key={isEditing ? field._id : field.id}
@@ -2058,7 +1930,7 @@ const AddEmployee = () => {
                   <div className="col-4">
                     <label
                       htmlFor={`medical_description_${field._id || field.id}`}
-                      className="form-label"
+                      className="form-label-for-profile"
                     >
                       Medical description:
                     </label>
@@ -2086,7 +1958,7 @@ const AddEmployee = () => {
                   <div className="col-4">
                     <label
                       htmlFor={`relationship_${field._id || field.id}`}
-                      className="form-label"
+                      className="form-label-for-profile"
                     >
                       Relationship:
                     </label>
@@ -2122,7 +1994,7 @@ const AddEmployee = () => {
                   <div className="col-4">
                     <label
                       htmlFor={`medicalrord_${field._id || field.id}`}
-                      className="form-label"
+                      className="form-label-for-profile"
                     >
                       Document Upload:
                     </label>
@@ -2206,10 +2078,10 @@ const AddEmployee = () => {
         </form>
       </div>
 
-      {openPopUp && <PopUp message={message} closePopup={handlePopupClose} />}
+      {openPopUp && <PopUp message={message} closePopup={reloadpage} />}
       <Loader isLoading={isLoading} />
     </>
   );
 };
 
-export default AddEmployee;
+export default EditProfile;

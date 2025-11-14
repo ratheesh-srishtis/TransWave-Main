@@ -6,46 +6,67 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
   getAllEmployeeLeaves,
+  getAllUserLeaves,
   deleteLeave,
 } from "../../services/apiLeavePortal";
 import "../../css/payment.css";
 import AddLeave from "./AddLeave";
 import Swal from "sweetalert2";
 import PopUp from "../PopUp";
+import Loader from "../Loader";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-const EmployeeLeaves = () => {
+const Leave = ({ loginResponse }) => {
   const Group = require("../../assets/images/leave.png");
-  const employeeId = localStorage.getItem("employeeId");
+  const [isLoading, setIsLoading] = useState(false); // Loader state
+
   const [LeaveList, SetEmpLeaves] = useState([]);
+  const [employeeId, setEmployeeId] = useState("");
   const [message, setMessage] = useState("");
   const [openPopUp, setOpenPopUp] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [errors, setErrors] = useState({});
+  const [open, setOpen] = useState(false);
   const [leaveCounts, setLeaveCounts] = useState({
     remainingAnnualLeave: 0,
     remainingCasuallLeave: 0,
     remainingSicklLeave: 0,
     remainingEmergencyLeave: 0,
   });
-  const [open, setOpen] = useState(false);
-  const fecthEmployeeLeaves = async (paylaod) => {
-    const listLeaves = await getAllEmployeeLeaves(paylaod);
-    //   // Update leave counts
+
+  useEffect(() => {
+    fecthUserLeaves({ userId: loginResponse?.data?._id });
+  }, [loginResponse]);
+
+  // const fecthEmployeeLeaves = async (paylaod) => {
+  //   console.log("payload", paylaod);
+  //   const listLeaves = await getAllEmployeeLeaves(paylaod);
+  //   SetEmpLeaves(listLeaves?.leaves || []);
+
+  //   // Update leave counts
+  //   setLeaveCounts({
+  //     remainingAnnualLeave: listLeaves?.remainingAnnualLeave || 0,
+  //     remainingCasuallLeave: listLeaves?.remainingCasuallLeave || 0,
+  //     remainingSicklLeave: listLeaves?.remainingSicklLeave || 0,
+  //     remainingEmergencyLeave: listLeaves?.remainingEmergencyLeave || 0,
+  //   });
+  // };
+  const fecthUserLeaves = async (paylaod) => {
+    console.log("payload", paylaod);
+    const listLeaves = await getAllUserLeaves(paylaod);
+    SetEmpLeaves(listLeaves?.leaves || []);
+    setEmployeeId(listLeaves?.employeeId || "");
+
+    // Update leave counts
     setLeaveCounts({
       remainingAnnualLeave: listLeaves?.remainingAnnualLeave || 0,
       remainingCasuallLeave: listLeaves?.remainingCasuallLeave || 0,
       remainingSicklLeave: listLeaves?.remainingSicklLeave || 0,
       remainingEmergencyLeave: listLeaves?.remainingEmergencyLeave || 0,
     });
-    SetEmpLeaves(listLeaves?.leaves || []);
   };
 
-  useEffect(() => {
-    const payload = { employeeId: employeeId };
-    fecthEmployeeLeaves(payload);
-  }, [employeeId]);
   const handleEdit = (row) => {
     setSelectedRow(row);
     setEditMode(true);
@@ -53,7 +74,7 @@ const EmployeeLeaves = () => {
   };
   const handleListLeaves = (payload) => {
     setEditMode(false);
-    fecthEmployeeLeaves(payload);
+    // fecthUserLeaves(payload);
     setOpen(false);
   };
   const payloadParams = { employeeId: employeeId };
@@ -76,10 +97,11 @@ const EmployeeLeaves = () => {
             const response = await deleteLeave(payload);
             setMessage(response.message);
             setOpenPopUp(true);
-            fecthEmployeeLeaves(payloadParams);
+            // Always fetch with userId to refresh the table
+            fecthUserLeaves({ userId: loginResponse?.data?._id });
           } catch (error) {
             Swal.fire("Error deleting leaves");
-            fecthEmployeeLeaves(payloadParams);
+            fecthUserLeaves({ userId: loginResponse?.data?._id });
           }
         }
       }
@@ -138,6 +160,8 @@ const EmployeeLeaves = () => {
     setOpen(false);
     setEditMode(false);
     setErrors({});
+    const payload = { employeeId: employeeId };
+    fecthUserLeaves({ userId: loginResponse?.data?._id });
   };
 
   const handleExportToExcel = () => {
@@ -148,6 +172,7 @@ const EmployeeLeaves = () => {
       // Prepare data for Excel export
       const excelData = LeaveList.map((item) => {
         const datefrom = item.leaveFrom.split("T")[0];
+
         const [fromyear, frommonth, fromday] = datefrom.split("-");
         const leaveFrom = `${fromday}-${frommonth}-${fromyear}`;
         const dateto = item.leaveTo.split("T")[0];
@@ -193,10 +218,10 @@ const EmployeeLeaves = () => {
       ];
 
       // Add worksheet to workbook
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Employee Leaves");
+      XLSX.utils.book_append_sheet(workbook, worksheet, "User Leaves");
 
       // Generate filename
-      const fileName = "Employee Leaves.xlsx";
+      const fileName = "User Leaves.xlsx";
 
       // Convert to buffer and save
       const excelBuffer = XLSX.write(workbook, {
@@ -237,16 +262,21 @@ const EmployeeLeaves = () => {
             </button>
           </div>
           <div className="">
-            <button
-              onClick={() => {
-                OpenDialog();
-              }}
-              className="btn btn-info infobtn addleave"
-            >
-              Add Leave
-            </button>
+            {employeeId && (
+              <>
+                <button
+                  onClick={() => {
+                    OpenDialog();
+                  }}
+                  className="btn btn-info infobtn addleave"
+                >
+                  Add Leave
+                </button>
+              </>
+            )}
           </div>
         </div>
+
         {/* Leave Count Cards */}
         <div className="leave-cards-container mt-4 mb-4">
           <div className="row g-3">
@@ -307,6 +337,7 @@ const EmployeeLeaves = () => {
             </div>
           </div>
         </div>
+
         <div>
           <DataGrid
             rows={LeaveList.map((item) => {
@@ -388,22 +419,45 @@ const EmployeeLeaves = () => {
             <p>No Data Found</p>
           </div>
         )}
-        <AddLeave
-          open={open}
-          onClose={handleClose}
-          listLeaves={handleListLeaves}
-          employeeId={employeeId}
-          editMode={editMode}
-          leavevalues={selectedRow}
-          errors={errors}
-          setErrors={setErrors}
-        ></AddLeave>
+
+        {!employeeId && (
+          <div
+            style={{
+              textAlign: "center",
+              margin: "30px 0",
+              color: "#4079ed",
+              fontWeight: "bold",
+              fontSize: "18px",
+              background: "#f4f8ff",
+              padding: "16px",
+              borderRadius: "8px",
+              boxShadow: "0 2px 8px rgba(64,121,237,0.08)",
+            }}
+          >
+            This user is not added by admin yet
+          </div>
+        )}
+        {employeeId && (
+          <>
+            <AddLeave
+              open={open}
+              onClose={handleClose}
+              listLeaves={handleListLeaves}
+              employeeId={employeeId}
+              editMode={editMode}
+              leavevalues={selectedRow}
+              errors={errors}
+              setErrors={setErrors}
+            ></AddLeave>
+          </>
+        )}
       </div>
       {openPopUp && (
         <PopUp message={message} closePopup={() => setOpenPopUp(false)} />
       )}
+      <Loader isLoading={isLoading} />
     </>
   );
 };
 
-export default EmployeeLeaves;
+export default Leave;

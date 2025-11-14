@@ -7,7 +7,8 @@ import {
 } from "../../services/apiLeavePortal";
 import PopUp from ".././PopUp";
 import "../../css/payment.css";
-
+import Loader from "../Loader";
+import { se } from "date-fns/locale";
 const AddLeave = ({
   open,
   onClose,
@@ -19,6 +20,7 @@ const AddLeave = ({
   setErrors,
 }) => {
   console.log("Received leavevalues:", leavevalues);
+  const [isLoading, setIsLoading] = useState(false); // Loader state
 
   const [message, setMessage] = useState("");
   const [empLeaveTypes, SetEmpLeaveTypes] = useState("");
@@ -112,6 +114,7 @@ const AddLeave = ({
     if (!validateForm()) return;
 
     try {
+      setIsLoading(true); // Show loader
       let response = "";
       if (editMode) {
         formData.leaveId = leavevalues._id;
@@ -122,6 +125,7 @@ const AddLeave = ({
       }
 
       if (response.status === true) {
+        setIsLoading(false); // Hide loader
         setOpenPopUp(true);
         setMessage(response.message);
         setFormData({
@@ -133,6 +137,8 @@ const AddLeave = ({
         });
         onClose();
       } else {
+        setIsLoading(false); // Hide loader
+
         setMessage(response.message);
         setOpenPopUp(true);
       }
@@ -173,10 +179,10 @@ const AddLeave = ({
         fullWidth
         maxWidth="lg"
       >
-        <div className="d-flex justify-content-between " onClick={onClose}>
+        <div className="d-flex justify-content-between ">
           <DialogTitle>{editMode ? "Edit Leave" : "Add Leave"}</DialogTitle>
           <div className="closeicon">
-            <i className="bi bi-x-lg "></i>
+            <i className="bi bi-x-lg " onClick={onClose}></i>
           </div>
         </div>
         <DialogContent style={{ marginBottom: "40px" }}>
@@ -238,11 +244,12 @@ const AddLeave = ({
                   <input
                     name="leaveFrom"
                     type="date"
-                    className="form-control vessel-voyage"
+                    className="form-control custom-picker-styles"
                     id="leaveFrom"
                     placeholder=""
                     onChange={handleChange}
                     value={formData.leaveFrom}
+                    max={formData.leaveTo}
                   ></input>
                   {errors.leaveFrom && (
                     <span className="invalid">{errors.leaveFrom}</span>
@@ -257,11 +264,12 @@ const AddLeave = ({
                   <input
                     name="leaveTo"
                     type="date"
-                    className="form-control vessel-voyage"
+                    className="form-control custom-picker-styles"
                     id="leaveTo"
                     placeholder=""
                     onChange={handleChange}
                     value={formData.leaveTo}
+                    min={formData.leaveFrom}
                   ></input>
                   {errors.leaveTo && (
                     <span className="invalid">{errors.leaveTo}</span>
@@ -300,6 +308,7 @@ const AddLeave = ({
         </DialogContent>
       </Dialog>
       {openPopUp && <PopUp message={message} closePopup={fetchLeaves} />}
+      <Loader isLoading={isLoading} />
     </>
   );
 };

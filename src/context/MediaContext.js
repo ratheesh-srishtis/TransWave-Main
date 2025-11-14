@@ -22,6 +22,9 @@ export const MediaProvider = ({ children }) => {
       const response = await getCompanyMedias();
       const media = response?.media[0];
 
+
+      console.log("response",response);
+
       if (media) {
         setMediaId(media._id);
         setLogoPreview(`${process.env.REACT_APP_ASSET_URL}${media.siteLogo}`);
