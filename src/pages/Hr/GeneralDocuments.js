@@ -210,6 +210,17 @@ const GeneralDocuments = () => {
   };
 
   const handleSubmit = async () => {
+    // All fields are mandatory
+    if (
+      !documentTitle ||
+      !issuedDate ||
+      !expiryDate ||
+      !uploadedFiles || Object.keys(uploadedFiles).length === 0
+    ) {
+      setMessage("Please fill the required fields");
+      setOpenPopUp(true);
+      return;
+    }
     const formattedIssuedDate = issuedDate
       ? moment(issuedDate).format("DD-MM-YYYY")
       : "";
@@ -402,13 +413,13 @@ const GeneralDocuments = () => {
             <DialogTitle>
               {isEditMode ? "Edit General Document" : "Add General Document"}
             </DialogTitle>
-            <div
-              className="closeicon"
-              onClick={() => {
-                setOpen(false);
-              }}
-            >
-              <i className="bi bi-x-lg "></i>
+            <div className="closeicon">
+              <i
+                className="bi bi-x-lg "
+                onClick={() => {
+                  setOpen(false);
+                }}
+              ></i>
             </div>
           </div>
           <DialogContent>
@@ -417,7 +428,7 @@ const GeneralDocuments = () => {
                 <div className="col-4">
                   <label htmlFor="employeeName" className="form-label">
                     Document Title:
-                    {/* <span className="required"> * </span> */}
+                    <span className="required"> * </span>
                   </label>
                   <input
                     type="text"
@@ -432,7 +443,7 @@ const GeneralDocuments = () => {
                 <div className="col-4">
                   <label htmlFor="employeeName" className="form-label">
                     Issued Date:
-                    {/* <span className="required"> * </span> */}
+                    <span className="required"> * </span>
                   </label>
                   <DatePicker
                     dateFormat="dd/MM/yyyy"
@@ -457,7 +468,7 @@ const GeneralDocuments = () => {
                 <div className="col-4">
                   <label htmlFor="employeeName" className="form-label">
                     Expiry Date:
-                    {/* <span className="required"> * </span> */}
+                    <span className="required"> * </span>
                   </label>
                   <DatePicker
                     dateFormat="dd/MM/yyyy"
@@ -485,7 +496,7 @@ const GeneralDocuments = () => {
               <div className="row d-flex align-items-baseline ">
                 <div className="col-6 docuplo">
                   <label htmlFor="formFile" className="form-label">
-                    Documents Upload:
+                    Documents Upload:<span className="required"> * </span>
                   </label>
                   <input
                     className="form-control documentsfsize linheight"

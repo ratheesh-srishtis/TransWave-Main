@@ -31,6 +31,14 @@ export const getAllEmployeeLeaves = async (leaves) => {
     console.log("Error in Employee Leave Listing", error);
   }
 };
+export const getAllUserLeaves = async (leaves) => {
+  try {
+    const response = await axiosInstance.post("/getAllUserLeaves", leaves);
+    return response.data;
+  } catch (error) {
+    console.log("Error in Employee Leave Listing", error);
+  }
+};
 export const getAllEmployeeLeaveRequests = async (leaves) => {
   try {
     const response = await axiosInstance.post(

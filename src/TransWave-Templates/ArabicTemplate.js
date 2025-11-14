@@ -136,7 +136,7 @@ const ArabicTemplate = ({
     <>
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
         <div className="d-flex justify-content-between ">
-          <DialogTitle>{selectedTemplateName}</DialogTitle>
+          <DialogTitle>{selectedTemplateName.toUpperCase()}</DialogTitle>
           <div className="closeicon" onClick={onClose}>
             <i className="bi bi-x-lg "></i>
           </div>

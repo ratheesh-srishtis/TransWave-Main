@@ -66,6 +66,7 @@ import Profile from "../settings/Profile";
 import EmployeeModification from "../pages/Hr/EmployeeModification";
 import ViewEmployeeDetails from "../pages/Hr/ViewEmployeeDetails";
 import LeaveRequests from "../pages/Hr/LeaveRequests";
+import Leave from "../pages/Hr/Leave";
 const Content = ({ onNotFound }) => {
   const { loginResponse } = useAuth();
 
@@ -209,6 +210,9 @@ const Content = ({ onNotFound }) => {
     "/employee-details-modifications",
     "/view-employee-details",
     "/leave-requests",
+    "/company-bank-info",
+     "/leave",
+     "/update-employee-info",
   ];
 
   useEffect(() => {
@@ -254,6 +258,10 @@ const Content = ({ onNotFound }) => {
       <Route path="/workcalendar" element={<WorkCalendar />} />
       <Route path="/desiginations" element={<Desiginations />} />
       <Route path="/employee-leaves" element={<EmployeeLeaves />} />
+ <Route path="/leave" element={<Leave loginResponse={loginResponse} />} />
+      <Route path="/update-employee-info" element={<EmployeeModification />} />
+
+
       <Route
         path="/employee-details-modifications"
         element={<EmployeeModification />}
@@ -367,6 +375,13 @@ const Content = ({ onNotFound }) => {
       <Route path="/password-requests" element={<PasswordRequests />} />
       <Route path="/reports" element={<Reports />} />
       <Route path="/cost-centre-breakup" element={<CostCenterBreakup />} />
+
+      <Route path="/company-bank-info" element={<CompanyBankDetails />} />
+
+
+
+
+
       <Route
         path="/cost-centre-summary"
         element={<CostCenterSummary ports={ports} customers={customers} />}

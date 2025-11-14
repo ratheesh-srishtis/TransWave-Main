@@ -5,7 +5,8 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { financeDashboardDetails } from "../services/apiService";
 import "../css/quotation.css";
 import {
   getAllQuotations,
@@ -35,6 +36,7 @@ const Quotations = ({
   vessels,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   console.log(loginResponse, "loginResponse_quoatations_page");
   const [selectedRows, setSelectedRows] = useState([]);
   const [quotationsList, setQuotationsList] = useState([]);
@@ -46,27 +48,74 @@ const Quotations = ({
   const [message, setMessage] = useState("");
   const [selectedTab, setSelectedTab] = useState("all");
   const [remarksOpen, setRemarksOpen] = useState(false);
-
+  // Add this state variable around line 40 with other state declarations
+  const [fromDashboard, setFromDashboard] = useState(false);
+  const [cardNumber, setCardNumber] = useState(null);
   const acceptedIcon = require("../assets/images/accepted.png");
   const rejectedIcon = require("../assets/images/rejected.png");
   const messageIcon = require("../assets/images/chat_icon.png");
 
+  // const fetchQuotations = async (type) => {
+  //   setSelectedTab(type);
+  //   try {
+  //     setIsLoading(true);
+  //     let userData = {
+  //       filter: type,
+  //     };
+  //     const quotations = await getAllQuotations(userData);
+  //     console.log("Quotations:", quotations);
+
+  //     const matchId = "6780a9a94d57992670a2a70a";
+  //     const matchedQuotation = quotations?.pda.find((q) => q._id === matchId);
+
+  //     console.log("Matched Quotation:", matchedQuotation);
+
+  //     setQuotationsList(quotations?.pda || []);
+  //     setIsLoading(false);
+  //   } catch (error) {
+  //     console.error("Failed to fetch quotations:", error);
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  // Replace the existing fetchQuotations function (around lines 55-73) with this:
   const fetchQuotations = async (type) => {
     setSelectedTab(type);
     try {
       setIsLoading(true);
-      let userData = {
-        filter: type,
-      };
-      const quotations = await getAllQuotations(userData);
-      console.log("Quotations:", quotations);
 
-      const matchId = "6780a9a94d57992670a2a70a";
-      const matchedQuotation = quotations?.pda.find((q) => q._id === matchId);
+      if (fromDashboard && cardNumber) {
+        // Use dashboard API when data came from dashboard
+        const payload = {
+          filter: type,
+          cardNumber: String(cardNumber),
+        };
+        const res = await financeDashboardDetails(payload);
 
-      console.log("Matched Quotation:", matchedQuotation);
+        if (res.status == true) {
+          if (cardNumber == "1") {
+            setQuotationsList(res?.receivedQuotation || []);
+          } else if (cardNumber == "2") {
+            setQuotationsList(res?.submittedQuotation || []);
+          } else if (cardNumber == "3") {
+            setQuotationsList(res?.approvedQuotation || []);
+          } else if (cardNumber == "4") {
+            setQuotationsList(res?.processedQuotation || []);
+          } else if (cardNumber == "5") {
+            setQuotationsList(res?.completedQuotation || []);
+          } else if (cardNumber == "6") {
+            setQuotationsList(res?.invoiceSubmitted || []);
+          }
+        }
+      } else {
+        // Use existing API when data didn't come from dashboard
+        let userData = {
+          filter: type,
+        };
+        const quotations = await getAllQuotations(userData);
+        setQuotationsList(quotations?.pda || []);
+      }
 
-      setQuotationsList(quotations?.pda || []);
       setIsLoading(false);
     } catch (error) {
       console.error("Failed to fetch quotations:", error);
@@ -74,8 +123,21 @@ const Quotations = ({
     }
   };
 
+  // If navigated from Dashboard with state, use it; otherwise fetch
+  // Replace the existing useEffect (around lines 75-83) with this:
   useEffect(() => {
-    fetchQuotations("all");
+    const fromDashboardData = location?.state?.quotationsFromDashboard;
+    const cardNumberValue = location?.state?.cardNumber; // Assuming cardNumber comes from state
+
+    if (Array.isArray(fromDashboardData) && fromDashboardData.length > 0) {
+      setQuotationsList(fromDashboardData);
+      setFromDashboard(true);
+      setCardNumber(cardNumberValue);
+    } else {
+      setFromDashboard(false);
+      fetchQuotations("all");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatDate = (date) => {
@@ -262,7 +324,7 @@ const Quotations = ({
     {
       field: "actions",
       headerName: "Action",
-      flex: 1,
+      flex: 1.5,
       renderCell: (params) => (
         <>
           <IconButton color="primary" onClick={() => handleEdit(params.row)}>
@@ -295,7 +357,8 @@ const Quotations = ({
               )}
             </>
           )}
-          {loginResponse?.data?.userRole?.roleType == "admin" && (
+          {(loginResponse?.data?.userRole?.roleType == "admin" ||
+            loginResponse?.data?.userRole?.roleType == "superadmin") && (
             <>
               <IconButton
                 color="secondary"
@@ -631,11 +694,11 @@ const Quotations = ({
           </ul>
         </div>
 
-        <div className="d-flex gap-3 rightside">
+        <div className="d-flex gap-3 rightside qurigh">
           <div className=" searchmain">
             <input
               type="text"
-              className="form-control search"
+              className="form-control search srchquo"
               id="exampleFormControlInput1"
               placeholder="Search"
               value={searchTerm}
@@ -643,24 +706,29 @@ const Quotations = ({
             />
             <i className="bi bi-search searchicon"></i>
           </div>
-          <div className=" filtermain ">
-            <i className="bi bi-funnel-fill filtericon"></i>
-            <select
-              className="form-select form-select-sm filter"
-              aria-label="Small select example"
-              name="status"
-              onChange={handleSelectChange}
-              value={selectedStatus}
-            >
-              <option value="">All</option>
-              {statusList?.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className=" createbtn" style={{ width: "100%" }}>
+          {(!fromDashboard || (fromDashboard && cardNumber === "1")) && (
+            <>
+              <div className=" filtermain filquofil">
+                <i className="bi bi-funnel-fill filtericon"></i>
+                <select
+                  className="form-select form-select-sm filter"
+                  aria-label="Small select example"
+                  name="status"
+                  onChange={handleSelectChange}
+                  value={selectedStatus}
+                >
+                  <option value="">All</option>
+                  {statusList?.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
+
+          <div className=" createbtn crtq" style={{ width: "100%" }}>
             <button
               type="button"
               onClick={() => handleNavigation()}
