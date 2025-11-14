@@ -570,14 +570,15 @@ const PdaDialog = ({
               Payment:
               <br /> Payment in advance prior to vessel arrival as per below
               bank account details:
-              <br /> TRANS WAVE MARINE SHIPPING SERVICES L.L.C
-              <br /> MASHREQ BANK PSC
-              <br /> BURJUMAN
-              <br /> A/C NUMBER:- 019101496540 (USD)
-              <br /> IBAN:- AE100330000019101496540 (USD)
-              <br /> A/C NUMBER:- 019101496539 (AED)
-              <br /> IBAN:- AE370330000019101496539 (AED)
-              <br /> SWIFT CODE: - BOMLAEAD
+              <br /> OUR BANKING ACCOUNT DETAILS
+              <br /> TRANS OCEAN MARITIME SERVICES LLC
+              <br /> {companyBankDetails?.bankName}
+              <br /> {companyBankDetails?.bankAddress}
+              <br /> A/C NUMBER:- {companyBankDetails?.accountNumberOMR} (OMR)
+              <br /> IBAN:- {companyBankDetails?.ibanOMR} (OMR)
+              <br /> A/C NUMBER:-{companyBankDetails?.accountNumberUSD} (USD)
+              <br /> IBAN:- {companyBankDetails?.ibanUSD} (USD)
+              <br /> SWIFT CODE: - {companyBankDetails?.swiftCode}
             </div>
           </div>
           <table className="tabstyle">

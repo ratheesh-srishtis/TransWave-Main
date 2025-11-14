@@ -49,6 +49,11 @@ const TransportationSlip = ({
   const [openPopUp, setOpenPopUp] = useState(false);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false); // Loader state
+
+  const heading = "Transportation slip";
+
+
+
   const handleClose = (event, reason) => {
     if (reason === "backdropClick") {
       return; // Prevent closing on backdrop click
@@ -251,7 +256,7 @@ const TransportationSlip = ({
         <DialogContent>
           <div className="mainoktb ">
             <div className=" d-flex justify-content-center">
-              <h5 className="twoktbsubhead mb-3"> TRANSPORTATION SLIP</h5>
+              <h5 className="twoktbsubhead mb-3">{heading.toUpperCase()}</h5>
             </div>
             <div className="cont row d-flex  ">
               <div className="col-6 queheading">

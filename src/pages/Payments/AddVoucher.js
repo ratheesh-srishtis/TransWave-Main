@@ -5,7 +5,7 @@ import {
   saveVoucher,
   editVoucher,
   getAllQuotationIds,
-  getAllBanks,
+  // getAllBanks,
   getAllFinanceEmployees,
 } from "../../services/apiPayment";
 import PopUp from ".././PopUp";
@@ -22,7 +22,7 @@ const AddVoucher = ({
   setErrors,
 }) => {
   const [QuotationList, setQuotationList] = useState([]);
-  const [BankList, setBankList] = useState([]);
+  // const [BankList, setBankList] = useState([]);
   const [EmployeeList, setEmployeeList] = useState([]);
   const [pettyNumber, setPettyNumber] = useState("");
   const [vendorList, setVendorList] = useState([]);
@@ -36,8 +36,8 @@ const AddVoucher = ({
     voucherAccount: "",
     paymentDate: "",
     // pdaIds: "",
-    modeofPayment: "",
-    bank: "",
+    // modeofPayment: "",
+    // bank: "",
     vendorId: "",
     remark: "",
   });
@@ -50,14 +50,14 @@ const AddVoucher = ({
       console.log("Invoice list Error", error);
     }
   };
-  const fetchBanks = async () => {
-    try {
-      const listbanks = await getAllBanks();
-      setBankList(listbanks?.bank || []);
-    } catch (error) {
-      console.log("Bank list Error", error);
-    }
-  };
+  // const fetchBanks = async () => {
+  //   try {
+  //     const listbanks = await getAllBanks();
+  //     setBankList(listbanks?.bank || []);
+  //   } catch (error) {
+  //     console.log("Bank list Error", error);
+  //   }
+  // };
   const fetchFinaceEmployees = async () => {
     try {
       const listemployees = await getAllFinanceEmployees();
@@ -78,7 +78,7 @@ const AddVoucher = ({
   };
   useEffect(() => {
     fecthQuotations();
-    fetchBanks();
+    // fetchBanks();
     fetchFinaceEmployees();
     fetchVendorList();
   }, []);
@@ -92,8 +92,8 @@ const AddVoucher = ({
         voucherParticulers: "",
         voucherAccount: "",
         paymentDate: "",
-        modeofPayment: "",
-        bank: "",
+        // modeofPayment: "",
+        // bank: "",
         vendorId: "",
         remark: "",
       });
@@ -108,12 +108,12 @@ const AddVoucher = ({
       } else {
         formattedDate = "";
       }
-      let modePay = "";
-      if (
-        prevVouchers.modeofPayment !== undefined &&
-        prevVouchers.modeofPayment !== "N/A"
-      )
-        modePay = prevVouchers.modeofPayment.toLowerCase();
+      // let modePay = "";
+      // if (
+      //   prevVouchers.modeofPayment !== undefined &&
+      //   prevVouchers.modeofPayment !== "N/A"
+      // )
+      //   modePay = prevVouchers.modeofPayment.toLowerCase();
       //setPettyNumber(prevVouchers.voucherNumber);
       setFormData({
         amount: prevVouchers.amount,
@@ -127,11 +127,11 @@ const AddVoucher = ({
         paymentDate: formattedDate,
         pettyId: prevVouchers._id,
         //pdaIds:prevVouchers.pdaIds ? prevVouchers.pdaIds._id : "",
-        modeofPayment: modePay,
-        bank:
-          prevVouchers.bank && prevVouchers.bank._id
-            ? prevVouchers.bank._id
-            : "",
+        // modeofPayment: modePay,
+        // bank:
+        //   prevVouchers.bank && prevVouchers.bank._id
+        //     ? prevVouchers.bank._id
+        //     : "",
         vendorId: prevVouchers.vendorId,
         remark: prevVouchers.remark,
       });
@@ -162,11 +162,11 @@ const AddVoucher = ({
     if (!formData.paymentDate) {
       newErrors.paymentDate = "Payment Date  is required";
     }
-    if (!formData.modeofPayment)
-      newErrors.modeofPayment = "Mode of payment is required";
-    if (formData.modeofPayment === "bank" && !formData.bank) {
-      newErrors.bank = "Bank name is required";
-    }
+    // if (!formData.modeofPayment)
+    //   newErrors.modeofPayment = "Mode of payment is required";
+    // if (formData.modeofPayment === "bank" && !formData.bank) {
+    //   newErrors.bank = "Bank name is required";
+    // }
     setErrors(newErrors);
 
     return Object.keys(newErrors).length === 0;
@@ -183,8 +183,8 @@ const AddVoucher = ({
         voucherAccount: "",
         paymentDate: "",
         // pdaIds: "",
-        modeofPayment: "",
-        bank: "",
+        // modeofPayment: "",
+        // bank: "",
         vendorId: "",
         remark: "",
       });
@@ -268,10 +268,10 @@ const AddVoucher = ({
         fullWidth
         maxWidth="lg"
       >
-        <div className="d-flex justify-content-between " onClick={onClose}>
+        <div className="d-flex justify-content-between ">
           <DialogTitle>{editMode ? "Edit Petty" : "Add Petty"}</DialogTitle>
           <div className="closeicon">
-            <i className="bi bi-x-lg "></i>
+            <i className="bi bi-x-lg " onClick={onClose}></i>
           </div>
         </div>
         <DialogContent style={{ marginBottom: "40px" }}>
@@ -452,7 +452,7 @@ const AddVoucher = ({
               </div>
             </div>
             <div className="row">
-              <div className="col-6 mb-3 align-items-start">
+              {/* <div className="col-6 mb-3 align-items-start">
                 <div className="">
                   <label
                     htmlFor="exampleFormControlInput1"
@@ -477,8 +477,8 @@ const AddVoucher = ({
                     )}
                   </div>
                 </div>
-              </div>
-              <div className="col-6 mb-3 align-items-start">
+              </div> */}
+              {/* <div className="col-6 mb-3 align-items-start">
                 <div className="">
                   <label
                     htmlFor="exampleFormControlInput1"
@@ -507,7 +507,7 @@ const AddVoucher = ({
                     )}
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             <div className="row">

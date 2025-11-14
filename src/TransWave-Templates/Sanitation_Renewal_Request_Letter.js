@@ -36,6 +36,8 @@ const SanitationRenewalRequestLetter = ({
   const [openPopUp, setOpenPopUp] = useState(false);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false); // Loader state
+  const heading = "Sanitation Certificate Renewal Request";
+
   React.useEffect(() => {
     if (!dataFromAPI) return; // Prevent running if data is not loaded
 
@@ -154,8 +156,7 @@ const SanitationRenewalRequestLetter = ({
           <div className="mainoktb ">
             <div className=" d-flex justify-content-center">
               <h5 className="twoktbsubhead">
-                {" "}
-                Sanitation Certificate Renewal Request
+               {heading.toUpperCase()}
               </h5>
             </div>
             <div className="cont row d-flex  ">

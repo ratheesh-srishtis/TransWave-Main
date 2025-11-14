@@ -129,7 +129,7 @@ const ViewVoucher = ({ open, onClose, getvoucher }) => {
                     onClick={downloadVoucher}
                   >
                     {" "}
-                    Download Petty
+                    Download Voucher
                   </button>
                 </div>
               </div>
