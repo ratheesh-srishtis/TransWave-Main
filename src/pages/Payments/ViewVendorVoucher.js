@@ -4,18 +4,21 @@ import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import {
   generateCustomerVoucherPDF,
   generateVendorVoucherPDF,
+  getVendorVoucherDetails,
   generateVoucherPDF,
 } from "../../services/apiPayment";
 import { saveAs } from "file-saver";
 import "../../css/viewvoucher.css";
 import moment from "moment";
 import { useMedia } from "../../context/MediaContext";
+import { get } from "jquery";
 
 const { ToWords } = require("to-words");
 
 const toWords = new ToWords();
 const ViewVendorVoucher = ({ open, onClose, getvoucher }) => {
   const [voucher, setVoucherNumber] = useState("");
+  const [vendorVoucher, setVendorVoucher] = useState("");
   const [through, setThrough] = useState("");
   const [amount, setAmount] = useState("");
   const [particulars, setParticulars] = useState("");
@@ -38,46 +41,156 @@ const ViewVendorVoucher = ({ open, onClose, getvoucher }) => {
       setJobId(getvoucher?.jobId);
     }
   }, [getvoucher]);
+  // const getWordRepresentation = (value, currency) => {
+  //   if (
+  //     value === undefined ||
+  //     value === null ||
+  //     isNaN(Number(value)) ||
+  //     value === "N/A" ||
+  //     value === ""
+  //   ) {
+  //     return "Zero";
+  //   }
+
+  //   const amount = Number(value);
+  //   const integerPart = Math.floor(amount);
+  //   const fractionPart = Math.round((amount - integerPart) * 100); // 2 decimal places
+
+  //   const amountInWords = toWords.convert(integerPart);
+
+  //   let currencyFullName = "";
+  //   let currencyUnit = "";
+  //   let subUnit = "";
+
+  //   switch (currency?.toUpperCase()) {
+  //     case "USD":
+  //       currencyFullName = "United States Dollar";
+  //       currencyUnit = "Dollars";
+  //       subUnit = "Cents";
+  //       break;
+  //     case "OMR":
+  //       currencyFullName = "Omani Riyal";
+  //       currencyUnit = "Riyal";
+  //       subUnit = "Baisa";
+  //       break;
+  //     case "AED":
+  //       currencyFullName = "Dirham";
+  //       currencyUnit = "Dirhams";
+  //       subUnit = "Fils";
+  //       break;
+  //     default:
+  //       currencyFullName = currency;
+  //       currencyUnit = "";
+  //       subUnit = "";
+  //   }
+
+  //   let result = `${currencyFullName} ${amountInWords}`;
+
+  //   if (fractionPart > 0) {
+  //     const fractionInWords = toWords.convert(fractionPart);
+  //     result += ` and ${fractionInWords} ${subUnit}`;
+  //   }
+
+  //   return `${result} Only`;
+  // };
   const getWordRepresentation = (value, currency) => {
-    console.log(value, currency, "getWordRepresentation");
+    // Guard clauses
     if (
       value === undefined ||
       value === null ||
-      isNaN(Number(value)) ||
       value === "N/A" ||
-      value === ""
+      value === "" ||
+      isNaN(Number(value))
     ) {
-      return "Zero";
+      return "Zero Only";
     }
 
-    const amountInWords = toWords.convert(Number(value)); // "One Hundred"
+    let amount = Number(value);
 
-    let currencyFullName = "";
-    let currencyUnit = "";
+    // handle negative by treating absolute (remove if you want to keep negative sign)
+    const isNegative = amount < 0;
+    amount = Math.abs(amount);
 
-    switch (currency?.toUpperCase()) {
-      case "USD":
-        currencyFullName = "United States Dollar";
-        currencyUnit = "Dollars";
-        break;
-      case "OMR":
-        currencyFullName = "Omani Rial";
-        currencyUnit = "Rials";
-        break;
-      default:
-        currencyFullName =
-          currency?.toUpperCase() === "AED" ? "Dirham" : currency;
-        currencyUnit = "";
+    // split integer & fraction (2 decimal places)
+    let integerPart = Math.floor(amount);
+    let fractionPart = Math.round((amount - integerPart) * 100);
+
+    // handle rounding edge (e.g. 1.999 -> 2.00)
+    if (fractionPart === 100) {
+      integerPart += 1;
+      fractionPart = 0;
     }
 
-    return `${currencyFullName} ${amountInWords} ${currencyUnit} Only`;
+    // convert numbers to words (expects toWords.convert to exist)
+    const intWords = integerPart === 0 ? "zero" : toWords.convert(integerPart);
+    const fracWords = fractionPart > 0 ? toWords.convert(fractionPart) : "";
+
+    // currency map: singular base forms (we'll add 's' for plural where applicable)
+    const map = {
+      USD: { fullName: null, unit: "Dollar", subUnit: "Cent" },
+      OMR: { fullName: "Omani Riyal", unit: "Riyal", subUnit: "Baisa" },
+      AED: { fullName: null, unit: "Dirham", subUnit: "Fils" },
+      // add more currencies here if needed
+    };
+
+    const key = (currency || "").toUpperCase();
+    const cfg = map[key] || {
+      fullName: currency || "",
+      unit: currency || "",
+      subUnit: "",
+    };
+
+    // Decide output format:
+    // - For currencies with a fullName in the map (like OMR) we prefix with it and do NOT append unit after integer words,
+    //   matching your OMR example: "Omani Riyal One Hundred Fifty And Fifty Baisa Only"
+    // - Otherwise we show "<AmountWords> <Unit(s)> [And <FracWords> <SubUnit(s)>] Only"
+    const capitalizeWords = (str) =>
+      String(str || "")
+        .split(" ")
+        .filter(Boolean)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+
+    let result = "";
+
+    if (cfg.fullName) {
+      // Prefix with the full currency name (e.g., "Omani Riyal")
+      result = `${cfg.fullName} ${intWords}`;
+      if (fractionPart > 0) {
+        const sub = fractionPart === 1 ? cfg.subUnit : cfg.subUnit; // subUnit usually doesn't add 's' (e.g., "Baisa")
+        result += ` And ${fracWords} ${sub}`;
+      }
+    } else {
+      // Standard: number words + unit (pluralize if needed)
+      const unit =
+        integerPart === 1
+          ? cfg.unit
+          : `${cfg.unit}${cfg.unit.endsWith("s") ? "" : "s"}`; // Dollar -> Dollars
+      result = `${intWords} ${unit}`;
+      if (fractionPart > 0) {
+        const subUnit =
+          fractionPart === 1
+            ? cfg.subUnit
+            : `${cfg.subUnit}${cfg.subUnit.endsWith("s") ? "" : "s"}`; // Cent -> Cents
+        result += ` And ${fracWords} ${subUnit}`;
+      }
+    }
+
+    // add negative marker if needed
+    if (isNegative) result = `Minus ${result}`;
+
+    // Final "Only", and capitalize words as in your examples
+    result = `${result} Only`;
+    return capitalizeWords(result);
   };
-
   const downloadVoucher = async () => {
     try {
       let payload = {
-        paymentId: getvoucher?.id,
+        // paymentId: getvoucher?.id,
+        pdaId: getvoucher?.pdaIds["_id"],
+        voucherNo: getvoucher?.voucherNumber,
       };
+      console.log("Payload for PDF generation:", payload);
       const voucherPdf = await generateVendorVoucherPDF(payload);
       const fileUrl = process.env.REACT_APP_ASSET_URL + voucherPdf.pdfPath;
       const fileName = "Vendor Payment Voucher.pdf";
@@ -101,6 +214,31 @@ const ViewVendorVoucher = ({ open, onClose, getvoucher }) => {
     }
   };
 
+  const getVoucherDetails = async () => {
+    try {
+      let data = {
+        pdaId: getvoucher?.pdaIds["_id"],
+        voucherNo: getvoucher?.voucherNumber,
+      }; // Adjust the payload as needed
+      const response = await getVendorVoucherDetails(data);
+      setVendorVoucher(response);
+      console.log("Voucher Details:", response);
+      // Handle the response as needed
+    } catch (error) {
+      console.error("Error fetching voucher details:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (getvoucher?.pdaIds["_id"] && getvoucher?.voucherNumber) {
+      getVoucherDetails();
+    }
+  }, [getvoucher]);
+
+  useEffect(() => {
+    console.log("Vendor Voucher State Updated:", vendorVoucher);
+  }, [vendorVoucher]);
+
   return (
     <>
       <Dialog
@@ -120,10 +258,10 @@ const ViewVendorVoucher = ({ open, onClose, getvoucher }) => {
         fullWidth
         maxWidth="lg"
       >
-        <div className="d-flex justify-content-between " onClick={onClose}>
+        <div className="d-flex justify-content-between ">
           <DialogTitle></DialogTitle>
           <div className="closeicon">
-            <i className="bi bi-x-lg "></i>
+            <i className="bi bi-x-lg " onClick={onClose}></i>
           </div>
         </div>
         <DialogContent style={{ marginBottom: "40px" }}>
@@ -133,7 +271,7 @@ const ViewVendorVoucher = ({ open, onClose, getvoucher }) => {
             </div>
             <div className="voucherpadding">
               <div className=" headheadvoucher">
-                <div className="headvoucher">Voucher</div>
+                <div className="headvoucher">VENDOR VOUCHER</div>
 
                 <div className="downloadbutnvoucher">
                   <button
@@ -165,7 +303,8 @@ const ViewVendorVoucher = ({ open, onClose, getvoucher }) => {
                     <td className="voucheraccount">
                       Account:
                       <p className="voucherprint">
-                        {pdaNumber} - {jobId}
+                        {pdaNumber}{" "}
+                        {jobId && jobId !== "N/A" ? ` - ${jobId}` : ""}
                       </p>
                       <p className="voucherprint">
                         {getvoucher?.vendorId?.vendorName}
@@ -174,21 +313,59 @@ const ViewVendorVoucher = ({ open, onClose, getvoucher }) => {
                     <td className="voucherpartfour"></td>
                   </tr>
 
-                  <tr>
+                  {vendorVoucher?.payment?.length > 0 && (
+                    <>
+                      {vendorVoucher?.payment?.map((payment, index) => (
+                        <tr key={index}>
+                          <td className="voucherpartthree">
+                            <div className="voucheraccount">
+                              Payment Date :
+                              <div className="voucherprintingnew">
+                                {" "}
+                                {moment
+                                  .utc(payment?.paymentDate)
+                                  .format("DD-MM-YYYY")}
+                              </div>
+                              <div className="voucherprintingnew">
+                                Mode Of Payment :
+                                {payment?.modeofPayment
+                                  ? payment?.modeofPayment
+                                      .charAt(0)
+                                      .toUpperCase() +
+                                    payment?.modeofPayment.slice(1)
+                                  : ""}
+                              </div>
+                              <div className="voucherprintingnew">
+                                {payment?.bank?.bankName}
+                              </div>
+                            </div>
+                          </td>
+
+
+                    <td className="voucheramountrate text-center">
+                      {vendorVoucher?.currency?.toUpperCase()}{" "}
+                      {vendorVoucher?.currency === "AED"
+                        ? Number(vendorVoucher?.totalOMR).toFixed(2)
+                        : vendorVoucher?.currency === "USD"
+                        ? Number(vendorVoucher?.totalOMR).toFixed(2)
+                        : vendorVoucher?.totalOMR}
+                    </td>
+
+                         
+                        </tr>
+                      ))}
+                    </>
+                  )}
+
+                  {/* <tr>
                     <td className="voucherpartthree">
-                      {/* <div className="voucheraccount">
-                        Payment Date :
-                        {moment
-                          .utc(getvoucher?.paymentDate)
-                          .format("DD-MM-YYYY")}
-                      </div>
-                      <div className="voucheraccount">
-                        Currency : {getvoucher?.currency}
-                      </div>{" "} */}
                       <div className="voucheraccount">
                         Mode Of Payment :
                         <div className="voucherprintingnew">
-                          {getvoucher?.modeofPayment}
+                          {getvoucher?.modeofPayment
+                            ? getvoucher.modeofPayment.charAt(0).toUpperCase() +
+                              getvoucher.modeofPayment.slice(1)
+                            : ""}
                         </div>
                       </div>
                       {getvoucher?.modeofPayment === "bank" && (
@@ -198,24 +375,13 @@ const ViewVendorVoucher = ({ open, onClose, getvoucher }) => {
                           </div>
                         </>
                       )}
-
-                      {/* <div className="voucheraccount">
-                        Bank: {getvoucher?.bank?.bankName}
-                      </div> */}
                     </td>
                     <td className="voucherpartfour align-baseline">
                       {" "}
                       {getvoucher?.recvamount}
                     </td>
-                  </tr>
-                  <tr>
-                    <td className="voucherpartthree"> </td>
-                    <td className="voucherpartfour"></td>
-                  </tr>
-                  <tr>
-                    <td className="voucherpartthree"></td>
-                    <td className="voucherpartfour"></td>
-                  </tr>
+                  </tr> */}
+
                   <tr>
                     <td className="voucheraccount">Amount(in words):</td>
                     <td className="voucherpartfour"></td>
@@ -223,12 +389,17 @@ const ViewVendorVoucher = ({ open, onClose, getvoucher }) => {
                   <tr>
                     <td className="voucherprinting">
                       {getWordRepresentation(
-                        getvoucher?.amount,
-                        getvoucher?.currency
+                        vendorVoucher?.totalOMR,
+                        vendorVoucher?.currency
                       )}{" "}
                     </td>
                     <td className="voucheramountrate text-center">
-                      {getvoucher?.currency} {getvoucher?.amount}
+                      {vendorVoucher?.currency?.toUpperCase()}{" "}
+                      {vendorVoucher?.currency === "OMR"
+                        ? Number(vendorVoucher?.totalOMR).toFixed(3)
+                        : vendorVoucher?.currency === "USD"
+                        ? Number(vendorVoucher?.totalOMR).toFixed(2)
+                        : vendorVoucher?.totalOMR}
                     </td>
                   </tr>
                 </tbody>
