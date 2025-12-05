@@ -1,4 +1,6 @@
 // ResponsiveDialog.js
+//
+
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import {
