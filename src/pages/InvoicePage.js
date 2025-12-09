@@ -48,6 +48,7 @@ const InvoicePage = ({
   const [openPopUp, setOpenPopUp] = useState(false);
   const [employee, setEmployee] = useState("");
   const [message, setMessage] = useState("");
+  const [employeeError, setEmployeeError] = useState("");
   const [isLoading, setIsLoading] = useState(false); // Loader state
   const [remarksOpen, setRemarksOpen] = useState(false);
   const [serviceReports, setServiceReports] = useState([]);
@@ -109,7 +110,7 @@ const InvoicePage = ({
       const response = await changeInvoiceStatus(pdaPayload);
       console.log(response, "login_response");
       if (response?.status == true) {
-        setMessage("Invoice has been Rejected by FM");
+        setMessage("Invoice has been Rejected");
         setOpenPopUp(true);
         setRemarksOpen(false);
         onSubmit(pdaResponse?._id);
@@ -126,6 +127,17 @@ const InvoicePage = ({
     }
   };
   const acceptInvoice = async (remark) => {
+
+ // Check if employee is selected
+    if (!employee) {
+      setEmployeeError("Select Invoice By");
+      setMessage("Select 'Invoice By' to continue.");
+      setOpenPopUp(true);
+      return;
+    }
+     setEmployeeError("");
+
+
     console.log(remark, "handleRemarksSubmit");
     let pdaPayload = {
       pdaId: pdaResponse?._id,
@@ -306,10 +318,10 @@ const InvoicePage = ({
           style: { width: "1700px" }, // Custom width
         }}
       >
-        <div className="d-flex justify-content-between" onClick={onClose}>
+        <div className="d-flex justify-content-between" >
           <DialogTitle></DialogTitle>
           <div className="closeicon">
-            <i className="bi bi-x-lg "></i>
+            <i className="bi bi-x-lg " onClick={onClose}></i>
           </div>
         </div>
         <DialogContent>

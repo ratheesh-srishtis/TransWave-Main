@@ -114,14 +114,68 @@ const [formData, setFormData] = useState({
             </>
           ))}
         </div>
-
-           {/* Remarks Section */}
-
       </div>
 
 
 
+      <form onSubmit={handleSubmit}>
+      <div className="row">
+        <div className="col-12 mb-3 align-items-start">
+          <label htmlFor="comment1" className="form-label">
+            Text area1 <span className="required">*</span>:
+          </label>
+          <textarea
+            name="comment1"
+            className="form-control vessel-voyage"
+            id="comment1"
+            value={formData.comment1}
+            onChange={handleChange}
+            style={{ width: "100%", resize: "none" }}
+          />
+          {errors.comment1 && <span className="invalid">{errors.comment1}</span>}
+        </div>
+      </div>
 
+      <div className="row">
+        <div className="col-12 mb-3 align-items-start">
+          <label htmlFor="comment2" className="form-label">
+            Text area2 <span className="required">*</span>:
+          </label>
+          <textarea
+            name="comment2"
+            className="form-control vessel-voyage"
+            id="comment2"
+            value={formData.comment2}
+            onChange={handleChange}
+            style={{ width: "100%", resize: "none" }}
+          />
+          {errors.comment2 && <span className="invalid">{errors.comment2}</span>}
+        </div>
+      </div>
+
+      <div className="row">
+        <div className="col-12 mb-3 align-items-start">
+          <label htmlFor="comment3" className="form-label">
+            Text area3 <span className="required">*</span>:
+          </label>
+          <textarea
+            name="comment3"
+            className="form-control vessel-voyage"
+            id="comment3"
+            value={formData.comment3}
+            onChange={handleChange}
+            style={{ width: "100%", resize: "none" }}
+          />
+          {errors.comment3 && <span className="invalid">{errors.comment3}</span>}
+        </div>
+      </div>
+
+      <div className="btnuser">
+        <button type="submit" className="btn btna submit-button btnfsize">
+          Submit
+        </button>
+      </div>
+    </form>
 
 
        

@@ -1,6 +1,8 @@
 // ResponsiveDialog.js
 import React, { useState, useEffect } from "react";
 import "../../css/reports/pettycashreport.css";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import {
   getPettyCashReport,
   pettyCashReportPDF,
@@ -17,14 +19,23 @@ import {
   getAllBanks,
   getAllFinanceEmployees,
 } from "../../services/apiPayment";
+import { get } from "jquery";
+import Loader from "../Loader";
 
 const PettyCashReport = () => {
+  const [isLoading, setIsLoading] = useState(false); // Loader state
+
   const Group = require("../../assets/images/reporttttt.png");
   const [eta, setEta] = useState("");
   const [paymentDate, setPaymentDate] = useState("");
   const [reportList, setReportList] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState("");
+  const [filterType, setFilterType] = useState("month"); // Default to "monthly"
+  const [selectedMonth, setSelectedMonth] = useState(
+    (new Date().getMonth() + 1).toString()
+  ); // Default to current month
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Default to current year
 
   const handleEtaChange = (date) => {
     console.log(date, "datehandleEtaChange");
@@ -34,22 +45,122 @@ const PettyCashReport = () => {
       let formatDate = date ? moment(date).format("YYYY-MM-DD ") : null;
       console.log(formatDate, "formatDate");
       setPaymentDate(formatDate);
+      setSelectedEmployee("");
+      setSelectedMonth("");
+      setSelectedYear("");
+      setFilterType("");
     }
   };
 
   const filteredReports = reportList?.filter((item) => {
     const matchedEmployee =
-      !selectedEmployee || item.employee[0]?._id === selectedEmployee;
-
+      !selectedEmployee || item.employee?._id === selectedEmployee;
     return matchedEmployee;
   });
+  console.log(filteredReports, "filteredReports_main");
 
   const columns = [
     { field: "employee", headerName: "Employee Name", flex: 1 },
     { field: "totalPetty", headerName: "Total Petty", flex: 1 },
     { field: "usedPetties", headerName: "Used Petties", flex: 1 },
     { field: "balancePetties", headerName: "Balance Petties", flex: 1 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 0.5,
+      sortable: false,
+      renderCell: (params) => (
+        <button
+          className="btn btn-sm btn-info text-white"
+          onClick={() => downloadRowExcel(params.row)}
+          title="Download Excel"
+        >
+          <i className="bi bi-download"></i>
+        </button>
+      ),
+    },
   ];
+
+  const downloadRowExcel = async (rowData) => {
+    // Prepare single row data
+    const excelData = [
+      {
+        "Employee Name": rowData.employee,
+        "Total Petty": rowData.totalPetty,
+        "Used Petties": rowData.usedPetties,
+        "Balance Petties": rowData.balancePetties,
+      },
+    ];
+
+    const headers = Object.keys(excelData[0]);
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Petty Cash Report", {
+      properties: { defaultRowHeight: 18 },
+      pageSetup: { fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+    });
+
+    // Header
+    const headerRow = worksheet.addRow(headers);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.alignment = {
+        horizontal: "center",
+        vertical: "middle",
+        wrapText: true,
+      };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFEFEFEF" },
+      };
+    });
+
+    // Data row
+    const dataRow = worksheet.addRow(headers.map((h) => excelData[0][h]));
+    dataRow.eachCell((cell) => {
+      cell.alignment = {
+        horizontal: "center",
+        vertical: "middle",
+        wrapText: true,
+      };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+    });
+
+    // Auto-size columns
+    const minWidth = 15;
+    const maxWidth = 60;
+    headers.forEach((h, i) => {
+      let maxLen = (h || "").toString().length;
+      const val = excelData[0][h];
+      const len = val == null ? 0 : val.toString().length;
+      if (len > maxLen) maxLen = len;
+      const width = Math.max(minWidth, Math.min(maxWidth, maxLen + 2));
+      worksheet.getColumn(i + 1).width = width;
+    });
+    worksheet.getColumn(1).width = Math.max(
+      worksheet.getColumn(1).width || 0,
+      24
+    );
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    saveAs(blob, `Petty Cash ${rowData.employee.replace(/\s+/g, "_")}.xlsx`);
+  };
+
+  // ...existing code...
 
   const NoRowsOverlay = () => (
     <Box
@@ -80,21 +191,12 @@ const PettyCashReport = () => {
 
   useEffect(() => {
     console.log(filteredReports, "filteredReports");
-    filteredReports?.map((item, index) =>
-      console.log(item?.employee[0]["name"], "item")
-    );
   }, [filteredReports]);
 
   useEffect(() => {
     getReport();
     getEmployeesList();
   }, []);
-
-  const [filterType, setFilterType] = useState("month"); // Default to "monthly"
-  const [selectedMonth, setSelectedMonth] = useState(
-    (new Date().getMonth() + 1).toString()
-  ); // Default to current month
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Default to current year
 
   // Array of months
   const months = [
@@ -145,14 +247,21 @@ const PettyCashReport = () => {
       paymentDate: paymentDate,
     };
     console.log(payload, "payload_getReport");
+    setIsLoading(true); // Show loader
     try {
       const response = await getPettyCashReport(payload);
-      setReportList(response?.pettyData);
+      setIsLoading(false); // Hide loader
+      setReportList(response?.result);
       console.log("getPettyCashReport", response);
     } catch (error) {
       console.error("Failed to fetch quotations:", error);
+      setIsLoading(false); // Hide loader
     }
   };
+
+  useEffect(() => {
+    console.log(reportList, "reportList");
+  }, [reportList]);
 
   const getPDF = async () => {
     let payload = {
@@ -189,52 +298,136 @@ const PettyCashReport = () => {
   };
 
   // Create Excel for filteredReports
-  const createExcel = () => {
+  // const createExcel = () => {
+  //   if (!filteredReports || filteredReports.length === 0) return;
+  //   // Prepare data for Excel
+  //   const excelData = filteredReports.map((item) => {
+  //     const usedPetties = item.employeepetties.reduce(
+  //       (sum, petty) => sum + (petty.amount || 0),
+  //       0
+  //     );
+  //     const balancePetties = usedPetties - item.totalPetty;
+  //     return {
+  //       "Employee Name": item?.employee?.[0]?.name || "N/A",
+  //       "Total Petty": usedPetties ?? "N/A",
+  //       "Used Petties": item.totalPetty,
+  //       "Balance Petties": balancePetties,
+  //     };
+  //   });
+  //   // Add totals row
+  //   /*
+  //   const totalPettySum = excelData.reduce(
+  //     (sum, row) => sum + (parseFloat(row["Total Petty"]) || 0),
+  //     0
+  //   );
+  //   const usedPettiesSum = excelData.reduce(
+  //     (sum, row) => sum + (parseFloat(row["Used Petties"]) || 0),
+  //     0
+  //   );
+  //   const balancePettiesSum = excelData.reduce(
+  //     (sum, row) => sum + (parseFloat(row["Balance Petties"]) || 0),
+  //     0
+  //   );
+  //   excelData.push({
+  //     "Employee Name": "Total",
+  //     "Total Petty": totalPettySum,
+  //     "Used Petties": usedPettiesSum,
+  //     "Balance Petties": balancePettiesSum,
+  //   });
+  //   */
+  //   // Create worksheet and workbook
+  //   const XLSX = require("xlsx");
+  //   const worksheet = XLSX.utils.json_to_sheet(excelData);
+  //   worksheet["!cols"] = [{ wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "PettyCashReport");
+  //   XLSX.writeFile(workbook, "Petty Cash Report.xlsx");
+  // };
+  const createExcel = async () => {
     if (!filteredReports || filteredReports.length === 0) return;
-    // Prepare data for Excel
-    const excelData = filteredReports.map((item) => {
-      const usedPetties = item.employeepetties.reduce(
-        (sum, petty) => sum + (petty.amount || 0),
-        0
-      );
-      const balancePetties = usedPetties - item.totalPetty;
+
+    // Prepare rows
+    const rowsData = filteredReports.map((item) => {
       return {
-        "Employee Name": item?.employee?.[0]?.name || "N/A",
-        "Total Petty": usedPetties ?? "N/A",
-        "Used Petties": item.totalPetty,
-        "Balance Petties": balancePetties,
+        "Employee Name": item?.employee?.name || "N/A",
+        "Total Petty": Number(item.totalPetty).toFixed(2),
+        "Used Petties": Number(item.usedPetty).toFixed(2),
+        "Balance Petties": Number(item.balancePetty).toFixed(2),
       };
     });
-    // Add totals row
-    /*
-    const totalPettySum = excelData.reduce(
-      (sum, row) => sum + (parseFloat(row["Total Petty"]) || 0),
-      0
-    );
-    const usedPettiesSum = excelData.reduce(
-      (sum, row) => sum + (parseFloat(row["Used Petties"]) || 0),
-      0
-    );
-    const balancePettiesSum = excelData.reduce(
-      (sum, row) => sum + (parseFloat(row["Balance Petties"]) || 0),
-      0
-    );
-    excelData.push({
-      "Employee Name": "Total",
-      "Total Petty": totalPettySum,
-      "Used Petties": usedPettiesSum,
-      "Balance Petties": balancePettiesSum,
-    });
-    */
-    // Create worksheet and workbook
-    const XLSX = require("xlsx");
-    const worksheet = XLSX.utils.json_to_sheet(excelData);
-    worksheet["!cols"] = [{ wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "PettyCashReport");
-    XLSX.writeFile(workbook, "Petty Cash Report.xlsx");
-  };
 
+    const headers = Object.keys(rowsData[0] || {});
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Petty Cash Report", {
+      properties: { defaultRowHeight: 18 },
+      pageSetup: { fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+    });
+
+    // Header
+    const headerRow = worksheet.addRow(headers);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.alignment = {
+        horizontal: "center",
+        vertical: "middle",
+        wrapText: true,
+      };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFEFEFEF" },
+      };
+    });
+
+    // Data rows
+    rowsData.forEach((row) => {
+      const r = worksheet.addRow(headers.map((h) => row[h]));
+      r.eachCell((cell) => {
+        cell.alignment = {
+          horizontal: "center",
+          vertical: "middle",
+          wrapText: true,
+        };
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      });
+    });
+
+    // Auto-size columns (clamped) and ensure first column has enough width
+    const minWidth = 15;
+    const maxWidth = 60;
+    headers.forEach((h, i) => {
+      let maxLen = (h || "").toString().length;
+      rowsData.forEach((row) => {
+        const val = row[h];
+        const len = val == null ? 0 : val.toString().length;
+        if (len > maxLen) maxLen = len;
+      });
+      const width = Math.max(minWidth, Math.min(maxWidth, maxLen + 2));
+      worksheet.getColumn(i + 1).width = width;
+    });
+    // Nudge first column wider for names
+    worksheet.getColumn(1).width = Math.max(
+      worksheet.getColumn(1).width || 0,
+      24
+    );
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    saveAs(blob, "Petty Cash Report.xlsx");
+  };
   const getEmployeesList = async () => {
     try {
       const listemployees = await getAllFinanceEmployees();
@@ -247,8 +440,10 @@ const PettyCashReport = () => {
   useEffect(() => {
     console.log(paymentDate, "paymentDate");
     console.log(selectedEmployee, "selectedEmployee");
+    console.log(selectedMonth, "selectedMonth");
+    console.log(selectedYear, "selectedYear");
     getReport();
-  }, [paymentDate, selectedEmployee, selectedMonth, selectedYear]);
+  }, [selectedEmployee, selectedMonth, selectedYear, paymentDate, filterType]);
 
   return (
     <>
@@ -390,17 +585,12 @@ const PettyCashReport = () => {
         rows={
           filteredReports?.length > 0
             ? filteredReports.map((item, index) => {
-                const usedPetties = item.employeepetties.reduce(
-                  (sum, petty) => sum + (petty.amount || 0),
-                  0
-                );
-                const balancePetties = usedPetties - item.totalPetty;
                 return {
                   id: index,
-                  employee: item?.employee?.[0]?.name || "N/A",
-                  totalPetty: usedPetties ?? "N/A",
-                  usedPetties: item.totalPetty,
-                  balancePetties: balancePetties,
+                  employee: item?.employee?.name || "N/A",
+                  totalPetty: Number(item.totalPetty).toFixed(2),
+                  usedPetties: Number(item.usedPetty).toFixed(2),
+                  balancePetties: Number(item.balancePetty).toFixed(2),
                 };
               })
             : []
@@ -472,6 +662,7 @@ const PettyCashReport = () => {
           </div>
         </>
       )}
+      <Loader isLoading={isLoading} />
     </>
   );
 };

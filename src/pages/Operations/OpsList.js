@@ -71,7 +71,7 @@ const OpsList = () => {
       case 3:
         return "Internally Approved";
       case 4:
-        return "Rejected By FM";
+        return "Rejected";
       case 5:
         return "Customer Approved";
       case 6:
