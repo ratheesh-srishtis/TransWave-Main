@@ -189,6 +189,17 @@ export const getCustomerVoucherDetails = async (voucher) => {
     console.log("Error in getCustomerVoucherDetails", error);
   }
 };
+export const getVendorVoucherDetails = async (voucher) => {
+  try {
+    const response = await axiosInstance.post(
+      "/getVendorVoucherDetails",
+      voucher
+    );
+    return response.data;
+  } catch (error) {
+    console.log("Error in getVendorVoucherDetails", error);
+  }
+};
 //download vendor voucher pdf
 export const generateVendorVoucherPDF = async (voucher) => {
   try {

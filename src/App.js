@@ -107,10 +107,12 @@ const App = () => {
     };
   }, []);
 
+  // test commit
+
   return (
     <>
       <ErrorBoundary>
-        <Router basename="/project/transwave/">
+        <Router basename="/">
           <MediaProvider>
             <AuthProvider>
               <Routes>
