@@ -720,11 +720,11 @@ const AddJobs = ({
         >
           <div
             className="d-flex justify-content-between "
-            onClick={handleClose}
+           
           >
             <DialogTitle>Update Charge</DialogTitle>
             <div className="closeicon">
-              <i className="bi bi-x-lg "></i>
+              <i className="bi bi-x-lg " onClick={handleClose}></i>
             </div>
           </div>
           <DialogContent style={{ marginBottom: "40px" }}>

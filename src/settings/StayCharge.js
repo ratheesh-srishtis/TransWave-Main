@@ -192,16 +192,16 @@ const StayCharge = ({ portName, onClick }) => {
   const handleAddRole = () => {};
   return (
     <>
-      <div className="p-3">
+    <div className="p-3">
         <div className="jobreport-header">
           <div className="summary"></div>
-          <div className="col-1 getdownloadpdf">
+          <div className="col-2 staychrg ">
             <button
               type="button"
               onClick={() => handleOpen()}
-              className="btn btn-info infobtn"
+              className="btn btn-info infobtn "
             >
-              Add Charge
+              Add Charge Details
             </button>
           </div>
         </div>

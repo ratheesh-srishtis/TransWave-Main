@@ -168,7 +168,7 @@
   color: rgb(0, 0, 0) !important;
 }
 .timeslotnew {
-  width: 40px !important;
+  /* width: 40px!important; */
   margin-left: 5px !important;
 }
 .etdmargin {

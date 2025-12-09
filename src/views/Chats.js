@@ -10,6 +10,8 @@ import {
 } from "../services/chatApiService";
 import { useAuth } from "../context/AuthContext";
 import PopUp from "../pages/PopUp";
+import Loader from "../pages/Loader";
+
 import { useChat } from "./ChatContext";
 const Chats = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -164,6 +166,7 @@ const Chats = () => {
         getChatsList(limit, 0, recieverType, "sendMessage");
         setActionType("send"); // Set action type to "send"
         setMessage(""); // Clear input after sending
+        getUnreadCount();
         // Reset the textarea height to default (1 row)
         if (textareaRef.current) {
           textareaRef.current.style.height = "auto"; // Reset height
@@ -261,6 +264,7 @@ const Chats = () => {
   };
 
   const getUnreadCount = async (limit, offset) => {
+    setIsLoading(true);
     let payload = {
       userId: userId,
     };
@@ -270,8 +274,10 @@ const Chats = () => {
       setChatLogos(response);
       updateUnreadCounts(response); // Update chatUsers dynamically
       console.log("getUnreadChatCount", response);
+      setIsLoading(false);
     } catch (error) {
       console.error("Failed to fetch quotations:", error);
+      setIsLoading(false);
     }
   };
 
@@ -414,7 +420,7 @@ const Chats = () => {
                     {chatUsers.map((user, index) => (
                       <div
                         key={index}
-                        className={`messagemain mb-3 mt-3 ${
+                        className={`messagemain chatnewsty mb-3 mt-3 ${
                           recieverType === user.type?.toLowerCase()
                             ? "activechat"
                             : ""
@@ -428,14 +434,17 @@ const Chats = () => {
                         <div className="user-logo">
                           <img className="dept-logo" src={user?.logo} alt="" />
                         </div>
-                        <div className="about">
-                          <div className="chathead">{user.type}</div>
-                        </div>
-                        <div className="msgcontentandnumber">
-                          <div className="msgcontent text-truncate">
-                            {user.message}
+                        <div>
+                          {" "}
+                          <div className="about">
+                            <div className="chathead">{user.type}</div>
                           </div>
-                          <div className="msgnumber">{user.unread}</div>
+                          <div className="msgcontentandnumber">
+                            <div className="msgcontent text-truncate">
+                              {user.message}
+                            </div>
+                            <div className="msgnumber">{user.unread}</div>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -457,7 +466,10 @@ const Chats = () => {
                       {newChatList?.newMessages?.map((chat) => {
                         // pick logo based on senderUser
                         let logoPath = "";
-                        if (chat?.senderUser === "admin") {
+                        if (
+                          chat?.senderUser === "admin" ||
+                          chat?.senderUser === "superadmin"
+                        ) {
                           logoPath =
                             chat?.departmentLogoId?.adminDepartmentLogo;
                         } else if (chat?.senderUser === "finance") {
@@ -514,7 +526,7 @@ const Chats = () => {
                                     ? "other-message float-right "
                                     : "my-message"
                                 }`}
-                                style={{ whiteSpace: "pre-wrap" }} // This is the key fix
+                                style={{ whiteSpace: "normal" }} // This is the key fix
                               >
                                 {chat.message}
                               </div>
@@ -626,6 +638,7 @@ const Chats = () => {
       {openPopUp && (
         <PopUp message={popupMessage} closePopup={() => setOpenPopUp(false)} />
       )}{" "}
+      <Loader isLoading={isLoading} />
     </>
   );
 };

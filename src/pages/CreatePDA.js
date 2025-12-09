@@ -457,7 +457,7 @@ const CreatePDA = ({
         setPdaResponse(response?.pda);
         if (response?.pda?.pdaStatus == 4) {
           setIsApproved(true);
-          setMessage("PDA has been Rejected by FM");
+          setMessage("PDA has been Rejected");
           setOpenPopUp(true);
           setRemarksOpen(false);
         }
@@ -1344,7 +1344,7 @@ const CreatePDA = ({
                       : pdaResponse?.pdaStatus == 3
                       ? "Internally Approved"
                       : pdaResponse?.pdaStatus == 4
-                      ? "Rejected By FM"
+                      ? "Rejected"
                       : pdaResponse?.pdaStatus == 5
                       ? "Customer Approved"
                       : pdaResponse?.pdaStatus == 6
@@ -1949,7 +1949,7 @@ const CreatePDA = ({
               )}
 
               <div className="row align-items-start d-flex justify-content-end">
-                {pdaResponse?.pdaStatus != 7 && (
+              
                   <>
                     {requestedServices.length > 0 && (
                       <>
@@ -1967,7 +1967,7 @@ const CreatePDA = ({
                       </>
                     )}
                   </>
-                )}
+               
                 {pdaResponse?.pdaStatus != 7 && (
                   <>
                     <div className="col-2">
@@ -2171,10 +2171,13 @@ const CreatePDA = ({
                           </>
                         )}
 
-                        {(loginResponse?.data?.userRole?.role?.designationType?.toLowerCase() ===
+                          {(loginResponse?.data?.userRole?.role?.designationType?.toLowerCase() ===
                           "financemanager" ||
                           loginResponse?.data?.userRole?.role?.designationType?.toLowerCase() ===
-                            "operationsmanager") && (
+                            "operationsmanager" ||
+                          loginResponse?.data?.userRole?.role?.designationType?.toLowerCase() ===
+                            "financehead") && (
+
                           <>
                             {(pdaResponse?.pdaStatus == 2 ||
                               pdaResponse?.pdaStatus == 4) && (
