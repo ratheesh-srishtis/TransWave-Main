@@ -10,28 +10,10 @@ import {
   Grid,
   Button,
 } from "@mui/material";
-import AN_SHUN_Inward_Letterhead from "../../TransWave-Templates/AN_SHUN_Inward_Letterhead";
-import Crane_Tally from "../../TransWave-Templates/Crane_Tally";
-import Fresh_Water_Slip from "../../TransWave-Templates/Fresh_Water_Slip";
-import Hamriyah_Inward_Document_Entry from "../../TransWave-Templates/Hamriyah_Inward_Document_Entry";
-import Immigration_Guarantee_Letter_Dubai_New_Drydock from "../../TransWave-Templates/Immigration_Guarantee_Letter_Dubai_New_Drydock";
-import Immigration_Letter_Crew_Change from "../../TransWave-Templates/Immigration_Letter_Crew_Change";
-import Mashreq_AED_IBAN_Letter from "../../TransWave-Templates/Mashreq_AED_IBAN_Letter";
-import Mashreq_USD_IBAN_Letter from "../../TransWave-Templates/Mashreq_USD_IBAN_Letter";
-import Master_Agent_Declaration from "../../TransWave-Templates/Master_Agent_Declaration";
-import New_Delivery_Note_Transwave from "../../TransWave-Templates/New_Delivery_Note_Transwave";
-import New_OKTB_and_Log from "../../TransWave-Templates/New_OKTB_and_Log";
-import NOC_Gatepass from "../../TransWave-Templates/NOC_Gatepass";
-import NOC_Crew_Change_Our_Company from "../../TransWave-Templates/NOC_Crew_Change_Our_Company";
-import NOC_Crew_Change from "../../TransWave-Templates/NOC_Crew_Change";
-import Offshore from "../../TransWave-Templates/Offshore";
-import On_Signers_Attestation from "../../TransWave-Templates/On_Signers_Attestation";
-import Outward_Clearance_Letter_Clean from "../../TransWave-Templates/Outward_Clearance_Letter_Clean";
-import Proforma_Invoice from "../../TransWave-Templates/Proforma_Invoice";
-import QQ_Form from "../../TransWave-Templates/QQ_Form";
-import Sanitation_Renewal_Request_Letter from "../../TransWave-Templates/Sanitation_Renewal_Request_Letter";
-import Transportation_Slip from "../../TransWave-Templates/Transportation_Slip";
-import TWMS_Letterhead_New from "../../TransWave-Templates/TWMS_Letterhead_New";
+import BerthReport from "./Templates/BerthReport";
+import CrewChangeList from "./Templates/CrewChangeList";
+import LoadingReport from "./Templates/LoadingReport";
+import OKTBReport from "./Templates/OKTBReport";
 import Multiselect from "multiselect-react-dropdown";
 
 import {
@@ -49,7 +31,6 @@ import Transportationreciept from "./Templates/Transportationreciept";
 import Loader from "../Loader";
 import { saveAs } from "file-saver";
 import DischargeReport from "./Templates/DischargeReport";
-import ArabicTemplate from "../../TransWave-Templates/ArabicTemplate";
 const AddJobs = ({
   open,
   onClose,
@@ -64,104 +45,29 @@ const AddJobs = ({
   templates,
 }) => {
   console.log(pdaResponse, "pdaResponse");
-  console.log(templates, "templates");
   console.log(charge, "AddJobs_charge");
   const [isLoading, setIsLoading] = useState(false); // Loader state
   const [allVendors, setAllVendors] = useState([]);
-
-  // const templates = [
-  //   { _id: "temp001", templateName: "AN SHUN Inward Letterhead" },
-  //   { _id: "temp002", templateName: "Crane Tally" },
-  //   { _id: "temp003", templateName: "Fresh Water Slip" },
-  //   { _id: "temp004", templateName: "Hamriyah Inward Document Entry" },
-  //   {
-  //     _id: "temp005",
-  //     templateName: "Immigration Guarantee Letter - Dubai New - Drydock",
-  //   },
-  //   { _id: "temp006", templateName: "Immigration Letter Crew Change" },
-  //   { _id: "temp007", templateName: "Mashreq AED IBAN Letter" },
-  //   { _id: "temp008", templateName: "Mashreq USD IBAN Letter" },
-  //   { _id: "temp009", templateName: "Master Agent Declaration" },
-  //   { _id: "temp010", templateName: "New Delivery Note - Transwave" },
-  //   { _id: "temp011", templateName: "New OKTB and Log" },
-  //   { _id: "temp012", templateName: "NOC Gatepass" },
-  //   { _id: "temp013", templateName: "NOC Crew Change (Our Company)" },
-  //   { _id: "temp014", templateName: "NOC Crew Change" },
-  //   { _id: "temp015", templateName: "Offshore" },
-  //   { _id: "temp016", templateName: "On Signers Attestation" },
-  //   { _id: "temp017", templateName: "Outward Clearance Letter - Clean" },
-  //   { _id: "temp018", templateName: "Proforma Invoice" },
-  //   { _id: "temp019", templateName: "QQ Form" },
-  //   { _id: "temp020", templateName: "Sanitation Renewal Request Letter" },
-  //   { _id: "temp021", templateName: "Transportation Slip" },
-  //   { _id: "temp022", templateName: "TWMS Letterhead - New" },
-  // ];
-
-  // const [templates, setTemplates] = useState([]);
-
   const [editChargeData, setEditChargeData] = useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [selectedTemplateName, setSelectedTemplateName] = useState("");
-  // Dialog open states for each template
-  const [openTemplateDialog, setOpenTemplateDialog] = useState("");
+  const [isBerthReportOpen, setIsBerthReportOpen] = useState(false);
+  const [isCrewChangeListOpen, setIsCrewChangeListOpen] = useState(false);
+  const [isLoadingReportOpen, setIsLoadingReportOpen] = useState(false);
+  const [isOKTBOpen, setIsOKTBOpen] = useState(false);
+  const [isProvisionOpen, setIsProvisionOpen] = useState(false);
+  const [isTransportationOpen, setIsTransportationOpen] = useState(false);
+  const [isDischargeReportOpen, setIsDischargeReportOpen] = useState(false);
 
   const [templatesList, setTemplatesList] = useState([]);
 
-  // Removed unused setIs*Open state setters and edit states for new template dialogs
-
-  const handleTemplateChange = (event) => {
-    const selectedId = event.target.value; // Get the selected _id
-    setSelectedTemplate(selectedId); // Set the selected _id in the state
-    // Find the corresponding templateName
-    const selectedTemplate = templates.find(
-      (template) => template._id === selectedId
-    );
-    if (selectedTemplate) {
-      setSelectedTemplateName(selectedTemplate.templateName);
-    } else {
-      setSelectedTemplateName("");
-    }
-  };
-
-  useEffect(() => {
-    // Update allVendors whenever vendors prop changes
-    if (Array.isArray(vendors)) {
-      setAllVendors(vendors.map((v) => v._id));
-    }
-  }, [vendors]);
-
-  useEffect(() => {
-    console.log(allVendors, "allVendors");
-  }, [allVendors]);
-
-  // Open the dialog for the selected template
-  const handleOpenTemplate = () => {
-    setOpenTemplateDialog(selectedTemplate);
-    if (selectedTemplate === "689a32420f5c3d07e30f555e") {
-      setIsNewDeliveryNoteEdit(false);
-    } else if (selectedTemplate === "689b8dd3cb558b331d9426b5") {
-      setIsFreshWaterSlipEdit(false);
-    } else if (selectedTemplate === "68a2ccb7c69e011f34c1bfcc") {
-      setIsTransportationRecieptEdit(false);
-    } else if (selectedTemplate === "68a320e5c69e011f34c29c50") {
-      setIsSanitationRenewalRequestEdit(false);
-    } else if (selectedTemplate === "68a45dbec69e011f34c45100") {
-      setIsCraneTallyEdit(false);
-    } else if (selectedTemplate === "68a45d82c69e011f34c44f59") {
-      setIsProformaInvoiceEdit(false);
-    } else if (selectedTemplate === "6895da4493f51998aaa6328b") {
-      setIsNewOKTBAndLogEdit(false);
-    }
-  };
-
-  // Close all dialogs
-  const handleCloseAllDialogs = () => {
-    setOpenTemplateDialog("");
-    setSelectedTemplate("");
-  };
-
-  // All old handle*Submit and setIs*Open/setIs*Edit logic removed for new template dialogs
-
+  const [isBerthReportEdit, setIsBerthReportEdit] = useState(false);
+  const [isCrewChangeListEdit, setIsCrewChangeListEdit] = useState(false);
+  const [isLoadingReportEdit, setIsLoadingReportEdit] = useState(false);
+  const [isOKTBEdit, setIsOKTBEdit] = useState(false);
+  const [isProvisionEdit, setIsProvisionEdit] = useState(false);
+  const [isTransportationEdit, setIsTransportationEdit] = useState(false);
+  const [isDischargeReportEdit, setIsDischargeReportEdit] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [selectedServiceError, setSelectedServiceError] = useState(false);
   const [selectedChargesTypeError, setSelectedChargesTypeError] =
@@ -185,15 +91,278 @@ const AddJobs = ({
   const [openPopUp, setOpenPopUp] = useState(false);
   const [message, setMessage] = useState("");
   const [selectedVendorError, setSelectedVendorError] = useState(false);
-  const [isNewDeliveryNoteEdit, setIsNewDeliveryNoteEdit] = useState(false);
-  const [isFreshWaterSlipEdit, setIsFreshWaterSlipEdit] = useState(false);
-  const [isCraneTallyEdit, setIsCraneTallyEdit] = useState(false);
-  const [isProformaInvoiceEdit, setIsProformaInvoiceEdit] = useState(false);
-  const [isNewOKTBAndLogEdit, setIsNewOKTBAndLogEdit] = useState(false);
-  const [isTransportationRecieptEdit, setIsTransportationRecieptEdit] =
-    useState(false);
-  const [isSanitationRenewalRequestEdit, setIsSanitationRenewalRequestEdit] =
-    useState(false);
+
+  // Template configuration mapping
+  const templateConfig = {
+    "Berthing Report": {
+      openSetter: setIsBerthReportOpen,
+      editSetter: setIsBerthReportEdit,
+    },
+    "Crew Change List": {
+      openSetter: setIsCrewChangeListOpen,
+      editSetter: setIsCrewChangeListEdit,
+    },
+    "Loading Report": {
+      openSetter: setIsLoadingReportOpen,
+      editSetter: setIsLoadingReportEdit,
+    },
+    OKTB: {
+      openSetter: setIsOKTBOpen,
+      editSetter: setIsOKTBEdit,
+    },
+    "Provision Delivery Notes": {
+      openSetter: setIsProvisionOpen,
+      editSetter: setIsProvisionEdit,
+    },
+    "Transportation Receipt": {
+      openSetter: setIsTransportationOpen,
+      editSetter: setIsTransportationEdit,
+    },
+    "Discharge Report": {
+      openSetter: setIsDischargeReportOpen,
+      editSetter: setIsDischargeReportEdit,
+    },
+  };
+
+  const handleTemplateChange = (event) => {
+    const selectedId = event.target.value; // Get the selected _id
+    setSelectedTemplate(selectedId); // Set the selected _id in the state
+
+    // Find the corresponding templateName
+    const selectedTemplate = templates.find(
+      (template) => template._id === selectedId
+    );
+    if (selectedTemplate) {
+      const templateName =
+        selectedTemplate.templateName === "Delivery Note"
+          ? "Provision Delivery Notes"
+          : selectedTemplate.templateName;
+
+      setSelectedTemplateName(templateName);
+    } else {
+      setSelectedTemplateName("");
+    }
+
+    console.log(
+      selectedId,
+      selectedTemplate?.templateName,
+      "handleTemplateChange"
+    );
+  };
+
+  useEffect(() => {
+    // Update allVendors whenever vendors prop changes
+    if (Array.isArray(vendors)) {
+      setAllVendors(vendors.map((v) => v._id));
+    }
+  }, [vendors]);
+
+  useEffect(() => {
+    console.log(allVendors, "allVendors");
+  }, [allVendors]);
+
+  const handleOpenTemplate = () => {
+    // Find the selected template by ID
+    const selectedTemplateObj = templates.find(
+      (template) => template._id === selectedTemplate
+    );
+
+    if (selectedTemplateObj) {
+      const templateName = selectedTemplateObj.templateName;
+      const config = templateConfig[templateName];
+
+      if (config) {
+        config.openSetter(true);
+        config.editSetter(false);
+      }
+    }
+  };
+
+  const handleCloseAllDialogs = () => {
+    setIsBerthReportOpen(false);
+    setIsCrewChangeListOpen(false);
+    setIsLoadingReportOpen(false);
+    setIsOKTBOpen(false);
+    setIsProvisionOpen(false);
+    setIsTransportationOpen(false);
+    setIsDischargeReportOpen(false);
+    setSelectedTemplate("");
+  };
+
+  const handleOKTBReportSubmit = (response) => {
+    console.log("template_Submitted:", response);
+    if (response?.status == true) {
+      setSelectedTemplate("");
+      if (isOKTBEdit == true) {
+        setMessage("Template has been updated successfully");
+      } else {
+        setMessage("Template has been saved successfully");
+      }
+      setOpenPopUp(true);
+      setIsOKTBOpen(false);
+
+      setTemplatesList((previousTemplates) => {
+        const existingIndex = previousTemplates.findIndex(
+          (template) => template.templateId === response.templateId
+        );
+        if (existingIndex !== -1) {
+          const updatedTemplates = [...previousTemplates];
+          updatedTemplates[existingIndex] = response;
+          return updatedTemplates;
+        }
+        return [...previousTemplates, response];
+      });
+    }
+  };
+  const handleBerthReportSubmit = (response) => {
+    console.log("template_Submitted:", response);
+    if (response?.status == true) {
+      setSelectedTemplate("");
+      if (isBerthReportEdit == true) {
+        setMessage("Template has been updated successfully");
+      } else {
+        setMessage("Template has been saved successfully");
+      }
+      setOpenPopUp(true);
+      setIsBerthReportOpen(false);
+      setTemplatesList((previousTemplates) => {
+        const existingIndex = previousTemplates.findIndex(
+          (template) => template.templateId === response.templateId
+        );
+        if (existingIndex !== -1) {
+          const updatedTemplates = [...previousTemplates];
+          updatedTemplates[existingIndex] = response;
+          return updatedTemplates;
+        }
+        return [...previousTemplates, response];
+      });
+    }
+  };
+  const handleCrewSubmit = (response) => {
+    console.log("template_Submitted:", response);
+    if (response?.status == true) {
+      setSelectedTemplate("");
+      if (isCrewChangeListEdit == true) {
+        setMessage("Template has been updated successfully");
+      } else {
+        setMessage("Template has been saved successfully");
+      }
+      setOpenPopUp(true);
+      setIsCrewChangeListOpen(false);
+      setTemplatesList((previousTemplates) => {
+        const existingIndex = previousTemplates.findIndex(
+          (template) => template.templateId === response.templateId
+        );
+        if (existingIndex !== -1) {
+          const updatedTemplates = [...previousTemplates];
+          updatedTemplates[existingIndex] = response;
+          return updatedTemplates;
+        }
+        return [...previousTemplates, response];
+      });
+    }
+  };
+  const handleLoadingReportSubmit = (response) => {
+    console.log("template_Submitted:", response);
+    if (response?.status == true) {
+      setSelectedTemplate("");
+
+      if (isLoadingReportEdit == true) {
+        setMessage("Template has been updated successfully");
+      } else {
+        setMessage("Template has been saved successfully");
+      }
+      setOpenPopUp(true);
+      setIsLoadingReportOpen(false);
+      setTemplatesList((previousTemplates) => {
+        const existingIndex = previousTemplates.findIndex(
+          (template) => template.templateId === response.templateId
+        );
+        if (existingIndex !== -1) {
+          const updatedTemplates = [...previousTemplates];
+          updatedTemplates[existingIndex] = response;
+          return updatedTemplates;
+        }
+        return [...previousTemplates, response];
+      });
+    }
+  };
+
+  const handleProvisionSubmit = (response) => {
+    console.log("template_Submitted:", response);
+    if (response?.status == true) {
+      setSelectedTemplate("");
+
+      if (isProvisionEdit == true) {
+        setMessage("Template has been updated successfully");
+      } else {
+        setMessage("Template has been saved successfully");
+      }
+      setOpenPopUp(true);
+      setIsProvisionOpen(false);
+      setTemplatesList((previousTemplates) => {
+        const existingIndex = previousTemplates.findIndex(
+          (template) => template.templateId === response.templateId
+        );
+        if (existingIndex !== -1) {
+          const updatedTemplates = [...previousTemplates];
+          updatedTemplates[existingIndex] = response;
+          return updatedTemplates;
+        }
+        return [...previousTemplates, response];
+      });
+    }
+  };
+  const handleTransportationSubmit = (response) => {
+    if (response?.status == true) {
+      setSelectedTemplate("");
+
+      if (isTransportationEdit == true) {
+        setMessage("Template has been updated successfully");
+      } else {
+        setMessage("Template has been saved successfully");
+      }
+      setOpenPopUp(true);
+      console.log("template_Submitted:", response);
+      setIsTransportationOpen(false);
+      setTemplatesList((previousTemplates) => {
+        const existingIndex = previousTemplates.findIndex(
+          (template) => template.templateId === response.templateId
+        );
+        if (existingIndex !== -1) {
+          const updatedTemplates = [...previousTemplates];
+          updatedTemplates[existingIndex] = response;
+          return updatedTemplates;
+        }
+        return [...previousTemplates, response];
+      });
+    }
+  };
+  const handleDischargeReportSubmit = (response) => {
+    if (response?.status == true) {
+      setSelectedTemplate("");
+
+      if (isDischargeReportEdit == true) {
+        setMessage("Template has been updated successfully");
+      } else {
+        setMessage("Template has been saved successfully");
+      }
+      setOpenPopUp(true);
+      console.log("template_Submitted:", response);
+      setIsDischargeReportOpen(false);
+      setTemplatesList((previousTemplates) => {
+        const existingIndex = previousTemplates.findIndex(
+          (template) => template.templateId === response.templateId
+        );
+        if (existingIndex !== -1) {
+          const updatedTemplates = [...previousTemplates];
+          updatedTemplates[existingIndex] = response;
+          return updatedTemplates;
+        }
+        return [...previousTemplates, response];
+      });
+    }
+  };
 
   const handleSelectChange = (event) => {
     const { name, value } = event.target;
@@ -347,6 +516,7 @@ const AddJobs = ({
       setUploadedFiles(updatedFiles);
     }
   };
+
   const editCharges = async () => {
     // Individual checks for each field
     if (selectedService == null || selectedService === "") {
@@ -523,26 +693,10 @@ const AddJobs = ({
         return response.blob();
       })
       .then((blob) => {
-        // Determine file extension from url or blob type
-        let ext = "";
-        if (template?.pdfPath) {
-          if (template.pdfPath.endsWith(".doc")) ext = ".doc";
-          else if (template.pdfPath.endsWith(".docx")) ext = ".docx";
-          else if (template.pdfPath.endsWith(".pdf")) ext = ".pdf";
+        if (blob.type !== "application/pdf") {
+          throw new Error("File is not a PDF");
         }
-        // Fallback to blob type if needed
-        if (!ext) {
-          if (blob.type === "application/pdf") ext = ".pdf";
-          else if (blob.type === "application/msword") ext = ".doc";
-          else if (
-            blob.type ===
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-          )
-            ext = ".docx";
-        }
-        // Append extension if not present
-        let finalName = fileName.endsWith(ext) ? fileName : fileName + ext;
-        saveAs(blob, finalName);
+        saveAs(blob, fileName);
       })
       .catch((error) => console.error("Download error:", error));
   };
@@ -552,25 +706,15 @@ const AddJobs = ({
     window.open(`${BASE_URL}${template?.pdfPath}`, "_blank");
   };
 
-  // Edit handler for new templates (opens dialog for selected template)
   const handleEdit = (template) => {
-    setSelectedTemplate(template?.templateId);
+    console.log(template, "template_handleEdit");
+    setSelectedTemplate(template?.templateId); // Set the selected _id in the state
     setSelectedTemplateName(template?.templateName);
-    setOpenTemplateDialog(template?.templateId);
-    if (template?.templateId === "689a32420f5c3d07e30f555e") {
-      setIsNewDeliveryNoteEdit(true);
-    } else if (template?.templateId === "689b8dd3cb558b331d9426b5") {
-      setIsFreshWaterSlipEdit(true);
-    } else if (template?.templateId === "68a2ccb7c69e011f34c1bfcc") {
-      setIsTransportationRecieptEdit(true);
-    } else if (template?.templateId === "68a320e5c69e011f34c29c50") {
-      setIsSanitationRenewalRequestEdit(true);
-    } else if (template?.templateId === "68a45dbec69e011f34c45100") {
-      setIsCraneTallyEdit(true);
-    } else if (template?.templateId === "68a45d82c69e011f34c44f59") {
-      setIsProformaInvoiceEdit(true);
-    } else if (template?.templateId === "6895da4493f51998aaa6328b") {
-      setIsNewOKTBAndLogEdit(true);
+
+    const config = templateConfig[template?.templateName];
+    if (config) {
+      config.openSetter(true);
+      config.editSetter(true);
     }
   };
 
@@ -673,30 +817,9 @@ const AddJobs = ({
     console.log(vendors, "vendors_addJobs");
   }, [vendors]);
 
-  const handleTemplateSubmit = (response) => {
-    console.log("template_Submitted:", response);
-    if (response?.status === true) {
-      setSelectedTemplate("");
-      setMessage("Template has been saved successfully");
-      setOpenPopUp(true);
-      setOpenTemplateDialog("");
-      setTemplatesList((previousTemplates) => {
-        const existingIndex = previousTemplates.findIndex(
-          (template) => template.templateId === response.templateId
-        );
-        if (existingIndex !== -1) {
-          const updatedTemplates = [...previousTemplates];
-          updatedTemplates[existingIndex] = response;
-          return updatedTemplates;
-        }
-        return [...previousTemplates, response];
-      });
-    }
-  };
-
   useEffect(() => {
-    console.log("Updated Templates List:", templatesList);
-  }, [templatesList]);
+    console.log(templates, "templates_addJobs");
+  }, [templates]);
 
   return (
     <>
@@ -718,10 +841,7 @@ const AddJobs = ({
           fullWidth
           maxWidth="lg"
         >
-          <div
-            className="d-flex justify-content-between "
-           
-          >
+          <div className="d-flex justify-content-between ">
             <DialogTitle>Update Charge</DialogTitle>
             <div className="closeicon">
               <i className="bi bi-x-lg " onClick={handleClose}></i>
@@ -907,44 +1027,6 @@ const AddJobs = ({
                         Vendor Name <span className="required"> </span> :
                       </label>
                       <div className="vessel-select">
-                        {/* <select
-                            name="vendor"
-                            className="form-select vesselbox"
-                            onChange={handleSelectChange}
-                            aria-label="Default select example"
-                            value={selectedVendor?._id}
-                          >
-                            <option value="">Choose Vendor</option>
-                            {vendors?.map((vendor) => (
-                              <option key={vendor._id} value={vendor?._id}>
-                                {vendor.vendorName}
-                              </option>
-                            ))}
-                          </select> */}
-
-                        {/* <Multiselect
-                        options={vendors}
-                        displayValue="vendorName" // Display the vendorName in the dropdown
-                        showCheckbox
-                        onSelect={handleVendorSelect} // Triggered when an item is selected
-                        onRemove={handleRemove} // Triggered when an item is removed
-                        // selectedValues={vendors.filter((v) =>
-                        //   selectedIds.includes(v._id)
-                        // )} // Pre-select vendors
-
-                        selectedValues={selectedIds
-                          .map((id) => vendors.find((v) => v._id === id))
-                          .filter(Boolean)} // Pre-select vendors in user selection order
-                        className="custom-multiselect" // Ap ply custom class
-                        style={{
-                          ...customStyles,
-                          option: {
-                            ...customStyles.option,
-                            ":hover": hoverStyles, // Add hover styling
-                          },
-                        }}
-                      /> */}
-
                         <div className="selected-vendors">
                           {selectedIds
                             .map((id) => vendors.find((v) => v._id === id))
@@ -960,7 +1042,7 @@ const AddJobs = ({
                   )}
                 </div>
                 <div className="row align-items-start">
-                  <div className="col-6">
+                  <div className="col-4">
                     <label
                       htmlFor="exampleFormControlInput1"
                       className="form-label"
@@ -979,7 +1061,12 @@ const AddJobs = ({
                         <option value="">Choose Template</option>
                         {templates.map((template) => (
                           <option key={template._id} value={template._id}>
-                            {template?.templateName}
+                            {template?.templateName ===
+                            "Provision Delivery Notes"
+                              ? "Delivery Note"
+                              : template?.templateName === "Berthing Report"
+                              ? "Statement Of Facts"
+                              : template?.templateName}
                           </option>
                         ))}
                       </select>
@@ -998,64 +1085,63 @@ const AddJobs = ({
               </div>
 
               {templatesList && templatesList?.length > 0 && (
-                <div className="templateouter">
-                  {templatesList?.length > 0 &&
-                    templatesList?.map((template, index) => {
-                      return (
-                        <>
-                          <div className="d-flex justify-content-between ">
-                            <div className="tempgenerated ">
-                              {template?.templateName ===
-                              "Provision Delivery Notes"
-                                ? "Delivery Note"
-                                : template?.templateName === "Berthing Report"
-                                ? "Statement Of Facts"
-                                : template?.templateName}
+                <>
+                  <div className="templatelink">Template Link:</div>
+                  <div className="templateouter">
+                    {templatesList?.length > 0 &&
+                      templatesList?.map((template, index) => {
+                        return (
+                          <>
+                            <div className="d-flex justify-content-between ">
+                              <div className="tempgenerated ">
+                                {template?.templateName ===
+                                "Provision Delivery Notes"
+                                  ? "Delivery Note"
+                                  : template?.templateName === "Berthing Report"
+                                  ? "Statement Of Facts"
+                                  : template?.templateName}
+                              </div>
+                              <div className="d-flex">
+                                <div
+                                  className="icondown"
+                                  onClick={() => handleDownload(template)}
+                                >
+                                  <i className="bi bi-download"></i>
+                                </div>
+                                <div
+                                  className="iconpdf"
+                                  onClick={() => handleView(template)}
+                                >
+                                  <i className="bi bi-file-earmark-pdf"></i>
+                                </div>
+                                {/* Show Edit icon only if not "Provision Delivery Notes" */}
+                                {template?.templateName !==
+                                  "Provision Delivery Notes" && (
+                                  <>
+                                    <div
+                                      className="iconpdf"
+                                      onClick={() => handleEdit(template)}
+                                    >
+                                      <i className="bi bi-pencil-square"></i>
+                                    </div>
+                                  </>
+                                )}
+
+                                <div
+                                  className="iconpdf"
+                                  onClick={() =>
+                                    handleTemplateFileDelete(template, index)
+                                  }
+                                >
+                                  <i className="bi bi-trash"></i>
+                                </div>
+                              </div>
                             </div>
-                            <div className="d-flex">
-                              <div
-                                className="icondown"
-                                onClick={() => handleDownload(template)}
-                              >
-                                <i className="bi bi-download"></i>
-                              </div>
-                              <div
-                                className="iconpdf"
-                                onClick={() => handleView(template)}
-                              >
-                                <i className="bi bi-file-earmark-pdf"></i>
-                              </div>
-                              {/* Show Edit icon only if not Provision Delivery Notes and not Arabic */}
-                              {(() => {
-                                const selected = templates?.find(
-                                  (t) => t._id === template.templateId
-                                );
-                                if (selected && selected.isArabicTemplate) {
-                                  return null;
-                                }
-                                return (
-                                  <div
-                                    className="iconpdf"
-                                    onClick={() => handleEdit(template)}
-                                  >
-                                    <i className="bi bi-pencil-square"></i>
-                                  </div>
-                                );
-                              })()}
-                              <div
-                                className="iconpdf"
-                                onClick={() =>
-                                  handleTemplateFileDelete(template, index)
-                                }
-                              >
-                                <i className="bi bi-trash"></i>
-                              </div>
-                            </div>
-                          </div>
-                        </>
-                      );
-                    })}
-                </div>
+                          </>
+                        );
+                      })}
+                  </div>
+                </>
               )}
 
               <div className="typesofcall-row ">
@@ -1145,140 +1231,98 @@ const AddJobs = ({
           </DialogContent>
         </Dialog>
       </div>
-      {/* Dialog Components for all 22 templates */}
-      {/* Dialog Components for all templates, opened by templateName match */}
-      {(() => {
-        const selected = templates?.find((t) => t._id === openTemplateDialog);
-        if (!selected) return null;
-        switch (selected.templateName) {
-          case "Crane Tally":
-            return (
-              <Crane_Tally
-                open={true}
-                onClose={handleCloseAllDialogs}
-                charge={charge}
-                selectedTemplateName={selectedTemplateName}
-                selectedTemplate={selectedTemplate}
-                pdaResponse={pdaResponse}
-                onSubmit={handleTemplateSubmit}
-                isEdit={isCraneTallyEdit}
-              />
-            );
-          case "Fresh Water Receipt":
-            return (
-              <Fresh_Water_Slip
-                open={true}
-                onClose={handleCloseAllDialogs}
-                charge={charge}
-                selectedTemplateName={selectedTemplateName}
-                selectedTemplate={selectedTemplate}
-                pdaResponse={pdaResponse}
-                onSubmit={handleTemplateSubmit}
-                isEdit={isFreshWaterSlipEdit}
-              />
-            );
-          case "Delivery Note":
-            return (
-              <New_Delivery_Note_Transwave
-                open={true}
-                onClose={handleCloseAllDialogs}
-                charge={charge}
-                selectedTemplateName={selectedTemplateName}
-                selectedTemplate={selectedTemplate}
-                pdaResponse={pdaResponse}
-                isEdit={isNewDeliveryNoteEdit}
-                onSubmit={handleTemplateSubmit}
-              />
-            );
-          case "OKTB":
-            return (
-              <New_OKTB_and_Log
-                open={true}
-                onClose={handleCloseAllDialogs}
-                charge={charge}
-                selectedTemplateName={selectedTemplateName}
-                selectedTemplate={selectedTemplate}
-                pdaResponse={pdaResponse}
-                onSubmit={handleTemplateSubmit}
-                isEdit={isNewOKTBAndLogEdit}
-              />
-            );
-          case "Proforma Invoice":
-            return (
-              <Proforma_Invoice
-                open={true}
-                onClose={handleCloseAllDialogs}
-                charge={charge}
-                selectedTemplateName={selectedTemplateName}
-                selectedTemplate={selectedTemplate}
-                pdaResponse={pdaResponse}
-                onSubmit={handleTemplateSubmit}
-                isEdit={isProformaInvoiceEdit}
-              />
-            );
-          case "Sanitation Certificate Renewal Request":
-            return (
-              <Sanitation_Renewal_Request_Letter
-                open={true}
-                onClose={handleCloseAllDialogs}
-                charge={charge}
-                selectedTemplateName={selectedTemplateName}
-                selectedTemplate={selectedTemplate}
-                pdaResponse={pdaResponse}
-                onSubmit={handleTemplateSubmit}
-                isEdit={isSanitationRenewalRequestEdit}
-              />
-            );
-          case "Transportation Receipt":
-            return (
-              <Transportation_Slip
-                open={true}
-                onClose={handleCloseAllDialogs}
-                charge={charge}
-                selectedTemplateName={selectedTemplateName}
-                selectedTemplate={selectedTemplate}
-                pdaResponse={pdaResponse}
-                onSubmit={handleTemplateSubmit}
-                isEdit={isTransportationRecieptEdit}
-              />
-            );
-          default:
-            return null;
-        }
-      })()}
-      {/* Render ArabicTemplate only if isArabicTemplate is true for selected template */}
-      {(() => {
-        const selected = templates?.find((t) => t._id === openTemplateDialog);
-        if (selected && selected.isArabicTemplate) {
-          return (
-            <ArabicTemplate
-              open={true}
-              onClose={handleCloseAllDialogs}
-              charge={charge}
-              selectedTemplateName={selectedTemplateName}
-              selectedTemplate={selectedTemplate}
-              pdaResponse={pdaResponse}
-              onSubmit={handleTemplateSubmit}
-              onUploadComplete={(templateObj) => {
-                setTemplatesList((prev) => {
-                  const newObj = { ...templateObj, isArabicTemplate: true };
-                  // Replace if templateId exists, else add
-                  const idx = prev.findIndex(
-                    (t) => t.templateId === templateObj.templateId
-                  );
-                  if (idx !== -1) {
-                    const updated = [...prev];
-                    updated[idx] = newObj;
-                    return updated;
-                  }
-                  return [...prev, newObj];
-                });
-              }}
-            />
-          );
-        }
-        return null;
-      })()}
+      {/* Dialog Components */}
+      {isBerthReportOpen && (
+        <BerthReport
+          open={isBerthReportOpen}
+          onClose={handleCloseAllDialogs}
+          charge={charge}
+          selectedTemplateName={selectedTemplateName}
+          selectedTemplate={selectedTemplate}
+          pdaResponse={pdaResponse}
+          onSubmit={handleBerthReportSubmit}
+          isEdit={isBerthReportEdit}
+        />
+      )}
+      {isCrewChangeListOpen && (
+        <CrewChangeList
+          open={isCrewChangeListOpen}
+          onClose={handleCloseAllDialogs}
+          charge={charge}
+          selectedTemplateName={selectedTemplateName}
+          selectedTemplate={selectedTemplate}
+          onSubmit={handleCrewSubmit}
+          pdaResponse={pdaResponse}
+          isEdit={isCrewChangeListEdit}
+        />
+      )}
+      {isLoadingReportOpen && (
+        <LoadingReport
+          open={isLoadingReportOpen}
+          onClose={handleCloseAllDialogs}
+          charge={charge}
+          selectedTemplateName={selectedTemplateName}
+          selectedTemplate={selectedTemplate}
+          onSubmit={handleLoadingReportSubmit}
+          pdaResponse={pdaResponse}
+          isEdit={isLoadingReportEdit}
+        />
+      )}
+      {isOKTBOpen && (
+        <OKTBReport
+          open={isOKTBOpen}
+          onClose={handleCloseAllDialogs}
+          charge={charge}
+          selectedTemplateName={selectedTemplateName}
+          selectedTemplate={selectedTemplate}
+          onSubmit={handleOKTBReportSubmit}
+          pdaResponse={pdaResponse}
+          isEdit={isOKTBEdit}
+          opsPhoneNumber={opsPhoneNumber}
+        />
+      )}
+      {isProvisionOpen && (
+        <ProvisionDeliveryNotes
+          open={isProvisionOpen}
+          onClose={handleCloseAllDialogs}
+          charge={charge}
+          onSubmit={handleProvisionSubmit}
+          selectedTemplateName={selectedTemplateName}
+          selectedTemplate={selectedTemplate}
+          pdaResponse={pdaResponse}
+          isEdit={isProvisionEdit}
+        />
+      )}
+      {isTransportationOpen && (
+        <Transportationreciept
+          open={isTransportationOpen}
+          onClose={handleCloseAllDialogs}
+          selectedTemplateName={selectedTemplateName}
+          selectedTemplate={selectedTemplate}
+          charge={charge}
+          onSubmit={handleTransportationSubmit}
+          selectedChargesType={selectedChargesType}
+          selectedService={selectedService}
+          services={services}
+          pdaResponse={pdaResponse}
+          isEdit={isTransportationEdit}
+        />
+      )}
+      {isDischargeReportOpen && (
+        <DischargeReport
+          open={isDischargeReportOpen}
+          onClose={handleCloseAllDialogs}
+          selectedTemplateName={selectedTemplateName}
+          selectedTemplate={selectedTemplate}
+          charge={charge}
+          onSubmit={handleDischargeReportSubmit}
+          selectedChargesType={selectedChargesType}
+          selectedService={selectedService}
+          services={services}
+          pdaResponse={pdaResponse}
+          isEdit={isDischargeReportEdit}
+        />
+      )}
       {openPopUp && (
         <PopUp message={message} closePopup={() => setOpenPopUp(false)} />
       )}{" "}

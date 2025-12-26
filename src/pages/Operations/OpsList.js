@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../../css/quotation.css";
 import {
   getAllQuotations,
@@ -18,10 +18,14 @@ import Remarks from "../Remarks";
 import { useAuth } from "../../context/AuthContext";
 const OpsList = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [selectedTab, setSelectedTab] = useState("all");
   const { loginResponse } = useAuth();
   console.log(loginResponse, "loginResponse_OpsList");
-
+  // Add this state variable around line 40 with other state declarations
+  const [fromDashboard, setFromDashboard] = useState(false);
+  const [cardNumber, setCardNumber] = useState(null);
   const acceptedIcon = require("../../assets/images/accepted.png");
   const rejectedIcon = require("../../assets/images/rejected.png");
   const messageIcon = require("../../assets/images/chat_icon.png");
@@ -37,11 +41,39 @@ const OpsList = () => {
   const [message, setMessage] = useState("");
   const fetchQuotations = async (type) => {
     setSelectedTab(type);
-
     try {
       setIsLoading(true);
       let userData = {
         filter: type,
+        assignedEmployee: (() => {
+          // First check: if roleType is not "operations", return ""
+          if (
+            loginResponse?.data?.userRole?.roleType?.toLowerCase() !==
+            "operations"
+          ) {
+            return "";
+          }
+
+          // If roleType is "operations", check designationType
+          const designationType =
+            loginResponse?.data?.userRole?.role?.designationType?.toLowerCase();
+
+          // If designationType is "operationsmanager" or "operationshead", return ""
+          if (
+            ["operationsmanager", "operationshead"].includes(designationType)
+          ) {
+            return "";
+          }
+
+          // If designationType is empty (""), return the user ID
+          // Note: If you meant roleType instead of _id, you can change this line
+          if (!designationType || designationType === "") {
+            return loginResponse?.data?._id;
+          }
+
+          // Default fallback
+          return "";
+        })(),
       };
       const quotations = await getAllJobs(userData);
       console.log("Quotations:", quotations);
@@ -53,8 +85,21 @@ const OpsList = () => {
     }
   };
 
+  // If navigated from Dashboard with state, use it; otherwise fetch
+  // Replace the existing useEffect (around lines 75-83) with this:
   useEffect(() => {
-    fetchQuotations("all");
+    const fromDashboardData = location?.state?.quotationsFromDashboard;
+    const cardNumberValue = location?.state?.cardNumber; // Assuming cardNumber comes from state
+    console.log(fromDashboardData, "fromDashboardData");
+    if (Array.isArray(fromDashboardData) && fromDashboardData.length > 0) {
+      setQuotationsList(fromDashboardData);
+      setFromDashboard(true);
+      setCardNumber(cardNumberValue);
+    } else {
+      setFromDashboard(false);
+      fetchQuotations("all");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatDate = (date) => {
@@ -71,7 +116,7 @@ const OpsList = () => {
       case 3:
         return "Internally Approved";
       case 4:
-        return "Rejected";
+        return "Rejected By FM";
       case 5:
         return "Customer Approved";
       case 6:
@@ -165,16 +210,17 @@ const OpsList = () => {
             <EditIcon sx={{ fontSize: "19px" }} />
           </IconButton>
 
-          {loginResponse?.data?.userRole?.roleType == "admin" && (
-            <>
-              <IconButton
-                color="secondary"
-                onClick={() => handleDelete(params.row)}
-              >
-                <DeleteIcon sx={{ fontSize: "19px" }} />
-              </IconButton>
-            </>
-          )}
+          {loginResponse?.data?.userRole?.roleType == "admin" ||
+            (loginResponse?.data?.userRole?.roleType == "superadmin" && (
+              <>
+                <IconButton
+                  color="secondary"
+                  onClick={() => handleDelete(params.row)}
+                >
+                  <DeleteIcon sx={{ fontSize: "19px" }} />
+                </IconButton>
+              </>
+            ))}
         </>
       ),
     },
@@ -188,7 +234,8 @@ const OpsList = () => {
     console.log("Edit row", row);
     if (
       loginResponse?.data?.userRole?.roleType == "finance" ||
-      loginResponse?.data?.userRole?.roleType == "admin"
+      loginResponse?.data?.userRole?.roleType == "admin" ||
+      loginResponse?.data?.userRole?.roleType == "superadmin"
     ) {
       navigate("/create-pda", { state: { row } });
     } else if (loginResponse?.data?.userRole?.roleType == "operations") {
@@ -394,23 +441,29 @@ const OpsList = () => {
             />
             <i className="bi bi-search searchicon"></i>
           </div>
-          <div className=" filtermain ">
-            <i className="bi bi-funnel-fill filtericon"></i>
-            <select
-              className="form-select form-select-sm filter"
-              aria-label="Small select example"
-              name="status"
-              onChange={handleSelectChange}
-              value={selectedStatus}
-            >
-              <option value="">All</option>
-              {statusList?.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-          </div>
+
+          {(!fromDashboard || (fromDashboard && cardNumber === "1")) && (
+            <>
+              <div className=" filtermain filquofil">
+                <i className="bi bi-funnel-fill filtericon"></i>
+                <select
+                  className="form-select form-select-sm filter"
+                  aria-label="Small select example"
+                  name="status"
+                  onChange={handleSelectChange}
+                  value={selectedStatus}
+                >
+                  <option value="">All</option>
+                  {statusList?.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
+
           <div className=" createbtn" style={{ width: "100%" }}>
             <button
               type="button"
@@ -454,6 +507,9 @@ const OpsList = () => {
               sx={{
                 "& .MuiDataGrid-root": {
                   border: "none",
+                },
+                "& .MuiDataGrid-scrollbarFiller": {
+                  backgroundColor: "#eee !important",
                 },
                 "& .MuiDataGrid-columnHeader": {
                   backgroundColor: "#eee !important", // Set gray background color

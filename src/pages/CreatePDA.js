@@ -40,7 +40,6 @@ const CreatePDA = ({
   customers,
   loginResponse,
   vendors,
-  aedConversionRate,
 }) => {
   const createPdaImage = require("../assets/images/Group 1000002975.png");
   const updatePdaImage = require("../assets/images/updatedpda.png");
@@ -53,7 +52,6 @@ const CreatePDA = ({
   const [selectedCargoCapacity, setSelectedCargoCapacity] = useState(null);
   const [selectedCargoCapacityError, setSelectedCargoCapacityError] =
     useState(null);
-  const [selectedBerth, setSelectedBerth] = useState(null);
   const [selectedAnchorageLocation, setSelectedAnchorageLocation] =
     useState(null);
   const [selectedVesselType, setSelectedVesselType] = useState(null);
@@ -198,8 +196,6 @@ const CreatePDA = ({
     if (name === "cargoCapacity") {
       setSelectedCargoCapacity(value);
       setSelectedCargoCapacityError(false);
-    } else if (name === "berth") {
-      setSelectedBerth(value);
     }
 
     // Clear individual field error if user starts typing
@@ -478,7 +474,21 @@ const CreatePDA = ({
     console.log("chargesArray_Submitted: ", chargesArray);
     console.log("handleSubmit_from:", from);
     setFinalChargesArray(chargesArray);
+    updateBadgeStatus();
     handleClose();
+  };
+
+  const updateBadgeStatus = async () => {
+    let data = {
+      pdaId: pdaResponse?._id,
+    };
+    try {
+      const pdaDetails = await getPdaDetails(data);
+      console.log(pdaDetails, "pdaDetails_after_adding_charges");
+      setPdaResponse(pdaDetails?.pda);
+    } catch (error) {
+      console.error("Failed to fetch quotations:", error);
+    }
   };
 
   const handleEdit = (charges, index) => {
@@ -649,7 +659,6 @@ const CreatePDA = ({
         charges: finalChargesArray,
         anchorageLocation: selectedAnchorageLocation?._id,
         cargoCapacity: selectedCargoCapacity,
-        berth: selectedBerth,
       };
       console.log(pdaPayload, "pdaPayload");
       if (!pdaResponse?._id) {
@@ -934,7 +943,7 @@ const CreatePDA = ({
     setAnchorageLocationID(response?.pda?.anchorageLocation);
     setIsVessels(response?.pda?.isVessels);
     setIsServices(response?.pda?.isServices);
-    setSelectedBerth(response?.pda?.berth);
+
     setSelectedCargoCapacity(response?.pda?.cargoCapacity);
     setUploadedFiles(response?.pda?.documents); // Append new files to existing ones
 
@@ -1286,10 +1295,6 @@ const CreatePDA = ({
     handleQuotationClose();
   };
 
-  useEffect(() => {
-    console.log(aedConversionRate, "aedConversionRate_createPDA");
-  }, [aedConversionRate]);
-
   return (
     <>
       <div className="pdacontent">
@@ -1344,7 +1349,7 @@ const CreatePDA = ({
                       : pdaResponse?.pdaStatus == 3
                       ? "Internally Approved"
                       : pdaResponse?.pdaStatus == 4
-                      ? "Rejected"
+                      ? "Rejected By FM"
                       : pdaResponse?.pdaStatus == 5
                       ? "Customer Approved"
                       : pdaResponse?.pdaStatus == 6
@@ -1395,7 +1400,7 @@ const CreatePDA = ({
           </div>
           <div className="typesofcall-row ">
             <div className="row align-items-start">
-              <div className="col">
+              <div className="col-lg-4 col-md-6 col-sm-12">
                 <div className="mb-3">
                   <label
                     htmlFor="exampleFormControlInput1"
@@ -1437,7 +1442,7 @@ const CreatePDA = ({
                   )}
                 </div>
               </div>
-              <div className="col">
+              <div className="col-lg-4 col-md-6 col-sm-12">
                 <label
                   htmlFor="exampleFormControlInput1"
                   className="form-label"
@@ -1468,7 +1473,7 @@ const CreatePDA = ({
                   </>
                 )}
               </div>
-              <div className="col">
+              <div className="col-lg-4 col-md-6 col-sm-12">
                 <label
                   htmlFor="exampleFormControlInput1"
                   className="form-label"
@@ -1501,7 +1506,7 @@ const CreatePDA = ({
           </div>
           <div className="choosecargo-row ">
             <div className="row align-items-start">
-              <div className="col-3">
+              <div className="col-lg-3 col-md-6 col-sm-12">
                 <div className="mb-3">
                   <label
                     htmlFor="exampleFormControlInput1"
@@ -1527,7 +1532,7 @@ const CreatePDA = ({
                   </div>
                 </div>
               </div>
-              <div className="col-3">
+              <div className="col-lg-3 col-md-6 col-sm-12 mb-3">
                 <label
                   htmlFor="exampleFormControlInput1"
                   className="form-label"
@@ -1551,56 +1556,53 @@ const CreatePDA = ({
                   </select>
                 </div>
               </div>
-              <div className="col">
-                <div className="row">
-                  <div className="col-6">
-                    <label
-                      htmlFor="exampleFormControlInput1"
-                      className="form-label"
-                    >
-                      Vessel Voyage No:
-                    </label>
-                    <input
-                      name="vesselVoyageNumber"
-                      type="text"
-                      className="form-control vessel-voyage"
-                      id="exampleFormControlInput1"
-                      placeholder=" "
-                      value={formData.vesselVoyageNumber}
-                      onChange={handleInputChange}
-                      onWheel={handleWheel}
-                    />
-                  </div>
-                  <div className="col-6">
-                    <label
-                      htmlFor="exampleFormControlInput1"
-                      className="form-label"
-                    >
-                      Anchorage Location:
-                    </label>
-                    <div className="vessel-select">
-                      <select
-                        name="anchorageLocation"
-                        className="form-select vesselbox vboxholder"
-                        onChange={handleSelectChange}
-                        aria-label="Default select example"
-                        value={selectedAnchorageLocation?._id}
-                      >
-                        <option value="">Choose Anchorage Location</option>
-                        {anchorageLocations.map((location) => (
-                          <option key={location._id} value={location._id}>
-                            {location.area}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
+
+              <div className="col-lg-3 col-md-6 col-sm-12 mb-3">
+                <label
+                  htmlFor="exampleFormControlInput1"
+                  className="form-label"
+                >
+                  Vessel Voyage No:
+                </label>
+                <input
+                  name="vesselVoyageNumber"
+                  type="text"
+                  className="form-control vessel-voyage"
+                  id="exampleFormControlInput1"
+                  placeholder=" "
+                  value={formData.vesselVoyageNumber}
+                  onChange={handleInputChange}
+                  onWheel={handleWheel}
+                />
+              </div>
+              <div className="col-lg-3 col-md-6 col-sm-12 mb-3">
+                <label
+                  htmlFor="exampleFormControlInput1"
+                  className="form-label"
+                >
+                  Anchorage Location:
+                </label>
+                <div className="vessel-select">
+                  <select
+                    name="anchorageLocation"
+                    className="form-select vesselbox vboxholder"
+                    onChange={handleSelectChange}
+                    aria-label="Default select example"
+                    value={selectedAnchorageLocation?._id}
+                  >
+                    <option value="">Choose Anchorage Location</option>
+                    {anchorageLocations.map((location) => (
+                      <option key={location._id} value={location._id}>
+                        {location.area}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
           </div>
           <div className="thirdrow mb-3 row">
-            <div className="col-4">
+            <div className="col-lg-4 col-md-6 col-sm-12">
               <div className="row">
                 <div className="col-6">
                   <label
@@ -1653,8 +1655,8 @@ const CreatePDA = ({
                 </div>
               </div>
             </div>
-            <div className="col-4">
-              <div className="row">
+            <div className="col-lg-4 col-md-6 col-sm-12">
+              <div className="row mb-3">
                 <div className="col-6 grt">
                   <label
                     htmlFor="exampleFormControlInput1"
@@ -1705,7 +1707,7 @@ const CreatePDA = ({
                 </div>
               </div>
             </div>
-            <div className="col-4">
+            <div className="col-lg-4 col-md-6 col-sm-12">
               <label htmlFor="exampleFormControlInput1" className="form-label">
                 Customer Name:<span className="required"> * </span>
               </label>
@@ -1735,7 +1737,7 @@ const CreatePDA = ({
 
           <div className="imo">
             <div className="row align-items-start">
-              <div className="col-2">
+              <div className="col-lg-2 col-md-6 col-sm-12 mb-3">
                 <div className="d-flex">
                   <div>
                     <label
@@ -1766,18 +1768,28 @@ const CreatePDA = ({
                     <div className="d-flex">
                       <input
                         type="text"
-                        name="berth"
-                        className="form-control vessel-voyage voyageblock timeslotnew"
-                        id="exampleFormControlInput1"
+                        name="etaHours"
+                        style={{
+                          paddingBottom: "5px",
+                          paddingTop: "5px",
+                          textAlign: "center",
+                        }}
+                        className="form-control vessel-voyage voyageblock timespace"
+                        id="etaHours"
                         placeholder="00"
                         value={etaHours}
                         onChange={handleEtaHoursChange}
                       />
                       <input
                         type="text"
-                        name="berth"
-                        className="form-control vessel-voyage voyageblock timeslotnew"
-                        id="exampleFormControlInput1"
+                        name="etaMinutes"
+                        style={{
+                          paddingBottom: "5px",
+                          paddingTop: "5px",
+                          textAlign: "center",
+                        }}
+                        className="form-control vessel-voyage voyageblock timespace"
+                        id="etaMinutes"
                         placeholder="00"
                         value={etaMinutes}
                         onChange={handleEtaMinutesChange}
@@ -1800,7 +1812,7 @@ const CreatePDA = ({
                 )}
               </div>
 
-              <div className="col-2 etdmargin">
+              <div className="col-lg-2 col-md-6 col-sm-12 mb-3 ">
                 <div className="d-flex">
                   <div>
                     <label
@@ -1834,18 +1846,28 @@ const CreatePDA = ({
                     <div className="d-flex">
                       <input
                         type="text"
-                        name="berth"
-                        className="form-control vessel-voyage voyageblock timeslotnew"
-                        id="exampleFormControlInput1"
+                        name="etdHours"
+                        style={{
+                          paddingBottom: "5px",
+                          paddingTop: "5px",
+                          textAlign: "center",
+                        }}
+                        className="form-control vessel-voyage voyageblock timespace"
+                        id="etdHours"
                         placeholder="00"
                         value={etdHours}
                         onChange={handleEtdHoursChange}
                       />
                       <input
                         type="text"
-                        name="berth"
-                        className="form-control vessel-voyage voyageblock timeslotnew"
-                        id="exampleFormControlInput1"
+                        name="etdMinutes"
+                        style={{
+                          paddingBottom: "5px",
+                          paddingTop: "5px",
+                          textAlign: "center",
+                        }}
+                        className="form-control vessel-voyage voyageblock timespace"
+                        id="etdMinutes"
                         placeholder="00"
                         value={etdMinutes}
                         onChange={handleEtdMinutesChange}
@@ -1868,21 +1890,8 @@ const CreatePDA = ({
                   </>
                 )}
               </div>
-              <div className="col-1 nrt ">
-                <label for="exampleFormControlInput1" className="form-label">
-                  Berth:
-                </label>
-                <input
-                  type="text"
-                  name="berth"
-                  className="form-control vessel-voyage voyageblock"
-                  id="exampleFormControlInput1"
-                  placeholder=""
-                  value={selectedBerth}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="col-2 nrt ">
+
+              <div className="col-lg-2 col-md-6 col-sm-12 nrt mb-3">
                 <label
                   htmlFor="exampleFormControlInput1"
                   className="form-label"
@@ -1907,7 +1916,7 @@ const CreatePDA = ({
 
               {opsByValue && (
                 <>
-                  <div className="col-2 nrt ">
+                  <div className="col-lg-2 col-md-6 col-sm-12 nrt ">
                     <label
                       htmlFor="exampleFormControlInput1"
                       className="form-label"
@@ -1917,7 +1926,7 @@ const CreatePDA = ({
                     <input
                       type="text"
                       name=""
-                      className="form-control vessel-voyage voyageblock"
+                      className="form-control vessel-voyage voyageblock "
                       id="exampleFormControlInput1"
                       placeholder=""
                       value={opsByValue}
@@ -1928,7 +1937,7 @@ const CreatePDA = ({
               )}
               {invoiceByValue && (
                 <>
-                  <div className="col-2 nrt ">
+                  <div className="col-lg-2 col-md-6 col-sm-12 nrt ">
                     <label
                       htmlFor="exampleFormControlInput1"
                       className="form-label"
@@ -1947,43 +1956,37 @@ const CreatePDA = ({
                   </div>
                 </>
               )}
+            </div>
+          </div>
+          <div className="row align-items-start d-flex justify-content-end">
+            <>
+              {requestedServices.length > 0 && (
+                <>
+                  <div className="col-2">
+                    <button
+                      type="button"
+                      className="btn addcharge-button text-center"
+                      onClick={() => {
+                        handleServiceRequestOpen();
+                      }}
+                    >
+                      Service Request
+                    </button>
+                  </div>
+                </>
+              )}
+            </>
 
-              <div className="row align-items-start d-flex justify-content-end">
-              
-                  <>
-                    {requestedServices.length > 0 && (
-                      <>
-                        <div className="col-2">
-                          <button
-                            type="button"
-                            className="btn addcharge-button text-center"
-                            onClick={() => {
-                              handleServiceRequestOpen();
-                            }}
-                          >
-                            Service Request
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </>
-               
-                {pdaResponse?.pdaStatus != 7 && (
-                  <>
-                    <div className="col-2">
-                      <button
-                        type="button"
-                        className="btn addcharge-button text-center"
-                        onClick={() => {
-                          openDialog();
-                        }}
-                      >
-                        Add charge
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
+            <div className="col-lg-2 col-md-6 col-sm-12">
+              <button
+                type="button"
+                className="btn addcharge-button text-center"
+                onClick={() => {
+                  openDialog();
+                }}
+              >
+                Add charge
+              </button>
             </div>
           </div>
 
@@ -2171,13 +2174,12 @@ const CreatePDA = ({
                           </>
                         )}
 
-                          {(loginResponse?.data?.userRole?.role?.designationType?.toLowerCase() ===
+                        {(loginResponse?.data?.userRole?.role?.designationType?.toLowerCase() ===
                           "financemanager" ||
                           loginResponse?.data?.userRole?.role?.designationType?.toLowerCase() ===
                             "operationsmanager" ||
                           loginResponse?.data?.userRole?.role?.designationType?.toLowerCase() ===
                             "financehead") && (
-
                           <>
                             {(pdaResponse?.pdaStatus == 2 ||
                               pdaResponse?.pdaStatus == 4) && (
@@ -2240,7 +2242,6 @@ const CreatePDA = ({
         fullPdaResponse={fullPdaResponse}
         vendors={vendors}
         isInitialEdit={isInitialEdit}
-        aedConversionRate={aedConversionRate}
       />
 
       <QuotationDialog

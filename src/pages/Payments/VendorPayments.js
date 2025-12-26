@@ -17,10 +17,57 @@ import Swal from "sweetalert2";
 import "../../css/payment.css";
 import PopUp from "../PopUp";
 import ViewVendorVoucher from "./ViewVendorVoucher";
+import Select from "react-select";
+import Loader from "../Loader";
 const VendorPayments = () => {
   const Group = require("../../assets/images/payments.png");
   const paymentIcon = require("../../assets/images/payment-icon.png");
-
+  const [isLoading, setIsLoading] = useState(false);
+  const customSelectStyles = {
+    control: (provided) => ({
+      ...provided,
+      height: "30px !important",
+      minWidth: "200px !important",
+      marginTop: "12px",
+      borderRadius: "0.375rem",
+      borderColor: "#dee2e6",
+      boxShadow: "none",
+      "&:hover": {
+        borderColor: "#dee2e6",
+      },
+    }),
+    menu: (provided) => ({
+      ...provided,
+      zIndex: 9999,
+      marginTop: "2px", // Reduced spacing between select and dropdown
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected
+        ? "#0d6efd"
+        : state.isFocused
+        ? "#e9ecef"
+        : "white",
+      color: state.isSelected ? "white" : "black",
+      cursor: "pointer",
+      fontSize: "13px", // Option font size
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      fontSize: "13px",
+      color: "#000000", // Black color for placeholder
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      fontSize: "13px",
+      color: "#000000",
+    }),
+    input: (provided) => ({
+      ...provided,
+      fontSize: "13px",
+      color: "#000000",
+    }),
+  };
   const [QuotationList, setQuotationList] = useState([]);
   const [vendorList, setVendorList] = useState([]);
   const [ButtonId, SetButtonId] = useState();
@@ -51,6 +98,16 @@ const VendorPayments = () => {
   const [viewopen, setviewOpen] = useState(false);
   const [isDirectVendorPayment, setIsDirectVendorPayment] = useState(false);
   const [EmployeeList, setEmployeeList] = useState([]);
+
+  // Helper function to format numbers with 3 decimal places without scientific notation
+  const formatAmount = (amount) => {
+    if (typeof amount !== "number" || isNaN(amount)) return "0.000";
+    return Number(amount).toLocaleString("en-US", {
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3,
+      useGrouping: false,
+    });
+  };
 
   const fetchVoucherNumber = async () => {
     const listvoucherNumber = await getVoucherNumber();
@@ -94,20 +151,23 @@ const VendorPayments = () => {
     } 
    }, [selectedVendorid]);*/
   const fetchVendorpayments = async (payload) => {
+    setIsLoading(true);
     try {
       const Listpayments = await getVendorPayments(payload);
       setVendorpayment(Listpayments?.payments || []);
-      setInvoiceAmount((Listpayments?.totalInvoiceAmount || 0).toFixed(2));
-      setPaidAmount((Listpayments?.paidAmount || 0).toFixed(2));
-      setDiscountAmount((Listpayments?.discountAmountOMR || 0).toFixed(2));
+      setInvoiceAmount(formatAmount(Listpayments?.totalInvoiceAmount || 0));
+      setPaidAmount(formatAmount(Listpayments?.paidAmount || 0));
+      setDiscountAmount(formatAmount(Listpayments?.discountAmountOMR || 0));
 
       const totalAmount = Listpayments?.totalInvoiceAmount || 0;
       const amountpaid = Listpayments?.paidAmount || 0;
       const discount = Listpayments?.discountAmountOMR || 0;
       const balance = totalAmount - amountpaid - discount;
-      setBalanceAmount(parseFloat(balance.toFixed(2)));
+      setBalanceAmount(formatAmount(balance));
+      setIsLoading(false);
     } catch (error) {
       console.log("Error in Api", error);
+      setIsLoading(false);
     }
   };
 
@@ -117,25 +177,11 @@ const VendorPayments = () => {
     setOpen(false);
   };
 
-  const handleChange = (e) => {
-    setSelectedVendorid("");
-    setSelectedVendorid(e.target.value);
-    let paylaod = {
-      vendorId: e.target.value,
-      paymentDate: inputFilterDate,
-      filter: FilterName,
-      [FilterName]: FilterValue,
-      isDirectPayment: isDirectVendorPayment,
-      employee: selectedEmployteeId,
-    };
-    fetchVendorpayments(paylaod);
-  };
-
   // Handle employee filter change
   const handleEmployeeChange = (e) => {
     setSelectedEmployteeId(e.target.value);
     let payload = {
-      vendorId: selectedVendorid,
+      vendorId: selectedVendorid ? selectedVendorid : vendorId,
       paymentDate: inputFilterDate,
       filter: FilterName,
       [FilterName]: FilterValue,
@@ -185,7 +231,7 @@ const VendorPayments = () => {
       setPeriod("");
       setFilterDate(e.target.value);
       payload = {
-        vendorId: selectedVendorid,
+        vendorId: selectedVendorid ? selectedVendorid : vendorId,
         paymentDate: e.target.value,
         pdaId: inputpdaId,
         isDirectPayment: isDirectVendorPayment,
@@ -193,7 +239,7 @@ const VendorPayments = () => {
     } else if (SelectBxname === "pdaId") {
       setPdaId(e.target.value);
       payload = {
-        vendorId: selectedVendorid,
+        vendorId: selectedVendorid ? selectedVendorid : vendorId,
         paymentDate: inputFilterDate,
         pdaId: e.target.value,
         filter: FilterName,
@@ -205,7 +251,7 @@ const VendorPayments = () => {
       setFilterName(SelectBxname);
       setFilterValue(e.target.value);
       payload = {
-        vendorId: selectedVendorid,
+        vendorId: selectedVendorid ? selectedVendorid : vendorId,
         paymentDate: "",
         pdaId: inputpdaId,
         filter: SelectBxname,
@@ -219,7 +265,7 @@ const VendorPayments = () => {
   let payloadParams = "";
   if (FilterName === "")
     payloadParams = {
-      vendorId: selectedVendorid,
+      vendorId: selectedVendorid ? selectedVendorid : vendorId,
       paymentDate: inputFilterDate,
       pdaId: inputpdaId,
       filter: "",
@@ -227,7 +273,7 @@ const VendorPayments = () => {
     };
   else
     payloadParams = {
-      vendorId: selectedVendorid,
+      vendorId: selectedVendorid ? selectedVendorid : vendorId,
       paymentDate: inputFilterDate,
       pdaId: inputpdaId,
       filter: FilterName,
@@ -372,10 +418,34 @@ const VendorPayments = () => {
     fetchFinaceEmployees();
   }, []);
 
+  const vendorOptions = vendorList.map((vendor) => ({
+    value: vendor._id,
+    label: vendor.vendorName,
+  }));
+
+  const handleVendorSelectChange = (selectedOption) => {
+    const vendorId = selectedOption ? selectedOption.value : "";
+    setSelectedVendorid(vendorId);
+
+    // If no vendor selected, do NOT call API
+    if (!vendorId) return;
+
+    let payload = {
+      vendorId: vendorId ? vendorId : selectedVendorid,
+      paymentDate: inputFilterDate,
+      filter: FilterName,
+      [FilterName]: FilterValue,
+      isDirectPayment: isDirectVendorPayment ? true : "",
+      employee: selectedEmployteeId,
+    };
+
+    fetchVendorpayments(payload);
+  };
+
   return (
     <>
       <div>
-        <div className=" mt-3 mb-3 d-flex">
+        <div className=" mt-3 mb-3 d-flex align-items-center ">
           <div className=" d-flex paymentbycus">
             <label
               htmlFor="exampleFormControlInput1"
@@ -385,18 +455,19 @@ const VendorPayments = () => {
               Vendor Name:
             </label>
             <div className="vessel-select">
-              <select
-                className="form-select vesselbox statusscustomervendor"
-                name="vendors"
-                value={selectedVendorid || ""}
-                onChange={handleChange}
-              >
-                {vendorList.map((vendor) => (
-                  <option key={vendor._id} value={vendor._id}>
-                    {vendor.vendorName} {""}
-                  </option>
-                ))}
-              </select>
+              <Select
+                options={vendorOptions}
+                onChange={handleVendorSelectChange}
+                value={vendorOptions.find(
+                  (opt) => opt.value === selectedVendorid
+                )}
+                placeholder="Choose Vendor Name"
+                isClearable
+                isSearchable
+                styles={customSelectStyles}
+                className="paymentcustomer"
+                classNamePrefix="react-select"
+              />
             </div>
           </div>
           <div className=" d-flex paymentbycus">
@@ -407,6 +478,7 @@ const VendorPayments = () => {
             <div className="vessel-select">
               <select
                 name="employeeId"
+                style={{ height: "38px" }}
                 className="form-select vesselbox"
                 aria-label="Default select example"
                 onChange={handleEmployeeChange}
@@ -441,7 +513,7 @@ const VendorPayments = () => {
             <i className="bi bi-funnel-fill filtericon"></i>
             <select
               name="pdaId"
-              className="form-select form-select-sm filteremployee"
+              className="form-select form-select-sm filteremployee cupaymentddfont"
               aria-label="Small select example"
               onChange={handleTimeperiod}
             >
@@ -477,7 +549,7 @@ const VendorPayments = () => {
             {period === "month" && (
               <select
                 name="month"
-                className="form-select jobporrt mmonthpayment monthcustomerpay"
+                className="form-select jobporrt vpmnth monthcustomerpay"
                 onChange={handleTimeperiod}
               >
                 <option value="">Select Month</option>
@@ -492,7 +564,7 @@ const VendorPayments = () => {
             {period === "year" && (
               <select
                 name="year"
-                className="form-select jobporrt mmonthpayment monthcustomerpay"
+                className="form-select jobporrt vpmnth monthcustomerpay"
                 onChange={handleTimeperiod}
               >
                 <option value="">Select Year</option>
@@ -548,11 +620,11 @@ const VendorPayments = () => {
 
         <div className="paymeamount">
           <div className=" d-flex">
-            <div className="totalinvocie"> Total Invoice Amount(AED):</div>{" "}
+            <div className="totalinvocie"> Total Invoice Amount(OMR):</div>{" "}
             <div className="amountpayment"> {totalInvoiceAmount} </div>
           </div>
           <div className=" d-flex">
-            <div className="totalinvocie"> Paid Amount(AED):</div>{" "}
+            <div className="totalinvocie"> Paid Amount(OMR):</div>{" "}
             <div className="amountpayment"> {paidAmount} </div>
           </div>
           <div className=" d-flex">
@@ -560,7 +632,7 @@ const VendorPayments = () => {
             <div className="amountpayment"> {discountAmount} </div>
           </div>
           <div className=" d-flex">
-            <div className="totalinvocie"> Balance Amount(AED):</div>{" "}
+            <div className="totalinvocie"> Balance Amount(OMR):</div>{" "}
             <div className="amountpayment"> {balanceAmount} </div>
           </div>
           {/*<div className=" ">
@@ -675,6 +747,7 @@ const VendorPayments = () => {
       {openPopUp && (
         <PopUp message={message} closePopup={() => setOpenPopUp(false)} />
       )}
+      <Loader isLoading={isLoading} />
     </>
   );
 };

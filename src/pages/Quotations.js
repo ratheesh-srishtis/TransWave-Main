@@ -80,6 +80,7 @@ const Quotations = ({
 
   // Replace the existing fetchQuotations function (around lines 55-73) with this:
   const fetchQuotations = async (type) => {
+    // alert("fetchQuotations called");
     setSelectedTab(type);
     try {
       setIsLoading(true);
@@ -90,7 +91,7 @@ const Quotations = ({
           filter: type,
           cardNumber: String(cardNumber),
         };
-        const res = await financeDashboardDetails(payload);
+        const res = await payload;
 
         if (res.status == true) {
           if (cardNumber == "1") {
@@ -128,7 +129,7 @@ const Quotations = ({
   useEffect(() => {
     const fromDashboardData = location?.state?.quotationsFromDashboard;
     const cardNumberValue = location?.state?.cardNumber; // Assuming cardNumber comes from state
-
+    console.log(fromDashboardData, "fromDashboardData");
     if (Array.isArray(fromDashboardData) && fromDashboardData.length > 0) {
       setQuotationsList(fromDashboardData);
       setFromDashboard(true);
@@ -217,6 +218,7 @@ const Quotations = ({
       field: "select",
       headerName: "",
       width: 50,
+      flex: 0.4,
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params) => (
@@ -252,7 +254,7 @@ const Quotations = ({
     {
       field: "pdaNumber",
       headerName: "Job ID",
-      flex: 0.8,
+      flex: 0.6,
       renderCell: (params) => (
         <div
           style={{
@@ -283,14 +285,14 @@ const Quotations = ({
       },
     },
     { field: "vessel", headerName: "Vessel Name", flex: 1.2 },
-    { field: "date", headerName: "Date", flex: 1 },
-    { field: "port", headerName: "Port Name", flex: 1.5 },
-    { field: "customer", headerName: "Customer Name", flex: 1.5 },
+    { field: "date", headerName: "Date", flex: 0.6 },
+    { field: "port", headerName: "Port Name", flex: 1.2 },
+    { field: "customer", headerName: "Customer Name", flex: 2 },
     { field: "preparedBy", headerName: "Prepared By", flex: 1 },
     {
       field: "status",
       headerName: "Status",
-      flex: 2.5,
+      flex: 1.6,
       renderCell: (params) => (
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <span>{params.value}</span>
@@ -324,7 +326,7 @@ const Quotations = ({
     {
       field: "actions",
       headerName: "Action",
-      flex: 1.5,
+      flex: 1,
       renderCell: (params) => (
         <>
           <IconButton color="primary" onClick={() => handleEdit(params.row)}>
@@ -757,7 +759,7 @@ const Quotations = ({
 
       <div className=" tablequo">
         <div className="quotation-outer-div">
-          <div>
+          <div style={{ marginLeft: "10px" }}>
             <DataGrid
               rows={rows}
               columns={columns}
@@ -765,10 +767,14 @@ const Quotations = ({
               components={{
                 NoRowsOverlay,
               }}
+              getRowHeight={() => "auto"}
               onCellClick={handleCellClick}
               sx={{
                 "& .MuiDataGrid-root": {
                   border: "none",
+                },
+                "& .MuiDataGrid-scrollbarFiller": {
+                  backgroundColor: "#eee !important",
                 },
                 "& .MuiDataGrid-columnHeader": {
                   backgroundColor: "#eee !important", // Set gray background color
@@ -797,6 +803,7 @@ const Quotations = ({
                   alignItems: "center", // Center vertically
                   justifyContent: "left", // Center horizontally
                   textOverflow: "ellipsis",
+                  padding: "6px",
                 },
               }}
               pagination // Enables pagination

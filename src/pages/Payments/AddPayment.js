@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import {
   getAllQuotationIds,
   getAllVendorQuotationIds,
+  getCustomerQuotationIds,
   savePayment,
   editPayment,
   getVendorBalanceDue,
@@ -234,9 +235,12 @@ const AddCustomerPayment = ({
     try {
       let listquotations = null;
       if (customerId) {
-        listquotations = await getAllQuotationIds();
+        // listquotations = await getAllQuotationIds();
+        listquotations = await getCustomerQuotationIds({
+          customerId: customerId,
+        });
       } else if (vendorId) {
-        listquotations = await getAllVendorQuotationIds();
+        listquotations = await getAllVendorQuotationIds({ vendorId: vendorId });
       } else {
         setQuotationList([]);
         return;
@@ -476,7 +480,7 @@ const AddCustomerPayment = ({
         fullWidth
         maxWidth="lg"
       >
-        <div className="d-flex justify-content-between " >
+        <div className="d-flex justify-content-between ">
           {buttonType === "addreceipt" ? (
             <DialogTitle>{editMode ? "Edit" : "Add Receipt"}</DialogTitle>
           ) : (
@@ -554,7 +558,7 @@ const AddCustomerPayment = ({
                       className="form-label"
                     >
                       {" "}
-                      Total Paid Amount(AED):
+                      Total Paid Amount(OMR):
                     </label>
                   ) : (
                     <label
@@ -562,7 +566,7 @@ const AddCustomerPayment = ({
                       className="form-label"
                     >
                       {" "}
-                      Balance Dues(AED):
+                      Balance Dues(OMR):
                     </label>
                   )}
                   <input
@@ -620,8 +624,9 @@ const AddCustomerPayment = ({
                     value={formData.currency}
                   >
                     <option value="">Choose Currency </option>
-                    <option value={"aed"}>AED</option>
+                    <option value={"omr"}>OMR </option>
                     <option value="usd">USD </option>
+                    <option value="aed">AED </option>
                   </select>
                   {errors.currency && (
                     <span className="invalid">{errors.currency}</span>
@@ -640,7 +645,7 @@ const AddCustomerPayment = ({
                     <input
                       name="paymentDate"
                       type="date"
-                      className="form-control vessel-voyage"
+                      className="form-control custom-picker-styles"
                       id="bank"
                       placeholder=""
                       onChange={handleChange}
@@ -786,7 +791,7 @@ const AddCustomerPayment = ({
                 <div className="col-6 mb-3 align-items-start">
                   <div className="">
                     <label htmlFor="discountAmount" className="form-label">
-                      Discount (AED)
+                      Discount (OMR)
                     </label>
                     <input
                       name="discountAmount"
