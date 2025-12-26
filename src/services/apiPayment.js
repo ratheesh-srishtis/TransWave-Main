@@ -21,6 +21,20 @@ axiosInstance.interceptors.request.use(
   }
 );
 
+//Vendor Voucher Details
+
+export const getVendorVoucherDetails = async (voucher) => {
+  try {
+    const response = await axiosInstance.post(
+      "/getVendorVoucherDetails",
+      voucher
+    );
+    return response.data;
+  } catch (error) {
+    console.log("Error in getVendorVoucherDetails", error);
+  }
+};
+
 //Save payments
 export const savePayment = async (paymentData) => {
   try {

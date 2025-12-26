@@ -649,7 +649,7 @@ const CreatePDA = ({
         charges: finalChargesArray,
         anchorageLocation: selectedAnchorageLocation?._id,
         cargoCapacity: selectedCargoCapacity,
-        berth: selectedBerth,
+        berth: ''
       };
       console.log(pdaPayload, "pdaPayload");
       if (!pdaResponse?._id) {
@@ -1868,20 +1868,9 @@ const CreatePDA = ({
                   </>
                 )}
               </div>
-              <div className="col-1 nrt ">
-                <label for="exampleFormControlInput1" className="form-label">
-                  Berth:
-                </label>
-                <input
-                  type="text"
-                  name="berth"
-                  className="form-control vessel-voyage voyageblock"
-                  id="exampleFormControlInput1"
-                  placeholder=""
-                  value={selectedBerth}
-                  onChange={handleInputChange}
-                />
-              </div>
+             
+
+            
               <div className="col-2 nrt ">
                 <label
                   htmlFor="exampleFormControlInput1"

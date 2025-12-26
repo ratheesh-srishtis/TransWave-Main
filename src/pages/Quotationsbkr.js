@@ -80,7 +80,6 @@ const Quotations = ({
 
   // Replace the existing fetchQuotations function (around lines 55-73) with this:
   const fetchQuotations = async (type) => {
-    // alert("fetchQuotations called");
     setSelectedTab(type);
     try {
       setIsLoading(true);
@@ -91,7 +90,7 @@ const Quotations = ({
           filter: type,
           cardNumber: String(cardNumber),
         };
-        const res = await payload;
+        const res = await financeDashboardDetails(payload);
 
         if (res.status == true) {
           if (cardNumber == "1") {
@@ -129,7 +128,7 @@ const Quotations = ({
   useEffect(() => {
     const fromDashboardData = location?.state?.quotationsFromDashboard;
     const cardNumberValue = location?.state?.cardNumber; // Assuming cardNumber comes from state
-    console.log(fromDashboardData, "fromDashboardData");
+
     if (Array.isArray(fromDashboardData) && fromDashboardData.length > 0) {
       setQuotationsList(fromDashboardData);
       setFromDashboard(true);
@@ -253,7 +252,7 @@ const Quotations = ({
     {
       field: "pdaNumber",
       headerName: "Job ID",
-      flex: 1.2,
+      flex: 0.8,
       renderCell: (params) => (
         <div
           style={{
@@ -272,7 +271,7 @@ const Quotations = ({
     {
       field: "typeOfCall",
       headerName: "Type Of Call",
-      flex: 1.2,
+      flex: 1,
       renderCell: (params) => {
         const { isVessels, isServices } = params.row || {};
         let label = "N/A";
@@ -284,14 +283,14 @@ const Quotations = ({
       },
     },
     { field: "vessel", headerName: "Vessel Name", flex: 1.2 },
-    { field: "date", headerName: "Date", flex: 1.2 },
-    { field: "port", headerName: "Port Name", flex: 1.2 },
-    { field: "customer", headerName: "Customer Name", flex: 1.8 },
-    { field: "preparedBy", headerName: "Prepared By", flex: 1.2 },
+    { field: "date", headerName: "Date", flex: 1 },
+    { field: "port", headerName: "Port Name", flex: 1.5 },
+    { field: "customer", headerName: "Customer Name", flex: 1.5 },
+    { field: "preparedBy", headerName: "Prepared By", flex: 1 },
     {
       field: "status",
       headerName: "Status",
-      flex: 1.8,
+      flex: 2.5,
       renderCell: (params) => (
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <span>{params.value}</span>
@@ -325,7 +324,7 @@ const Quotations = ({
     {
       field: "actions",
       headerName: "Action",
-      flex: 1.2,
+      flex: 1.5,
       renderCell: (params) => (
         <>
           <IconButton color="primary" onClick={() => handleEdit(params.row)}>

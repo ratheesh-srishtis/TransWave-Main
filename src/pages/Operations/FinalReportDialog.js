@@ -175,7 +175,7 @@ const FinalReportDialog = ({ open, onClose, pdaId, ports }) => {
             </div>
           </div>
           <DialogContent style={{ marginBottom: "40px" }}>
-            <div className="download-btn-container">
+           <div className="download-btn-container">
               <button
                 className="btn btn-info filbtnjobccbrkup"
                 onClick={() => {

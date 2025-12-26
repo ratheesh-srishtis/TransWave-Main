@@ -179,7 +179,8 @@ const NotificationPage = ({ open, onClose, onOpen }) => {
   //   }
   // };
 
-  const viewNotification = async (notification) => {
+
+ const viewNotification = async (notification) => {
     console.log(notification, "notification");
     let row = notification?.pdaId;
     console.log(row, "notification_row");
@@ -221,6 +222,8 @@ const NotificationPage = ({ open, onClose, onOpen }) => {
       onClose();
     }
   };
+
+
 
   return (
     <>
