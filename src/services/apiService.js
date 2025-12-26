@@ -335,6 +335,7 @@ export const uploadDocuments = async (formData) => {
     throw error;
   }
 };
+
 export const uploadConnectionFlightImage = async (formData) => {
   try {
     const response = await axiosInstance.post(
@@ -352,6 +353,8 @@ export const uploadConnectionFlightImage = async (formData) => {
     throw error;
   }
 };
+
+
 
 export const uploadSingleImage = async (formData) => {
   try {

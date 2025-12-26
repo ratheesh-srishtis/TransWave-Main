@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   getDashbordDetails,
   financeDashboardDetails,
-  getInvoiceTotal,
 } from "../services/apiService";
 import { Oval } from "react-loader-spinner"; // Import a loader type from react-loader-spinner
 import { useAuth } from "../context/AuthContext";
@@ -31,7 +30,6 @@ const Dashboard = () => {
   const img_5 = require("../assets/images/job completed.png");
   const img_6 = require("../assets/images/finalinvoicenew.png");
   const [counts, setCounts] = useState(null);
-  const [invoiceTotal, setInvoiceTotal] = useState(null);
   const [userType, setUserType] = useState(null);
   const [selectedCardNumber, setSelectedCardNumber] = useState("6");
   console.log(counts, "counts");
@@ -43,9 +41,6 @@ const Dashboard = () => {
     };
     try {
       const dashboardDetails = await getDashbordDetails(data);
-      const response = await getInvoiceTotal(data);
-      console.log("invoiceTotal:", response?.total);
-      setInvoiceTotal(response?.total);
       console.log("dashboardDetails:", dashboardDetails);
       setCounts(dashboardDetails);
       setIsLoading(false);
@@ -59,15 +54,11 @@ const Dashboard = () => {
   // Finance details call (only for finance role)
   const fetchFinanceDashboardDetails = async (filterValue, cardNumberValue) => {
     try {
-      setIsLoading(true);
       const payload = {
         filter: filterValue,
         cardNumber: String(cardNumberValue),
       };
       const res = await financeDashboardDetails(payload);
-      console.log(res, "dashboard_card_response");
-      setIsLoading(false);
-
       if (res.status == true) {
         if (cardNumberValue == "1") {
           navigate("/quotations", {
@@ -79,47 +70,33 @@ const Dashboard = () => {
         } else if (cardNumberValue == "2") {
           navigate("/quotations", {
             state: {
-              quotationsFromDashboard: res?.draftQuotation || [],
+              quotationsFromDashboard: res?.submittedQuotation || [],
               cardNumber: cardNumberValue,
             },
           });
         } else if (cardNumberValue == "3") {
           navigate("/quotations", {
             state: {
-              quotationsFromDashboard: res?.awaitingFMApproval || [],
+              quotationsFromDashboard: res?.approvedQuotation || [],
               cardNumber: cardNumberValue,
             },
           });
         } else if (cardNumberValue == "4") {
           navigate("/quotations", {
             state: {
-              quotationsFromDashboard: res?.awaitingCustomerApproval || [],
-              cardNumber: cardNumberValue,
-            },
-          });
-        } else if (cardNumberValue == "5") {
-          navigate("/jobs", {
-            state: {
-              quotationsFromDashboard: res?.approvedQuotation || [],
-              cardNumber: cardNumberValue,
-            },
-          });
-        } else if (cardNumberValue == "6") {
-          navigate("/jobs", {
-            state: {
               quotationsFromDashboard: res?.processedQuotation || [],
               cardNumber: cardNumberValue,
             },
           });
-        } else if (cardNumberValue == "7") {
-          navigate("/jobs", {
+        } else if (cardNumberValue == "5") {
+          navigate("/quotations", {
             state: {
               quotationsFromDashboard: res?.completedQuotation || [],
               cardNumber: cardNumberValue,
             },
           });
-        } else if (cardNumberValue == "8" || cardNumberValue == "9") {
-          navigate("/jobs", {
+        } else if (cardNumberValue == "6") {
+          navigate("/quotations", {
             state: {
               quotationsFromDashboard: res?.invoiceSubmitted || [],
               cardNumber: cardNumberValue,
@@ -130,7 +107,6 @@ const Dashboard = () => {
       console.log("financeDashboardDetails:", payload, res);
     } catch (err) {
       console.error("financeDashboardDetails error:", err);
-      setIsLoading(false);
     }
   };
 
@@ -228,7 +204,7 @@ const Dashboard = () => {
                 >
                   <img className="img-size" src={img_2} />
                   <h3 className="card_count">{counts?.receivedQuotation}</h3>
-                  <h5 className="card_title">PDA Created</h5>
+                  <h5 className="card_title">Quotation Prepared</h5>
                 </div>
               </div>
               <div className="col-md-4 mb-2 mb-md-4">
@@ -240,8 +216,8 @@ const Dashboard = () => {
                   }}
                 >
                   <img className="img-size" src={img_3} />
-                  <h3 className="card_count">{counts?.draftQuotation}</h3>
-                  <h5 className="card_title">Draft PDA</h5>
+                  <h3 className="card_count">{counts?.submittedQuotation}</h3>
+                  <h5 className="card_title">Submitted Quotations</h5>
                 </div>
               </div>
               <div className="col-md-4 mb-2 mb-md-4">
@@ -253,10 +229,8 @@ const Dashboard = () => {
                   }}
                 >
                   <img className="img-size" src={img_4} />
-                  <h3 className="card_count">{counts?.awaitingFMApproval}</h3>
-                  <h5 className="card_title">
-                    PDA Awaiting Finance Manager Approval
-                  </h5>
+                  <h3 className="card_count">{counts?.approvedQuotation}</h3>
+                  <h5 className="card_title">Approval of Jobs to OPS</h5>
                 </div>
               </div>
               <div className="col-md-4 mb-2 mb-md-4">
@@ -268,10 +242,8 @@ const Dashboard = () => {
                   }}
                 >
                   <img className="img-size" src={img_1} />
-                  <h3 className="card_count">
-                    {counts?.awaitingCustomerApproval}
-                  </h3>
-                  <h5 className="card_title">PDA Awaiting Customer Approval</h5>
+                  <h3 className="card_count">{counts?.processedQuotation}</h3>
+                  <h5 className="card_title">Job in Process</h5>
                 </div>
               </div>
               <div className="col-md-4 mb-2 mb-md-4">
@@ -283,10 +255,8 @@ const Dashboard = () => {
                   }}
                 >
                   <img className="img-size" src={img_5} />
-                  <h3 className="card_count">{counts?.approvedQuotation}</h3>
-                  <h5 className="card_title">
-                    Jobs Awaiting Operation Manager Approval
-                  </h5>
+                  <h3 className="card_count">{counts?.completedQuotation}</h3>
+                  <h5 className="card_title">Job Completed</h5>
                 </div>
               </div>
               <div className="col-md-4 mb-2 mb-md-4">
@@ -298,49 +268,8 @@ const Dashboard = () => {
                   }}
                 >
                   <img className="img-size" src={img_6} />
-                  <h3 className="card_count">{counts?.processedQuotation}</h3>
-                  <h5 className="card_title">Jobs in Progress</h5>
-                </div>
-              </div>
-              <div className="col-md-4 mb-2 mb-md-4">
-                <div
-                  className="dashboard_cards finalinvoicestatus"
-                  onClick={() => {
-                    setSelectedCardNumber("7");
-                    fetchFinanceDashboardDetails(selectedTab, "7");
-                  }}
-                >
-                  <img className="img-size" src={img_6} />
-                  <h3 className="card_count">{counts?.completedQuotation}</h3>
-                  <h5 className="card_title">Jobs Completed</h5>
-                </div>
-              </div>
-              <div className="col-md-4 mb-2 mb-md-4">
-                <div
-                  className="dashboard_cards finalinvoicestatus"
-                  onClick={() => {
-                    setSelectedCardNumber("8");
-                    fetchFinanceDashboardDetails(selectedTab, "8");
-                  }}
-                >
-                  <img className="img-size" src={img_6} />
                   <h3 className="card_count">{counts?.invoiceSubmitted}</h3>
-                  <h5 className="card_title">Invoice Submitted</h5>
-                </div>
-              </div>
-              <div className="col-md-4 mb-2 mb-md-4">
-                <div
-                  className="dashboard_cards finalinvoicestatus"
-                  onClick={() => {
-                    setSelectedCardNumber("8");
-                    fetchFinanceDashboardDetails(selectedTab, "8");
-                  }}
-                >
-                  <img className="img-size" src={img_6} />
-                  <h3 className="card_count">
-                    {invoiceTotal ? invoiceTotal : "N/A"}
-                  </h3>
-                  <h5 className="card_title">Worth of Invoice Submitted</h5>
+                  <h5 className="card_title">Final Invoice Status</h5>
                 </div>
               </div>
             </div>
