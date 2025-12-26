@@ -7,7 +7,7 @@ import {
   getPettyCashReport,
   pettyCashReportPDF,
   pettyCashReportEmployee,
-  pettyCashReportEmployeePDF,
+  // pettyCashReportEmployeePDF,
 } from "../../services/apiService";
 import { DataGrid } from "@mui/x-data-grid";
 import { Box, Typography } from "@mui/material";
@@ -51,213 +51,213 @@ const PettyCashReport = () => {
     { field: "totalPetty", headerName: "Total Petty", flex: 1 },
     { field: "usedPetties", headerName: "Used Petties", flex: 1 },
     { field: "balancePetties", headerName: "Balance Petties", flex: 1 },
-    {
-      field: "actions",
-      headerName: "Actions",
-      flex: 0.5,
-      sortable: false,
-      renderCell: (params) => (
-        <>
-          <button
-            className="btn btn-sm btn-info text-white row-download-icons excel-individual-button"
-            onClick={() => downloadRowExcel(params.row)}
-            title="Download Excel"
-          >
-            <i class="bi bi-file-earmark-spreadsheet-fill excel-individual-icon "></i>
-          </button>
-          <button
-            className="btn btn-sm btn-info text-white row-download-icons pdf-individual-button"
-            onClick={() => getRowPDF(params.row)}
-            title="Download PDF"
-          >
-            <i class="bi bi-file-earmark-pdf pdf-individual-icon"></i>
-          </button>
-        </>
-      ),
-    },
+    // {
+    //   field: "actions",
+    //   headerName: "Actions",
+    //   flex: 0.5,
+    //   sortable: false,
+    //   renderCell: (params) => (
+    //     <>
+    //       <button
+    //         className="btn btn-sm btn-info text-white row-download-icons excel-individual-button"
+    //         onClick={() => downloadRowExcel(params.row)}
+    //         title="Download Excel"
+    //       >
+    //         <i class="bi bi-file-earmark-spreadsheet-fill excel-individual-icon "></i>
+    //       </button>
+    //       <button
+    //         className="btn btn-sm btn-info text-white row-download-icons pdf-individual-button"
+    //         onClick={() => getRowPDF(params.row)}
+    //         title="Download PDF"
+    //       >
+    //         <i class="bi bi-file-earmark-pdf pdf-individual-icon"></i>
+    //       </button>
+    //     </>
+    //   ),
+    // },
   ];
 
-  const getRowPDF = async (rowData) => {
-    console.log(rowData, "rowData_getRowPDF");
+  // const getRowPDF = async (rowData) => {
+  //   console.log(rowData, "rowData_getRowPDF");
 
-    let payload = {
-      employeeId: rowData?.employeeId,
-      employeeName: rowData?.employee,
-      filter: filterType,
-      paymentDateFrom: formattedStart,
-      paymentDateTo: formattedEnd,
-      ...(filterType === "year" && { year: selectedYear }),
-      ...(filterType === "month" && { month: selectedMonth }),
-    };
+  //   let payload = {
+  //     employeeId: rowData?.employeeId,
+  //     employeeName: rowData?.employee,
+  //     filter: filterType,
+  //     paymentDateFrom: formattedStart,
+  //     paymentDateTo: formattedEnd,
+  //     ...(filterType === "year" && { year: selectedYear }),
+  //     ...(filterType === "month" && { month: selectedMonth }),
+  //   };
 
-    console.log(payload, "payload_getReport");
-    setIsLoading(true);
-    try {
-      const response = await pettyCashReportEmployeePDF(payload);
-      console.log("pettyCashReportEmployeePDF", response);
-      setIsLoading(false);
-      if (response?.pdfPath) {
-        const pdfUrl = `${process.env.REACT_APP_ASSET_URL}${response.pdfPath}`;
-        // Fetch the PDF as a Blob
-        const pdfResponse = await fetch(pdfUrl);
-        const pdfBlob = await pdfResponse.blob();
-        const pdfBlobUrl = URL.createObjectURL(pdfBlob);
-        // Create a hidden anchor tag to trigger the download
-        const link = document.createElement("a");
-        link.href = pdfBlobUrl;
-        link.setAttribute("download", "Petty Cash Details.pdf"); // Set the file name
-        document.body.appendChild(link);
-        link.click();
-        // Clean up
-        document.body.removeChild(link);
-        URL.revokeObjectURL(pdfBlobUrl);
-      }
-    } catch (error) {
-      setIsLoading(false);
-      console.error("Failed to fetch quotations:", error);
-    }
-  };
+  //   console.log(payload, "payload_getReport");
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await pettyCashReportEmployeePDF(payload);
+  //     console.log("pettyCashReportEmployeePDF", response);
+  //     setIsLoading(false);
+  //     if (response?.pdfPath) {
+  //       const pdfUrl = `${process.env.REACT_APP_ASSET_URL}${response.pdfPath}`;
+  //       // Fetch the PDF as a Blob
+  //       const pdfResponse = await fetch(pdfUrl);
+  //       const pdfBlob = await pdfResponse.blob();
+  //       const pdfBlobUrl = URL.createObjectURL(pdfBlob);
+  //       // Create a hidden anchor tag to trigger the download
+  //       const link = document.createElement("a");
+  //       link.href = pdfBlobUrl;
+  //       link.setAttribute("download", "Petty Cash Details.pdf"); // Set the file name
+  //       document.body.appendChild(link);
+  //       link.click();
+  //       // Clean up
+  //       document.body.removeChild(link);
+  //       URL.revokeObjectURL(pdfBlobUrl);
+  //     }
+  //   } catch (error) {
+  //     setIsLoading(false);
+  //     console.error("Failed to fetch quotations:", error);
+  //   }
+  // };
 
-  const downloadRowExcel = async (rowData) => {
-    console.log(rowData, "rowData_downloadRowExcel");
+  // const downloadRowExcel = async (rowData) => {
+  //   console.log(rowData, "rowData_downloadRowExcel");
 
-    let payload = {
-      employeeId: rowData?.employeeId,
-      filter: filterType,
-      paymentDate: paymentDate,
-      ...(filterType === "year" && { year: selectedYear }),
-      ...(filterType === "month" && { month: selectedMonth }),
-    };
-    console.log(payload, "payload_downloadRowExcel");
-    setIsLoading(true);
+  //   let payload = {
+  //     employeeId: rowData?.employeeId,
+  //     filter: filterType,
+  //     paymentDate: paymentDate,
+  //     ...(filterType === "year" && { year: selectedYear }),
+  //     ...(filterType === "month" && { month: selectedMonth }),
+  //   };
+  //   console.log(payload, "payload_downloadRowExcel");
+  //   setIsLoading(true);
 
-    try {
-      const response = await pettyCashReportEmployee(payload);
-      console.log("pettyCashReportEmployee", response?.pettyData);
+  //   try {
+  //     const response = await pettyCashReportEmployee(payload);
+  //     console.log("pettyCashReportEmployee", response?.pettyData);
 
-      // Check if response has data
-      if (!response?.pettyData || response.pettyData.length === 0) {
-        setMessage("No data available to download excel");
-        setOpenPopUp(true);
-        setIsLoading(false);
-        return;
-      }
+  //     // Check if response has data
+  //     if (!response?.pettyData || response.pettyData.length === 0) {
+  //       setMessage("No data available to download excel");
+  //       setOpenPopUp(true);
+  //       setIsLoading(false);
+  //       return;
+  //     }
 
-      // Prepare Excel data
-      const excelData = response.pettyData.map((item) => ({
-        "Employee Name": item.through?.name || "-",
-        Particulars: item.voucherParticulers || "-",
-        "On Account Of": item.voucherAccount || "-",
-        "Vendor Name": item.vendorId?.vendorName || "-",
-        Amount: Number(item.amount || 0).toFixed(3),
-        "Payment Date": item.paymentDate
-          ? `${new Date(item.paymentDate).toLocaleDateString(
-              "en-GB"
-            )} ${new Date(item.paymentDate).toLocaleTimeString("en-GB", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}`
-          : "-",
-      }));
+  //     // Prepare Excel data
+  //     const excelData = response.pettyData.map((item) => ({
+  //       "Employee Name": item.through?.name || "-",
+  //       Particulars: item.voucherParticulers || "-",
+  //       "On Account Of": item.voucherAccount || "-",
+  //       "Vendor Name": item.vendorId?.vendorName || "-",
+  //       Amount: Number(item.amount || 0).toFixed(3),
+  //       "Payment Date": item.paymentDate
+  //         ? `${new Date(item.paymentDate).toLocaleDateString(
+  //             "en-GB"
+  //           )} ${new Date(item.paymentDate).toLocaleTimeString("en-GB", {
+  //             hour: "2-digit",
+  //             minute: "2-digit",
+  //           })}`
+  //         : "-",
+  //     }));
 
-      // Create Excel workbook
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet("Petty Cash Details", {
-        properties: { defaultRowHeight: 18 },
-        pageSetup: { fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
-      });
+  //     // Create Excel workbook
+  //     const workbook = new ExcelJS.Workbook();
+  //     const worksheet = workbook.addWorksheet("Petty Cash Details", {
+  //       properties: { defaultRowHeight: 18 },
+  //       pageSetup: { fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+  //     });
 
-      const headers = Object.keys(excelData[0] || {});
+  //     const headers = Object.keys(excelData[0] || {});
 
-      // Add header row
-      const headerRow = worksheet.addRow(headers);
-      headerRow.eachCell((cell) => {
-        cell.font = { bold: true };
-        cell.alignment = {
-          horizontal: "center",
-          vertical: "middle",
-          wrapText: true,
-        };
-        cell.border = {
-          top: { style: "thin" },
-          left: { style: "thin" },
-          bottom: { style: "thin" },
-          right: { style: "thin" },
-        };
-        cell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "FFEFEFEF" },
-        };
-      });
+  //     // Add header row
+  //     const headerRow = worksheet.addRow(headers);
+  //     headerRow.eachCell((cell) => {
+  //       cell.font = { bold: true };
+  //       cell.alignment = {
+  //         horizontal: "center",
+  //         vertical: "middle",
+  //         wrapText: true,
+  //       };
+  //       cell.border = {
+  //         top: { style: "thin" },
+  //         left: { style: "thin" },
+  //         bottom: { style: "thin" },
+  //         right: { style: "thin" },
+  //       };
+  //       cell.fill = {
+  //         type: "pattern",
+  //         pattern: "solid",
+  //         fgColor: { argb: "FFEFEFEF" },
+  //       };
+  //     });
 
-      // Add data rows with auto row height
-      excelData.forEach((row) => {
-        const r = worksheet.addRow(headers.map((h) => row[h]));
-        r.eachCell((cell) => {
-          cell.alignment = {
-            horizontal: "center",
-            vertical: "middle",
-            wrapText: true,
-          };
-          cell.border = {
-            top: { style: "thin" },
-            left: { style: "thin" },
-            bottom: { style: "thin" },
-            right: { style: "thin" },
-          };
-        });
+  //     // Add data rows with auto row height
+  //     excelData.forEach((row) => {
+  //       const r = worksheet.addRow(headers.map((h) => row[h]));
+  //       r.eachCell((cell) => {
+  //         cell.alignment = {
+  //           horizontal: "center",
+  //           vertical: "middle",
+  //           wrapText: true,
+  //         };
+  //         cell.border = {
+  //           top: { style: "thin" },
+  //           left: { style: "thin" },
+  //           bottom: { style: "thin" },
+  //           right: { style: "thin" },
+  //         };
+  //       });
 
-        // Calculate row height based on content
-        let maxLines = 1;
-        headers.forEach((h, colIndex) => {
-          const cellValue = row[h];
-          if (cellValue != null) {
-            const columnWidth = worksheet.getColumn(colIndex + 1).width || 15;
-            const textLength = cellValue.toString().length;
-            const estimatedLines = Math.ceil(textLength / columnWidth);
-            if (estimatedLines > maxLines) {
-              maxLines = estimatedLines;
-            }
-          }
-        });
+  //       // Calculate row height based on content
+  //       let maxLines = 1;
+  //       headers.forEach((h, colIndex) => {
+  //         const cellValue = row[h];
+  //         if (cellValue != null) {
+  //           const columnWidth = worksheet.getColumn(colIndex + 1).width || 15;
+  //           const textLength = cellValue.toString().length;
+  //           const estimatedLines = Math.ceil(textLength / columnWidth);
+  //           if (estimatedLines > maxLines) {
+  //             maxLines = estimatedLines;
+  //           }
+  //         }
+  //       });
 
-        // Set row height (18 is default, multiply by number of lines needed)
-        r.height = Math.max(18, maxLines * 15);
-      });
+  //       // Set row height (18 is default, multiply by number of lines needed)
+  //       r.height = Math.max(18, maxLines * 15);
+  //     });
 
-      // Auto-size columns
-      headers.forEach((h, i) => {
-        let maxLen = h.length;
-        excelData.forEach((row) => {
-          const val = row[h];
-          if (val != null) {
-            const len = val.toString().length;
-            if (len > maxLen) maxLen = len;
-          }
-        });
-        // Set larger minimum width for "On Account Of" and "Particulars" columns
-        const minWidth = h === "On Account Of" || h === "Particulars" ? 30 : 15;
-        worksheet.getColumn(i + 1).width = Math.max(
-          minWidth,
-          Math.min(maxLen + 5, 60)
-        );
-      });
+  //     // Auto-size columns
+  //     headers.forEach((h, i) => {
+  //       let maxLen = h.length;
+  //       excelData.forEach((row) => {
+  //         const val = row[h];
+  //         if (val != null) {
+  //           const len = val.toString().length;
+  //           if (len > maxLen) maxLen = len;
+  //         }
+  //       });
+  //       // Set larger minimum width for "On Account Of" and "Particulars" columns
+  //       const minWidth = h === "On Account Of" || h === "Particulars" ? 30 : 15;
+  //       worksheet.getColumn(i + 1).width = Math.max(
+  //         minWidth,
+  //         Math.min(maxLen + 5, 60)
+  //       );
+  //     });
 
-      // Download Excel file
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      const fileName = "Petty Cash Details.xlsx";
-      saveAs(blob, fileName);
+  //     // Download Excel file
+  //     const buffer = await workbook.xlsx.writeBuffer();
+  //     const blob = new Blob([buffer], {
+  //       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  //     });
+  //     const fileName = "Petty Cash Details.xlsx";
+  //     saveAs(blob, fileName);
 
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Failed to download petty cash report:", error);
-      setIsLoading(false);
-    }
-  };
+  //     setIsLoading(false);
+  //   } catch (error) {
+  //     console.error("Failed to download petty cash report:", error);
+  //     setIsLoading(false);
+  //   }
+  // };
 
   // ...existing code...
 

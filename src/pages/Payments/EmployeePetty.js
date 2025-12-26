@@ -13,7 +13,7 @@ import {
   getEmployeePetty,
   deleteEmployeePetty,
   getAllFinanceEmployees,
-  generateEmployeePettyPDF,
+  // generateEmployeePettyPDF,
 } from "../../services/apiPayment";
 import "../../css/payment.css";
 import ExcelJS from "exceljs";
@@ -281,174 +281,174 @@ const EmployeePetty = () => {
     },
   ];
 
-  const getPDF = async () => {
-    let payload = {
-      employeeId: selectedEmppettyid,
-      paymentDate: inputFilterDate,
-      filter: FilterName,
-      month: selectedMonth,
-      year: selectedYear,
-    };
-    setIsLoading(true);
-    console.log(payload, "payload_getReport");
-    try {
-      const response = await generateEmployeePettyPDF(payload);
-      console.log("getPettyCashReport", response);
+  // const getPDF = async () => {
+  //   let payload = {
+  //     employeeId: selectedEmppettyid,
+  //     paymentDate: inputFilterDate,
+  //     filter: FilterName,
+  //     month: selectedMonth,
+  //     year: selectedYear,
+  //   };
+  //   setIsLoading(true);
+  //   console.log(payload, "payload_getReport");
+  //   try {
+  //     const response = await generateEmployeePettyPDF(payload);
+  //     console.log("getPettyCashReport", response);
 
-      if (response?.pdfPath) {
-        const pdfUrl = `${process.env.REACT_APP_ASSET_URL}${response.pdfPath}`;
-        // Fetch the PDF as a Blob
-        const pdfResponse = await fetch(pdfUrl);
-        const pdfBlob = await pdfResponse.blob();
-        const pdfBlobUrl = URL.createObjectURL(pdfBlob);
-        // Create a hidden anchor tag to trigger the download
-        const link = document.createElement("a");
-        link.href = pdfBlobUrl;
-        link.setAttribute("download", "Employee Petty Payments.pdf"); // Set the file name
-        document.body.appendChild(link);
-        link.click();
-        // Clean up
-        document.body.removeChild(link);
-        URL.revokeObjectURL(pdfBlobUrl);
-        setIsLoading(false);
-      }
-    } catch (error) {
-      console.error("Failed to fetch quotations:", error);
-      setIsLoading(false);
-    }
-  };
+  //     if (response?.pdfPath) {
+  //       const pdfUrl = `${process.env.REACT_APP_ASSET_URL}${response.pdfPath}`;
+  //       // Fetch the PDF as a Blob
+  //       const pdfResponse = await fetch(pdfUrl);
+  //       const pdfBlob = await pdfResponse.blob();
+  //       const pdfBlobUrl = URL.createObjectURL(pdfBlob);
+  //       // Create a hidden anchor tag to trigger the download
+  //       const link = document.createElement("a");
+  //       link.href = pdfBlobUrl;
+  //       link.setAttribute("download", "Employee Petty Payments.pdf"); // Set the file name
+  //       document.body.appendChild(link);
+  //       link.click();
+  //       // Clean up
+  //       document.body.removeChild(link);
+  //       URL.revokeObjectURL(pdfBlobUrl);
+  //       setIsLoading(false);
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to fetch quotations:", error);
+  //     setIsLoading(false);
+  //   }
+  // };
 
-  const createExcel = async () => {
-    if (!financeempList || financeempList.length === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "No Data",
-        text: "No employee petty records available to export",
-      });
-      return;
-    }
+  // const createExcel = async () => {
+  //   if (!financeempList || financeempList.length === 0) {
+  //     Swal.fire({
+  //       icon: "warning",
+  //       title: "No Data",
+  //       text: "No employee petty records available to export",
+  //     });
+  //     return;
+  //   }
 
-    // Prepare data for Excel
-    const excelData = financeempList.map((item) => {
-      const dateOnly = item.paymentDate
-        ? item.paymentDate.split("T")[0]
-        : "N/A";
-      const [year, month, day] = dateOnly.split("-");
-      const formattedDate = `${day}-${month}-${year}`;
+  //   // Prepare data for Excel
+  //   const excelData = financeempList.map((item) => {
+  //     const dateOnly = item.paymentDate
+  //       ? item.paymentDate.split("T")[0]
+  //       : "N/A";
+  //     const [year, month, day] = dateOnly.split("-");
+  //     const formattedDate = `${day}-${month}-${year}`;
 
-      let modeofpay = "";
-      if (item.modeofPayment !== undefined)
-        modeofpay =
-          item.modeofPayment.charAt(0).toUpperCase() +
-          item.modeofPayment.slice(1);
+  //     let modeofpay = "";
+  //     if (item.modeofPayment !== undefined)
+  //       modeofpay =
+  //         item.modeofPayment.charAt(0).toUpperCase() +
+  //         item.modeofPayment.slice(1);
 
-      return {
-        "Petty Number": item?.pettyNumber || "N/A",
-        "Payment Date": formattedDate || "N/A",
-        Amount: item.amount || "N/A",
-        "Mode of Payment": modeofpay || "N/A",
-        Bank: item.bank && item.bank.bankName ? item.bank.bankName : "N/A",
-        Remark: item.remark || "N/A",
-      };
-    });
+  //     return {
+  //       "Petty Number": item?.pettyNumber || "N/A",
+  //       "Payment Date": formattedDate || "N/A",
+  //       Amount: item.amount || "N/A",
+  //       "Mode of Payment": modeofpay || "N/A",
+  //       Bank: item.bank && item.bank.bankName ? item.bank.bankName : "N/A",
+  //       Remark: item.remark || "N/A",
+  //     };
+  //   });
 
-    const headers = Object.keys(excelData[0]);
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Employee Petty Payments", {
-      properties: { defaultRowHeight: 18 },
-      pageSetup: { fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
-    });
+  //   const headers = Object.keys(excelData[0]);
+  //   const workbook = new ExcelJS.Workbook();
+  //   const worksheet = workbook.addWorksheet("Employee Petty Payments", {
+  //     properties: { defaultRowHeight: 18 },
+  //     pageSetup: { fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+  //   });
 
-    // Header
-    const headerRow = worksheet.addRow(headers);
-    headerRow.eachCell((cell) => {
-      cell.font = { bold: true };
-      cell.alignment = {
-        horizontal: "center",
-        vertical: "middle",
-        wrapText: true,
-      };
-      cell.border = {
-        top: { style: "thin" },
-        left: { style: "thin" },
-        bottom: { style: "thin" },
-        right: { style: "thin" },
-      };
-      cell.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFEFEFEF" },
-      };
-    });
+  //   // Header
+  //   const headerRow = worksheet.addRow(headers);
+  //   headerRow.eachCell((cell) => {
+  //     cell.font = { bold: true };
+  //     cell.alignment = {
+  //       horizontal: "center",
+  //       vertical: "middle",
+  //       wrapText: true,
+  //     };
+  //     cell.border = {
+  //       top: { style: "thin" },
+  //       left: { style: "thin" },
+  //       bottom: { style: "thin" },
+  //       right: { style: "thin" },
+  //     };
+  //     cell.fill = {
+  //       type: "pattern",
+  //       pattern: "solid",
+  //       fgColor: { argb: "FFEFEFEF" },
+  //     };
+  //   });
 
-    // Data rows
-    excelData.forEach((data) => {
-      const dataRow = worksheet.addRow(headers.map((h) => data[h]));
+  //   // Data rows
+  //   excelData.forEach((data) => {
+  //     const dataRow = worksheet.addRow(headers.map((h) => data[h]));
 
-      // Calculate height for Remark column content
-      const remarkContent = data["Remark"] || "";
-      const remarkLength = remarkContent.toString().length;
+  //     // Calculate height for Remark column content
+  //     const remarkContent = data["Remark"] || "";
+  //     const remarkLength = remarkContent.toString().length;
 
-      // Estimate lines needed for Remark column (50 characters per line)
-      const estimatedLines = Math.max(1, Math.ceil(remarkLength / 50));
+  //     // Estimate lines needed for Remark column (50 characters per line)
+  //     const estimatedLines = Math.max(1, Math.ceil(remarkLength / 50));
 
-      // Set row height based on content (minimum 18, add 18 points per additional line)
-      const calculatedHeight = Math.max(18, 18 * estimatedLines);
-      dataRow.height = Math.min(calculatedHeight, 200); // Cap at 200 points
+  //     // Set row height based on content (minimum 18, add 18 points per additional line)
+  //     const calculatedHeight = Math.max(18, 18 * estimatedLines);
+  //     dataRow.height = Math.min(calculatedHeight, 200); // Cap at 200 points
 
-      dataRow.eachCell((cell) => {
-        cell.alignment = {
-          horizontal: "center",
-          vertical: "top",
-          wrapText: true,
-        };
-        cell.border = {
-          top: { style: "thin" },
-          left: { style: "thin" },
-          bottom: { style: "thin" },
-          right: { style: "thin" },
-        };
-      });
-    });
+  //     dataRow.eachCell((cell) => {
+  //       cell.alignment = {
+  //         horizontal: "center",
+  //         vertical: "top",
+  //         wrapText: true,
+  //       };
+  //       cell.border = {
+  //         top: { style: "thin" },
+  //         left: { style: "thin" },
+  //         bottom: { style: "thin" },
+  //         right: { style: "thin" },
+  //       };
+  //     });
+  //   });
 
-    // Auto-size columns with special handling for Remark
-    const minWidth = 15;
-    const maxWidth = 60;
-    headers.forEach((h, i) => {
-      if (h === "Remark") {
-        // Set fixed width for Remark column that needs wrapping
-        worksheet.getColumn(i + 1).width = 50;
-      } else {
-        let maxLen = (h || "").toString().length;
-        excelData.forEach((data) => {
-          const val = data[h];
-          const len = val == null ? 0 : val.toString().length;
-          if (len > maxLen) maxLen = len;
-        });
-        const width = Math.max(minWidth, Math.min(maxWidth, maxLen + 2));
-        worksheet.getColumn(i + 1).width = width;
-      }
-    });
+  //   // Auto-size columns with special handling for Remark
+  //   const minWidth = 15;
+  //   const maxWidth = 60;
+  //   headers.forEach((h, i) => {
+  //     if (h === "Remark") {
+  //       // Set fixed width for Remark column that needs wrapping
+  //       worksheet.getColumn(i + 1).width = 50;
+  //     } else {
+  //       let maxLen = (h || "").toString().length;
+  //       excelData.forEach((data) => {
+  //         const val = data[h];
+  //         const len = val == null ? 0 : val.toString().length;
+  //         if (len > maxLen) maxLen = len;
+  //       });
+  //       const width = Math.max(minWidth, Math.min(maxWidth, maxLen + 2));
+  //       worksheet.getColumn(i + 1).width = width;
+  //     }
+  //   });
 
-    // Set view options to ensure proper display when opened
-    worksheet.views = [
-      {
-        state: "normal",
-        showGridLines: true,
-        showRowColHeaders: true,
-        rightToLeft: false,
-      },
-    ];
+  //   // Set view options to ensure proper display when opened
+  //   worksheet.views = [
+  //     {
+  //       state: "normal",
+  //       showGridLines: true,
+  //       showRowColHeaders: true,
+  //       rightToLeft: false,
+  //     },
+  //   ];
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
+  //   const buffer = await workbook.xlsx.writeBuffer();
+  //   const blob = new Blob([buffer], {
+  //     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  //   });
 
-    const fileName = `Employee Petty Payments.xlsx`;
+  //   const fileName = `Employee Petty Payments.xlsx`;
 
-    saveAs(blob, fileName);
-  };
+  //   saveAs(blob, fileName);
+  // };
 
   return (
     <>
@@ -569,7 +569,7 @@ const EmployeePetty = () => {
                 </select>
               )}
 
-              <button
+              {/* <button
                 className="btn btn-info filbtnjob align-items-center"
                 style={{ height: "38px" }}
                 onClick={() => {
@@ -584,7 +584,7 @@ const EmployeePetty = () => {
                 onClick={createExcel}
               >
                 Download Excel
-              </button>
+              </button> */}
             </div>
           </div>
         }
