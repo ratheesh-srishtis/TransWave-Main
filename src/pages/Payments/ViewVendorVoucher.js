@@ -1,6 +1,4 @@
 // ResponsiveDialog.js
-//
-
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import {
@@ -343,17 +341,16 @@ const ViewVendorVoucher = ({ open, onClose, getvoucher }) => {
                             </div>
                           </td>
 
-
-                    <td className="voucheramountrate text-center">
-                      {vendorVoucher?.currency?.toUpperCase()}{" "}
-                      {vendorVoucher?.currency === "AED"
-                        ? Number(vendorVoucher?.totalOMR).toFixed(2)
-                        : vendorVoucher?.currency === "USD"
-                        ? Number(vendorVoucher?.totalOMR).toFixed(2)
-                        : vendorVoucher?.totalOMR}
-                    </td>
-
-                         
+                          <td className="voucherpartfour text-center">
+                            {payment?.currency?.toUpperCase()}{" "}
+                            {payment?.currency?.toUpperCase() === "OMR"
+                              ? Number(payment?.amount).toFixed(3)
+                              : payment?.currency?.toUpperCase() === "USD"
+                              ? Number(payment?.amount).toFixed(2)
+                              : payment?.currency?.toUpperCase() == "AED"
+                              ? Number(payment?.amount).toFixed(2)
+                              : Number(payment?.amount)}
+                          </td>
                         </tr>
                       ))}
                     </>

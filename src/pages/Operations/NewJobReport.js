@@ -293,14 +293,14 @@ const NewJobReport = ({ ports, loginResponse }) => {
           >
             View
           </button>
-          <button
+          {/* <button
             style={{ marginLeft: "10px" }}
             className="btn btn-sm btn-info text-white"
             onClick={() => downloadRowExcel(params.row)}
             title="Download Excel"
           >
             <i className="bi bi-download"></i>
-          </button>
+          </button> */}
         </>
       ),
     },

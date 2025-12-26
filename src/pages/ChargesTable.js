@@ -72,8 +72,8 @@ const ChargesTable = ({
 
   const formattedTotals = {
     quantity: totalValues?.quantity,
-    customerOMR: totalValues?.customerOMR.toFixed(2),
-    customerVAT: totalValues?.customerVAT.toFixed(2),
+    customerOMR: totalValues?.customerOMR.toFixed(3),
+    customerVAT: totalValues?.customerVAT.toFixed(3),
     customerTotalUSD: totalValues?.customerTotalUSD.toFixed(2),
   };
   const vendorTotalValues = chargesArray?.reduce(
@@ -90,8 +90,8 @@ const ChargesTable = ({
   // Format totals after calculations
   const formattedVendorTotals = {
     quantity: vendorTotalValues?.quantity,
-    vendorOMR: vendorTotalValues?.vendorOMR.toFixed(2),
-    vendorVAT: vendorTotalValues?.vendorVAT.toFixed(2),
+    vendorOMR: vendorTotalValues?.vendorOMR.toFixed(3),
+    vendorVAT: vendorTotalValues?.vendorVAT.toFixed(3),
     vendorTotalUSD: vendorTotalValues?.vendorTotalUSD.toFixed(2),
   };
 
@@ -277,7 +277,7 @@ const ChargesTable = ({
                               : "tableheadcolor"
                           }
                         >
-                          Amount (AED)
+                          Amount (OMR)
                         </th>
                         <th
                           className={
@@ -297,7 +297,7 @@ const ChargesTable = ({
                               : "tableheadcolor"
                           }
                         >
-                          Total AED
+                          Total OMR
                         </th>
                         <th
                           className={
@@ -372,13 +372,13 @@ const ChargesTable = ({
                               </td>
                               {from !== "view-operation" && (
                                 <>
-                                  <td>{charge.customerOMR.toFixed(2)}</td>
-                                  <td>{charge.customerVAT.toFixed(2)}</td>
+                                  <td>{charge.customerOMR.toFixed(3)}</td>
+                                  <td>{charge.customerVAT.toFixed(3)}</td>
                                   <td>
                                     {(
                                       parseFloat(charge.customerOMR) +
                                       parseFloat(charge.customerVAT)
-                                    ).toFixed(2)}
+                                    ).toFixed(3)}
                                   </td>
                                   <td>{charge.customerTotalUSD.toFixed(2)}</td>
 
@@ -441,7 +441,7 @@ const ChargesTable = ({
                               {(
                                 parseFloat(formattedTotals.customerOMR) +
                                 parseFloat(formattedTotals.customerVAT)
-                              ).toFixed(2)}
+                              ).toFixed(3)}
                             </td>
                             <td>{formattedTotals.customerTotalUSD}</td>
                             {isAction == true && (
@@ -528,7 +528,7 @@ const ChargesTable = ({
                               : "tableheadcolor"
                           }
                         >
-                          Amount (AED)
+                          Amount (OMR)
                         </th>
                         <th
                           className={
@@ -548,7 +548,7 @@ const ChargesTable = ({
                               : "tableheadcolor"
                           }
                         >
-                          Total AED
+                          Total OMR
                         </th>
                         <th
                           className={
@@ -620,7 +620,7 @@ const ChargesTable = ({
                                   ? charge.subchargeId?.subchargeName
                                   : charge?.subchargeName}
                               </td>
-                              <td>
+                              {/* <td>
                                 {(() => {
                                   const vendorIds = [
                                     "vendorId",
@@ -645,6 +645,45 @@ const ChargesTable = ({
                                         {vendorName && vendorName.trim()
                                           ? vendorName
                                           : ""}
+                                      </div>
+                                    );
+                                  });
+                                })()}
+                              </td> */}
+                              <td>
+                                {(() => {
+                                  const vendorIds = [
+                                    "vendorId",
+                                    "vendor2Id",
+                                    "vendor3Id",
+                                    "vendor4Id",
+                                  ]
+                                    .map((key) => charge[key])
+                                    .filter((id) => id);
+
+                                  if (vendorIds.length === 0) {
+                                    return <div>N/A</div>;
+                                  }
+
+                                  const hasMultipleVendors =
+                                    vendorIds.length > 1;
+
+                                  return vendorIds.map((id, idx) => {
+                                    const vendorName = vendors?.find(
+                                      (v) => v._id === id
+                                    )?.vendorName;
+
+                                    const displayName =
+                                      vendorName && vendorName.trim()
+                                        ? vendorName
+                                        : "N/A";
+
+                                    return (
+                                      <div key={id}>
+                                        {hasMultipleVendors
+                                          ? `${idx + 1}: `
+                                          : ""}
+                                        {displayName}
                                       </div>
                                     );
                                   });
@@ -711,7 +750,7 @@ const ChargesTable = ({
                                 <>
                                   <td>
                                     {(() => {
-                                      const decimalPlaces = 2;
+                                      const decimalPlaces = 3;
                                       const vendorIds = [
                                         "vendorId",
                                         "vendor2Id",
@@ -761,7 +800,7 @@ const ChargesTable = ({
 
                                   <td>
                                     {(() => {
-                                      const decimalPlaces = 2;
+                                      const decimalPlaces = 3;
                                       const vendorIds = [
                                         "vendorId",
                                         "vendor2Id",
@@ -810,7 +849,7 @@ const ChargesTable = ({
                                   </td>
                                   <td>
                                     {(() => {
-                                      const decimalPlaces = 2;
+                                      const decimalPlaces = 3;
                                       const vendorIds = [
                                         "vendorId",
                                         "vendor2Id",
@@ -861,7 +900,7 @@ const ChargesTable = ({
 
                                   <td>
                                     {(() => {
-                                      const decimalPlaces = 2;
+                                      const decimalPlaces = 3;
                                       const vendorIds = [
                                         "vendorId",
                                         "vendor2Id",
@@ -968,7 +1007,7 @@ const ChargesTable = ({
                                       totalOMR += val;
                                   });
                                 });
-                                return totalOMR.toFixed(2);
+                                return totalOMR.toFixed(3);
                               })()}
                             </td>
                             {/* Vendor VAT Total: sum all vendorVAT, vendor2VAT, vendor3VAT, vendor4VAT for all charges */}
@@ -987,7 +1026,7 @@ const ChargesTable = ({
                                       totalVAT += val;
                                   });
                                 });
-                                return totalVAT.toFixed(2);
+                                return totalVAT.toFixed(3);
                               })()}
                             </td>
                             {/* Vendor Total OMR: sum all (vendorOMR + vendorVAT), (vendor2OMR + vendor2VAT), ... for all charges */}
@@ -1022,7 +1061,7 @@ const ChargesTable = ({
                                     if (sum !== 0) total += sum;
                                   });
                                 });
-                                return total.toFixed(2);
+                                return total.toFixed(3);
                               })()}
                             </td>
                             {/* Vendor Total USD: sum all vendorTotalUSD, vendor2TotalUSD, vendor3TotalUSD, vendor4TotalUSD for all charges */}

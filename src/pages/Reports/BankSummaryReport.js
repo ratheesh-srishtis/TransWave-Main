@@ -11,6 +11,8 @@ import { saveAs } from "file-saver";
 import {
   getBankSummaryReport,
   bankSummaryReportPDF,
+  getBankPaymentDetails,
+  //getBankPaymentDetailsPDF,
 } from "../../services/apiService";
 import {
   saveVoucher,
@@ -57,30 +59,414 @@ const BankSummaryReport = ({ employees }) => {
   const columns = [
     { field: "bank", headerName: "Bank Name", flex: 1 },
     { field: "openingBalance", headerName: "Opening Balance", flex: 1 },
-    { field: "pettySum", headerName: "Petty Amount", flex: 1 },
-    { field: "customerReceived", headerName: "Received Amount", flex: 1 },
-    { field: "customerPaid", headerName: "Paid Amount", flex: 1 },
-    { field: "bankBalanceAmount", headerName: "Balance Amount", flex: 1 },
+    { field: "pettySum", headerName: "Petty Amount (OMR)", flex: 1 },
+    { field: "customerReceived", headerName: "Received Amount (OMR)", flex: 1 },
+    { field: "customerPaid", headerName: "Paid Amount (OMR)", flex: 1 },
+    { field: "bankBalanceAmount", headerName: "Balance Amount (OMR)", flex: 1 },
     {
       field: "actions",
       headerName: "Actions",
-      flex: 1,
+      flex: 2,
       sortable: false,
       filterable: false,
       renderCell: (params) => (
-        <button
-          className="btn btn-info filbtnjob"
-          onClick={() => {
-            setSelectedRow(params.row);
-            setDialogOpen(true);
-          }}
-        >
-          View Payment Details
-        </button>
+        <>
+          <button
+            className="btn btn-info filbtnjob"
+            onClick={() => {
+              setSelectedRow(params.row);
+              setDialogOpen(true);
+            }}
+          >
+            Payment Details
+          </button>
+          
+        </>
       ),
     },
   ];
 
+  // const getRowPDF = async (rowData) => {
+  //   console.log(rowData, "rowData_getRowPDF");
+  //   let payload = {
+  //     bankId: rowData?.bankId,
+  //     bankName: rowData?.bank,
+  //     customerId: selectedCustomer,
+  //     vendorId: selectedvendor,
+  //     paymentDateFrom: formattedStart,
+  //     paymentDateTo: formattedEnd,
+  //     employee: selectedEmployee,
+  //   };
+  //   console.log(payload, "payload_getReport");
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await getBankPaymentDetailsPDF(payload);
+  //     console.log("getBankPaymentDetailsPDF", response);
+  //     setIsLoading(false);
+  //     if (response?.pdfPath) {
+  //       const pdfUrl = `${process.env.REACT_APP_ASSET_URL}${response.pdfPath}`;
+  //       // Fetch the PDF as a Blob
+  //       const pdfResponse = await fetch(pdfUrl);
+  //       const pdfBlob = await pdfResponse.blob();
+  //       const pdfBlobUrl = URL.createObjectURL(pdfBlob);
+  //       // Create a hidden anchor tag to trigger the download
+  //       const link = document.createElement("a");
+  //       link.href = pdfBlobUrl;
+  //       link.setAttribute("download", "Bank Summary Details.pdf"); // Set the file name
+  //       document.body.appendChild(link);
+  //       link.click();
+  //       // Clean up
+  //       document.body.removeChild(link);
+  //       URL.revokeObjectURL(pdfBlobUrl);
+  //     }
+  //   } catch (error) {
+  //     setIsLoading(false);
+  //     console.error("Failed to fetch quotations:", error);
+  //   }
+  // };
+
+  const downloadRowExcel = async (rowData) => {
+    console.log(rowData, "rowData_downloadRowExcel");
+
+    let payload = {
+      bankId: rowData?.bankId,
+      bankName: rowData?.bank,
+      customerId: selectedCustomer,
+      vendorId: selectedvendor,
+      paymentDateFrom: formattedStart,
+      paymentDateTo: formattedEnd,
+      employee: selectedEmployee,
+    };
+    console.log(payload, "payload_downloadRowExcel");
+    setIsLoading(true);
+
+    try {
+      const response = await getBankPaymentDetails(payload);
+      console.log("getBankPaymentDetails", response);
+
+      // Convert payments object to array if it's an empty object
+      const paymentsArray = Array.isArray(response?.payments)
+        ? response.payments
+        : typeof response?.payments === "object" &&
+          Object.keys(response?.payments || {}).length > 0
+        ? Object.values(response.payments)
+        : [];
+
+      const pettyArray = Array.isArray(response?.petty) ? response.petty : [];
+
+      // Check if response has data
+      if (paymentsArray.length === 0 && pettyArray.length === 0) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Prepare Excel data from payments
+      const paymentsData = paymentsArray.map((item) => {
+        const payee =
+          [
+            item.customerId?.customerName,
+            item.vendorId?.vendorName,
+            item.pettyEmployeeId?.name,
+          ]
+            .filter(Boolean)
+            .join(" / ") || "-";
+
+        return {
+          "Customer/Vendor/Employee Name": payee,
+          Amount: Number(item.amount || 0).toFixed(3),
+          Currency: item.currency ? item.currency.toUpperCase() : "-",
+          "Exchange Loss": item?.exchangeLoss?.toFixed(3) || "-",
+          "Payment Date": item.paymentDate
+            ? new Date(item.paymentDate).toLocaleDateString("en-GB")
+            : "-",
+          "Payment Type": item.paymentType || "-",
+          "Quotation Number": item.pdaIds?.pdaNumber || "-",
+          "Invoice No": item.pdaIds?.invoiceId || "-",
+          "Job No": item.pdaIds?.jobId || "-",
+        };
+      });
+
+      // Prepare Excel data from petty - handle multiple property name variations
+      const pettyData = pettyArray.map((item) => {
+        // Handle different employee property names
+        const employeeName =
+          item.employeeId?.name ||
+          item.pettyEmployeeId?.name ||
+          item.name ||
+          "-";
+
+        const payee =
+          [employeeName, item.vendorId?.vendorName]
+            .filter(Boolean)
+            .join(" / ") || "-";
+
+        return {
+          "Customer/Vendor/Employee Name": payee,
+          Amount: Number(item.amount || 0).toFixed(3),
+          Currency: item.currency ? item.currency.toUpperCase() : "OMR",
+          "Exchange Loss": item?.exchangeLoss?.toFixed(3) || "0.000",
+          "Payment Date": item.paymentDate
+            ? new Date(item.paymentDate).toLocaleDateString("en-GB")
+            : "-",
+          "Payment Type": item.pettyNumber ? "petty" : "petty",
+          "Quotation Number": item.pdaIds?.pdaNumber || "-",
+          "Invoice No": item.pdaIds?.invoiceId || "-",
+          "Job No": item.pdaIds?.jobId || "-",
+        };
+      });
+
+      // Combine both datasets
+      const excelData = [...paymentsData, ...pettyData];
+
+      // If no data to display, stop here
+      if (excelData.length === 0) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Create Excel workbook
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Bank Summary Details", {
+        properties: { defaultRowHeight: 18 },
+        pageSetup: { fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+      });
+
+      const headers = Object.keys(excelData[0] || {});
+
+      // Add header row
+      const headerRow = worksheet.addRow(headers);
+      headerRow.eachCell((cell) => {
+        cell.font = { bold: true };
+        cell.alignment = {
+          horizontal: "center",
+          vertical: "middle",
+          wrapText: true,
+        };
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFEFEFEF" },
+        };
+      });
+
+      // Add data rows
+      excelData.forEach((row) => {
+        const r = worksheet.addRow(headers.map((h) => row[h]));
+        r.eachCell((cell) => {
+          cell.alignment = {
+            horizontal: "center",
+            vertical: "middle",
+          };
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+        });
+      });
+
+      // Auto-size columns
+      headers.forEach((h, i) => {
+        let maxLen = h.length;
+        excelData.forEach((row) => {
+          const val = row[h];
+          if (val != null) {
+            const len = val.toString().length;
+            if (len > maxLen) maxLen = len;
+          }
+        });
+        worksheet.getColumn(i + 1).width = Math.max(
+          15,
+          Math.min(maxLen + 5, 50)
+        );
+      });
+
+      // Download Excel file
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const fileName = "Bank Summary Details.xlsx";
+      saveAs(blob, fileName);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Failed to download payment details:", error);
+      setIsLoading(false);
+    }
+  };
+
+  // const downloadRowExcel = async (rowData) => {
+  //   console.log(rowData, "rowData_downloadRowExcel");
+
+  //   let payload = {
+  //     bankId: rowData?.bankId,
+  //     bankName: rowData?.bank,
+  //     customerId: selectedCustomer,
+  //     vendorId: selectedvendor,
+  //     paymentDateFrom: formattedStart,
+  //     paymentDateTo: formattedEnd,
+  //     employee: selectedEmployee,
+  //   };
+  //   console.log(payload, "payload_downloadRowExcel");
+  //   setIsLoading(true);
+
+  //   try {
+  //     const response = await getBankPaymentDetails(payload);
+  //     console.log("getBankPaymentDetails", response);
+
+  //     // Check if response has data
+  //     if (
+  //       (!response?.payments || response.payments.length === 0) &&
+  //       (!response?.petty || response.petty.length === 0)
+  //     ) {
+  //       setIsLoading(false);
+  //       return;
+  //     }
+
+  //     // Prepare Excel data from payments
+  //     const paymentsData = (response.payments || []).map((item) => {
+  //       const payee =
+  //         [
+  //           item.customerId?.customerName,
+  //           item.vendorId?.vendorName,
+  //           item.pettyEmployeeId?.name,
+  //         ]
+  //           .filter(Boolean)
+  //           .join(" / ") || "-";
+
+  //       return {
+  //         "Customer/Vendor/Employee Name": payee,
+  //         Amount: Number(item.amount || 0).toFixed(3),
+  //         Currency: item.currency ? item.currency.toUpperCase() : "-",
+  //         "Exchange Loss": item?.exchangeLoss?.toFixed(3) || "-",
+  //         "Payment Date": item.paymentDate
+  //           ? new Date(item.paymentDate).toLocaleDateString("en-GB")
+  //           : "-",
+  //         "Payment Type": item.paymentType || "-",
+  //         "Quotation Number": item.pdaIds?.pdaNumber || "-",
+  //         "Invoice No": item.pdaIds?.invoiceId || "-",
+  //         "Job No": item.pdaIds?.jobId || "-",
+  //       };
+  //     });
+
+  //     // Prepare Excel data from petty - handle multiple property name variations
+  //     const pettyData = (response.petty || []).map((item) => {
+  //       // Handle different employee property names
+  //       const employeeName =
+  //         item.employeeId?.name ||
+  //         item.pettyEmployeeId?.name ||
+  //         item.name ||
+  //         "-";
+
+  //       const payee =
+  //         [employeeName, item.vendorId?.vendorName]
+  //           .filter(Boolean)
+  //           .join(" / ") || "-";
+
+  //       return {
+  //         "Customer/Vendor/Employee Name": payee,
+  //         Amount: Number(item.amount || 0).toFixed(3),
+  //         Currency: item.currency ? item.currency.toUpperCase() : "OMR",
+  //         "Exchange Loss": item?.exchangeLoss?.toFixed(3) || "0.000",
+  //         "Payment Date": item.paymentDate
+  //           ? new Date(item.paymentDate).toLocaleDateString("en-GB")
+  //           : "-",
+  //         "Payment Type": item.pettyNumber ? "petty" : "petty",
+  //         "Quotation Number": item.pdaIds?.pdaNumber || "-",
+  //         "Invoice No": item.pdaIds?.invoiceId || "-",
+  //         "Job No": item.pdaIds?.jobId || "-",
+  //       };
+  //     });
+
+  //     // ...existing code...
+  //     // Combine both datasets
+  //     const excelData = [...paymentsData, ...pettyData];
+  //     // ...rest of the Excel generation code...
+
+  //     // Create Excel workbook
+  //     const workbook = new ExcelJS.Workbook();
+  //     const worksheet = workbook.addWorksheet("Bank Summary Detailed Report", {
+  //       properties: { defaultRowHeight: 18 },
+  //       pageSetup: { fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+  //     });
+
+  //     const headers = Object.keys(excelData[0] || {});
+
+  //     // Add header row
+  //     const headerRow = worksheet.addRow(headers);
+  //     headerRow.eachCell((cell) => {
+  //       cell.font = { bold: true };
+  //       cell.alignment = {
+  //         horizontal: "center",
+  //         vertical: "middle",
+  //         wrapText: true,
+  //       };
+  //       cell.border = {
+  //         top: { style: "thin" },
+  //         left: { style: "thin" },
+  //         bottom: { style: "thin" },
+  //         right: { style: "thin" },
+  //       };
+  //       cell.fill = {
+  //         type: "pattern",
+  //         pattern: "solid",
+  //         fgColor: { argb: "FFEFEFEF" },
+  //       };
+  //     });
+
+  //     // Add data rows
+  //     excelData.forEach((row) => {
+  //       const r = worksheet.addRow(headers.map((h) => row[h]));
+  //       r.eachCell((cell) => {
+  //         cell.alignment = {
+  //           horizontal: "center",
+  //           vertical: "middle",
+  //         };
+  //         cell.border = {
+  //           top: { style: "thin" },
+  //           left: { style: "thin" },
+  //           bottom: { style: "thin" },
+  //           right: { style: "thin" },
+  //         };
+  //       });
+  //     });
+
+  //     // Auto-size columns
+  //     headers.forEach((h, i) => {
+  //       let maxLen = h.length;
+  //       excelData.forEach((row) => {
+  //         const val = row[h];
+  //         if (val != null) {
+  //           const len = val.toString().length;
+  //           if (len > maxLen) maxLen = len;
+  //         }
+  //       });
+  //       worksheet.getColumn(i + 1).width = Math.max(
+  //         15,
+  //         Math.min(maxLen + 5, 50)
+  //       );
+  //     });
+
+  //     // Download Excel file
+  //     const buffer = await workbook.xlsx.writeBuffer();
+  //     const blob = new Blob([buffer], {
+  //       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  //     });
+  //     const fileName = "Bank Summary Detailed Report.xlsx";
+  //     saveAs(blob, fileName);
+  //     setIsLoading(false);
+  //   } catch (error) {
+  //     console.error("Failed to download payment details:", error);
+  //     setIsLoading(false);
+  //   }
+  // };
   const NoRowsOverlay = () => (
     <Box
       sx={{
@@ -313,6 +699,8 @@ const BankSummaryReport = ({ employees }) => {
     console.log(formattedEnd, "formattedEnd filter_dates");
   }, [formattedStart, formattedEnd]);
 
+  // Create Excel for Bank Summary
+
   const createExcel = async () => {
     if (!reportList || reportList.length === 0) return;
 
@@ -321,23 +709,23 @@ const BankSummaryReport = ({ employees }) => {
       "Bank Name": item?.bank || "N/A",
       "Opening Balance":
         typeof item?.openingBalance === "number"
-          ? item.openingBalance.toFixed(2)
+          ? item.openingBalance.toFixed(3)
           : item?.openingBalance ?? "N/A",
       "Petty Amount":
         typeof item?.pettySum === "number"
-          ? item.pettySum.toFixed(2)
+          ? item.pettySum.toFixed(3)
           : item?.pettySum ?? "N/A",
       "Received Amount":
         typeof item?.customerReceived === "number"
-          ? item.customerReceived.toFixed(2)
+          ? item.customerReceived.toFixed(3)
           : item?.customerReceived ?? "N/A",
       "Paid Amount":
         typeof item?.vendorPaid === "number"
-          ? item.vendorPaid.toFixed(2)
+          ? item.vendorPaid.toFixed(3)
           : item?.vendorPaid ?? "N/A",
       "Balance Amount":
         typeof item?.bankBalanceAmount === "number"
-          ? item.bankBalanceAmount.toFixed(2)
+          ? item.bankBalanceAmount.toFixed(3)
           : item?.bankBalanceAmount ?? "N/A",
     }));
 
@@ -422,25 +810,6 @@ const BankSummaryReport = ({ employees }) => {
   return (
     <>
       <div className="mt-3  container-fluid d-flex">
-        {/* <div className="jobfilter banksummarypayment">
-            <label
-              htmlFor="inputPassword"
-              className=" form-labele col-form-label text-nowrap"
-            >
-              Payment Date:
-            </label>
-            <div className="datepickerpetty">
-              <DatePicker
-                dateFormat="dd/MM/yyyy"
-                selected={eta ? new Date(eta) : null} // Inline date conversion for prefilled value
-                onChange={handleEtaChange}
-                className="form-control bansummary-datepicker"
-                id="eta-picker"
-                placeholderText="dd-mm-yyyy"
-                autoComplete="off"
-              />
-            </div>
-          </div> */}
         <div className="jobfilter  mb-2 ">
           <label
             htmlFor="inputPassword"
@@ -550,16 +919,19 @@ const BankSummaryReport = ({ employees }) => {
             </select>
           </div>
         </div>
-        <div className=" d-flex   banksummarybank">
+      </div>
+
+      <div className="mt-3  container-fluid d-flex align-items-center">
+        <div className=" d-flex  align-items-center">
           <label
             htmlFor="exampleFormControlInput1"
-            className="form-labele filterbypayment "
+            className="form-labele filterbypayment vendor-select-label"
           >
             Filter By:
           </label>
           <div className="vessel-select">
             <select
-              className="form-select vesselbox statusscustomerbybank"
+              className="form-select vesselbox statusscustomerbybank vendor-select-stylle"
               aria-label="Small select example"
               name="vendor"
               onChange={handleSelectChange}
@@ -574,9 +946,7 @@ const BankSummaryReport = ({ employees }) => {
             </select>
           </div>
         </div>
-      </div>
-      <div className="mt-1 container-fluid ">
-        <div className=" d-flex align-items-center">
+        <div className=" d-flex align-items-center banksummarybank">
           <label
             htmlFor="exampleFormControlInput1"
             className="form-labele filterbypayment "
@@ -601,13 +971,15 @@ const BankSummaryReport = ({ employees }) => {
           </div>
         </div>
       </div>
+
+      <div className="mt-1 container-fluid "></div>
       <div className="charge mt-3 mb-3">
         <div className="rectangle"></div>
         <div>
           <img src={Group}></img>
         </div>
       </div>
-      <div class=" banksmrymar-right mt-3 mb-3">
+      <div className=" banksmrymar-right mt-3 mb-3">
         <div className="d-flex justify-content-end  gap-2 ">
           <button
             className="btn btn-info filbtnjob"
