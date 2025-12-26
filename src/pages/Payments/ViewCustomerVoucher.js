@@ -182,7 +182,7 @@ const ViewCustomerVoucher = ({ open, onClose, getvoucher }) => {
           ? voucherPdf.pdfPath.substring(1)
           : voucherPdf.pdfPath;
       const fileUrl = process.env.REACT_APP_ASSET_URL + pdfPath;
-      const fileName = "Customer Voucher.pdf";
+      const fileName = "Customer Payment Voucher.pdf";
       // Fetch the file and save it
       fetch(fileUrl)
         .then((response) => {
@@ -354,6 +354,8 @@ const ViewCustomerVoucher = ({ open, onClose, getvoucher }) => {
                               ? Number(payment?.amount).toFixed(3)
                               : payment?.currency?.toUpperCase() === "USD"
                               ? Number(payment?.amount).toFixed(2)
+                              : payment?.currency?.toUpperCase() === "AED"
+                              ? Number(payment?.amount).toFixed(2)
                               : payment?.amount}
                           </td>
                         </tr>
@@ -372,16 +374,14 @@ const ViewCustomerVoucher = ({ open, onClose, getvoucher }) => {
                         customerVoucher?.currency
                       )}{" "}
                     </td>
-
                     <td className="voucheramountrate text-center">
                       {customerVoucher?.currency?.toUpperCase()}{" "}
-                      {customerVoucher?.currency === "aed"
-                        ? Number(customerVoucher?.totalOMR).toFixed(2)
+                      {customerVoucher?.currency === "omr"
+                        ? Number(customerVoucher?.totalOMR).toFixed(3)
                         : customerVoucher?.currency === "usd"
                         ? Number(customerVoucher?.totalOMR).toFixed(2)
                         : customerVoucher?.totalOMR}
                     </td>
-
                   </tr>
                 </tbody>
               </table>

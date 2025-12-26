@@ -127,16 +127,16 @@ const InvoicePage = ({
     }
   };
   const acceptInvoice = async (remark) => {
-
- // Check if employee is selected
+    // Check if employee is selected
     if (!employee) {
       setEmployeeError("Select Invoice By");
       setMessage("Select 'Invoice By' to continue.");
       setOpenPopUp(true);
       return;
     }
-     setEmployeeError("");
 
+    // Clear error if employee is selected
+    setEmployeeError("");
 
     console.log(remark, "handleRemarksSubmit");
     let pdaPayload = {
@@ -283,6 +283,10 @@ const InvoicePage = ({
 
   const handleChange = (e) => {
     setEmployee(e.target.value);
+    // Clear error when employee is selected
+    if (e.target.value) {
+      setEmployeeError("");
+    }
   };
 
   useEffect(() => {
@@ -318,7 +322,7 @@ const InvoicePage = ({
           style: { width: "1700px" }, // Custom width
         }}
       >
-        <div className="d-flex justify-content-between" >
+        <div className="d-flex justify-content-between">
           <DialogTitle></DialogTitle>
           <div className="closeicon">
             <i className="bi bi-x-lg " onClick={onClose}></i>
@@ -355,6 +359,9 @@ const InvoicePage = ({
                     ))}
                   </select>
                 </div>
+                {employeeError && (
+                  <div className="invalid">{employeeError}</div>
+                )}
               </div>
             </div>
           </div>
@@ -365,9 +372,9 @@ const InvoicePage = ({
                 <th className="tabheadinvoice">Sl No:</th>
                 <th className="tabheadinvoice">Charges </th>
                 <th className="tabheadinvoice">Quantity</th>
-                <th className="tabheadinvoice">Amount (AED)</th>
+                <th className="tabheadinvoice">Amount (OMR)</th>
                 <th className="tabheadinvoice">VAT Amount</th>
-                <th className="tabheadinvoice">Total AED</th>
+                <th className="tabheadinvoice">Total OMR</th>
                 <th className="tabheadinvoice">Total USD</th>
                 <th className="tabheadinvoice">Documents</th>
                 <th className="tabheadinvoice">Attachments</th>
@@ -383,16 +390,16 @@ const InvoicePage = ({
                     </td>
                     <td className="tdstylinvoice">{charge?.quantity}</td>
                     <td className="tdstylinvoice">
-                      {charge.customerOMR.toFixed(2)}
+                      {charge.customerOMR.toFixed(3)}
                     </td>
                     <td className="tdstylinvoice">
-                      {charge.customerVAT.toFixed(2)}
+                      {charge.customerVAT.toFixed(3)}
                     </td>
                     <td className="tdstylinvoice">
                       {(
                         parseFloat(charge.customerOMR) +
                         parseFloat(charge.customerVAT)
-                      ).toFixed(2)}
+                      ).toFixed(3)}
                     </td>
                     <td className="tdstylinvoice">
                       {charge.customerTotalUSD.toFixed(2)}

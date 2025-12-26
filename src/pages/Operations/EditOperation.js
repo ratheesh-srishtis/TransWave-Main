@@ -87,7 +87,9 @@ const EditOperation = ({
     console.log("Row data:", row);
     if (row) {
       setEditData(row);
+      setSelectedEmployee(null);
       setFetchInitiated(false); // Reset fetch so new data loads
+
       // Optionally reset other states here if needed
     }
   }, [row, location.key]);
@@ -189,15 +191,27 @@ const EditOperation = ({
     }
 
     let selectedEmployee;
+    console.log(
+      response?.pda?.assignedEmployee,
+      "response?.pda?.assignedEmployee"
+    );
+
     if (response?.pda?.assignedEmployee) {
       let employees_list = localStorage.getItem("employees_list");
       selectedEmployee = JSON.parse(employees_list)?.find(
         (employee) => employee._id === response?.pda?.assignedEmployee
       );
-      console.log(selectedEmployee, "selectedEmployee");
+      console.log(selectedEmployee, "selectedEmployee_updatevalues");
+    } else if (
+      response?.pda?.assignedEmployee == null ||
+      response?.pda?.assignedEmployee == undefined ||
+      response?.pda?.assignedEmployee == ""
+    ) {
+      setSelectedEmployee(null);
     }
 
     if (selectedEmployee) {
+      console.log(selectedEmployee, "selectedEmployee_set");
       setSelectedEmployee(selectedEmployee);
     }
   };
@@ -351,6 +365,7 @@ const EditOperation = ({
         const response = await editPDA(pdaPayload);
         if (response?.status == true) {
           fetchPdaDetails(response?.pda?._id);
+          setSelectedEmployee(null);
           setMessage("Job has been saved successfully");
           setOpenPopUp(true);
         } else {
@@ -379,6 +394,7 @@ const EditOperation = ({
         `The data for ${pdaResponse?.jobId} regarding the ${selectedVessel?.vesselName} at the ${selectedPort?.portName} has been updated and resubmitted`
       );
       setOpenPopUp(true);
+      fetchPdaDetails(editData?._id);
     } else {
       setMessage(`Please try again`);
       setOpenPopUp(true);
@@ -591,6 +607,10 @@ const EditOperation = ({
     setOpen(false);
   };
 
+  useEffect(() => {
+    console.log(selectedEmployee, "selectedEmployee_UE");
+  }, [selectedEmployee]);
+
   return (
     <>
       <div className="job-no">
@@ -753,7 +773,7 @@ const EditOperation = ({
                 className="form-select vesselbox"
                 onChange={handleSelectChange}
                 aria-label="Default select example"
-                value={selectedEmployee?._id}
+                value={selectedEmployee?._id || ""}
               >
                 <option value="">Choose employee name</option>
                 {employees.map((employee) => (
@@ -812,6 +832,7 @@ const EditOperation = ({
           </div>
         </div>
         {/* fifthrowdocumentsupload */}
+
         <div className="typesofcall-row ">
           <div className="row align-items-start">
             <div className="mb-2 col-4 docuplo">
@@ -920,25 +941,22 @@ const EditOperation = ({
               </div>
             </div>
           </div>
-          {pdaResponse?.pdaStatus != 7 && (
-            <>
-              <div className="col-2 addserv">
-                <div className="mb-3">
-                  <div className="col">
-                    <button
-                      type="button"
-                      className="btn addcharge-button text-center serviceaddbtn"
-                      onClick={() => {
-                        addServices();
-                      }}
-                    >
-                      Request Service
-                    </button>
-                  </div>
-                </div>
+
+          <div className="col-2 addserv">
+            <div className="mb-3">
+              <div className="col">
+                <button
+                  type="button"
+                  className="btn addcharge-button text-center serviceaddbtn"
+                  onClick={() => {
+                    addServices();
+                  }}
+                >
+                  Request Service
+                </button>
               </div>
-            </>
-          )}
+            </div>
+          </div>
         </div>
 
         <div className="charges-table">
@@ -1008,18 +1026,19 @@ const EditOperation = ({
               </>
             )}
 
-            {pdaResponse?.invoiceStatus == 2 && pdaResponse?.pdaStatus == 7 && (
-              <>
-                <button
-                  className="btn btna submit-button btnfsize"
-                  onClick={() => {
-                    resubmitApi();
-                  }}
-                >
-                  Resubmit for FM Approval
-                </button>
-              </>
-            )}
+            {pdaResponse?.invoiceStatus == 2 &&
+              pdaResponse?.isResubmitRequestExist == true && (
+                <>
+                  <button
+                    className="btn btna submit-button btnfsize"
+                    onClick={() => {
+                      resubmitApi();
+                    }}
+                  >
+                    Resubmit for Approval
+                  </button>
+                </>
+              )}
 
             {pdaResponse?.pdaStatus != 7 && (
               <>
