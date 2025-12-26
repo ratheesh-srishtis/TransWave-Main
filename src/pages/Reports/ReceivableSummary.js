@@ -7,7 +7,7 @@ import {
   saveCustomerReportRemark,
   receivableSummaryReportPDF,
   receivableSummaryReportCustomer,
-  receivableSummaryReportCustomerPDF,
+  // receivableSummaryReportCustomerPDF,
 } from "../../services/apiService";
 import Remarks from "../Remarks";
 import PopUp from "../PopUp";
@@ -308,7 +308,7 @@ const ReceivableSummary = () => {
                 </button>
               )}
             </div>
-            <button
+            {/* <button
               className="btn btn-sm btn-info text-white row-download-icons excel-individual-button"
               onClick={() => downloadRowExcel(params.row)}
               title="Download Excel"
@@ -321,214 +321,214 @@ const ReceivableSummary = () => {
               title="Download PDF"
             >
               <i class="bi bi-file-earmark-pdf pdf-individual-icon"></i>
-            </button>
+            </button> */}
           </>
         );
       },
     },
   ];
 
-  const getRowPDF = async (rowData) => {
-    console.log(rowData, "rowData_getRowPDF");
-    let payload = {
-      customerId: rowData?.action?.customer[0]?._id,
-      customerName: rowData?.action?.customer[0]?.customerName,
-    };
-    console.log(payload, "payload_getReport");
-    setIsLoading(true);
-    try {
-      const response = await receivableSummaryReportCustomerPDF(payload);
-      console.log("receivableSummaryReportCustomerPDF", response);
-      setIsLoading(false);
-      if (response?.pdfPath) {
-        const pdfUrl = `${process.env.REACT_APP_ASSET_URL}${response.pdfPath}`;
-        // Fetch the PDF as a Blob
-        const pdfResponse = await fetch(pdfUrl);
-        const pdfBlob = await pdfResponse.blob();
-        const pdfBlobUrl = URL.createObjectURL(pdfBlob);
-        // Create a hidden anchor tag to trigger the download
-        const link = document.createElement("a");
-        link.href = pdfBlobUrl;
-        link.setAttribute("download", "Receivable Summary Details.pdf"); // Set the file name
-        document.body.appendChild(link);
-        link.click();
-        // Clean up
-        document.body.removeChild(link);
-        URL.revokeObjectURL(pdfBlobUrl);
-      }
-    } catch (error) {
-      setIsLoading(false);
-      console.error("Failed to fetch quotations:", error);
-    }
-  };
+  // const getRowPDF = async (rowData) => {
+  //   console.log(rowData, "rowData_getRowPDF");
+  //   let payload = {
+  //     customerId: rowData?.action?.customer[0]?._id,
+  //     customerName: rowData?.action?.customer[0]?.customerName,
+  //   };
+  //   console.log(payload, "payload_getReport");
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await receivableSummaryReportCustomerPDF(payload);
+  //     console.log("receivableSummaryReportCustomerPDF", response);
+  //     setIsLoading(false);
+  //     if (response?.pdfPath) {
+  //       const pdfUrl = `${process.env.REACT_APP_ASSET_URL}${response.pdfPath}`;
+  //       // Fetch the PDF as a Blob
+  //       const pdfResponse = await fetch(pdfUrl);
+  //       const pdfBlob = await pdfResponse.blob();
+  //       const pdfBlobUrl = URL.createObjectURL(pdfBlob);
+  //       // Create a hidden anchor tag to trigger the download
+  //       const link = document.createElement("a");
+  //       link.href = pdfBlobUrl;
+  //       link.setAttribute("download", "Receivable Summary Details.pdf"); // Set the file name
+  //       document.body.appendChild(link);
+  //       link.click();
+  //       // Clean up
+  //       document.body.removeChild(link);
+  //       URL.revokeObjectURL(pdfBlobUrl);
+  //     }
+  //   } catch (error) {
+  //     setIsLoading(false);
+  //     console.error("Failed to fetch quotations:", error);
+  //   }
+  // };
 
-  const downloadRowExcel = async (rowData) => {
-    console.log(rowData, "rowData_downloadRowExcel");
+  // const downloadRowExcel = async (rowData) => {
+  //   console.log(rowData, "rowData_downloadRowExcel");
 
-    let payload = {
-      customerId: rowData?.action?.customer[0]?._id,
-      customerName: rowData?.action?.customer[0]?.customerName,
-    };
-    console.log(payload, "payload_getReport");
-    setIsLoading(true);
+  //   let payload = {
+  //     customerId: rowData?.action?.customer[0]?._id,
+  //     customerName: rowData?.action?.customer[0]?.customerName,
+  //   };
+  //   console.log(payload, "payload_getReport");
+  //   setIsLoading(true);
 
-    try {
-      const response = await receivableSummaryReportCustomer(payload);
-      console.log("receivableSummaryReportCustomer", response?.report);
+  //   try {
+  //     const response = await receivableSummaryReportCustomer(payload);
+  //     console.log("receivableSummaryReportCustomer", response?.report);
 
-      // Check if response has data
-      if (!response?.report || response.report.length === 0) {
-        setIsLoading(false);
-        return;
-      }
+  //     // Check if response has data
+  //     if (!response?.report || response.report.length === 0) {
+  //       setIsLoading(false);
+  //       return;
+  //     }
 
-      // Prepare Excel data
-      const excelData = response.report.map((item) => ({
-        "Quotation Number": item.pdaNumber || "N/A",
-        "Job No": item.jobId || "N/A",
-        "Invoice No": item.invoiceId || "N/A",
-        "Vessel Name": item.vesselName || "N/A",
-        "Port Name": item.portName || "N/A",
-        Arrived: item.eta
-          ? new Date(item.eta).toLocaleDateString("en-GB")
-          : "N/A",
-        Departed: item.etd
-          ? new Date(item.etd).toLocaleDateString("en-GB")
-          : "N/A",
-        "Total OMR": Number(item.totalInvoiceAmount || 0).toFixed(3),
-        "Credit Note": Number(item.creditNoteSum || 0).toFixed(3),
-        "Paid OMR": Number(item.paidAmount || 0).toFixed(3),
-        Discount: Number(item.discoutAmount || 0).toFixed(3),
-        "Balance Overdue OMR": Number(item.balanceDue || 0).toFixed(3),
-      }));
+  //     // Prepare Excel data
+  //     const excelData = response.report.map((item) => ({
+  //       "Quotation Number": item.pdaNumber || "N/A",
+  //       "Job No": item.jobId || "N/A",
+  //       "Invoice No": item.invoiceId || "N/A",
+  //       "Vessel Name": item.vesselName || "N/A",
+  //       "Port Name": item.portName || "N/A",
+  //       Arrived: item.eta
+  //         ? new Date(item.eta).toLocaleDateString("en-GB")
+  //         : "N/A",
+  //       Departed: item.etd
+  //         ? new Date(item.etd).toLocaleDateString("en-GB")
+  //         : "N/A",
+  //       "Total OMR": Number(item.totalInvoiceAmount || 0).toFixed(3),
+  //       "Credit Note": Number(item.creditNoteSum || 0).toFixed(3),
+  //       "Paid OMR": Number(item.paidAmount || 0).toFixed(3),
+  //       Discount: Number(item.discoutAmount || 0).toFixed(3),
+  //       "Balance Overdue OMR": Number(item.balanceDue || 0).toFixed(3),
+  //     }));
 
-      // Calculate totals
-      const totals = response.report.reduce(
-        (acc, item) => {
-          acc.totalInvoice += Number(item.totalInvoiceAmount || 0);
-          acc.totalPaid += Number(item.paidAmount || 0);
-          acc.totalCreditNote += Number(item.creditNoteSum || 0);
-          acc.totalDiscount += Number(item.discoutAmount || 0);
-          acc.totalBalance += Number(item.balanceDue || 0);
-          return acc;
-        },
-        {
-          totalInvoice: 0,
-          totalPaid: 0,
-          totalCreditNote: 0,
-          totalDiscount: 0,
-          totalBalance: 0,
-        }
-      );
+  //     // Calculate totals
+  //     const totals = response.report.reduce(
+  //       (acc, item) => {
+  //         acc.totalInvoice += Number(item.totalInvoiceAmount || 0);
+  //         acc.totalPaid += Number(item.paidAmount || 0);
+  //         acc.totalCreditNote += Number(item.creditNoteSum || 0);
+  //         acc.totalDiscount += Number(item.discoutAmount || 0);
+  //         acc.totalBalance += Number(item.balanceDue || 0);
+  //         return acc;
+  //       },
+  //       {
+  //         totalInvoice: 0,
+  //         totalPaid: 0,
+  //         totalCreditNote: 0,
+  //         totalDiscount: 0,
+  //         totalBalance: 0,
+  //       }
+  //     );
 
-      // Add totals row
-      excelData.push({
-        "Quotation Number": "",
-        "Job No": "",
-        "Invoice No": "",
-        "Vessel Name": "",
-        "Port Name": "",
-        Arrived: "",
-        Departed: "Total:",
-        "Total OMR": totals.totalInvoice.toFixed(3),
-        "Credit Note": totals.totalCreditNote.toFixed(3),
-        "Paid OMR": totals.totalPaid.toFixed(3),
-        Discount: totals.totalDiscount.toFixed(3),
-        "Balance Overdue OMR": Number(response?.totalBalanceDue || 0).toFixed(
-          3
-        ),
-      });
+  //     // Add totals row
+  //     excelData.push({
+  //       "Quotation Number": "",
+  //       "Job No": "",
+  //       "Invoice No": "",
+  //       "Vessel Name": "",
+  //       "Port Name": "",
+  //       Arrived: "",
+  //       Departed: "Total:",
+  //       "Total OMR": totals.totalInvoice.toFixed(3),
+  //       "Credit Note": totals.totalCreditNote.toFixed(3),
+  //       "Paid OMR": totals.totalPaid.toFixed(3),
+  //       Discount: totals.totalDiscount.toFixed(3),
+  //       "Balance Overdue OMR": Number(response?.totalBalanceDue || 0).toFixed(
+  //         3
+  //       ),
+  //     });
 
-      // Create Excel workbook
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet("Receivable Summary Details", {
-        properties: { defaultRowHeight: 18 },
-        pageSetup: { fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
-      });
+  //     // Create Excel workbook
+  //     const workbook = new ExcelJS.Workbook();
+  //     const worksheet = workbook.addWorksheet("Receivable Summary Details", {
+  //       properties: { defaultRowHeight: 18 },
+  //       pageSetup: { fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+  //     });
 
-      const headers = Object.keys(excelData[0] || {});
+  //     const headers = Object.keys(excelData[0] || {});
 
-      // Add header row
-      const headerRow = worksheet.addRow(headers);
-      headerRow.eachCell((cell) => {
-        cell.font = { bold: true };
-        cell.alignment = {
-          horizontal: "center",
-          vertical: "middle",
-          wrapText: true,
-        };
-        cell.border = {
-          top: { style: "thin" },
-          left: { style: "thin" },
-          bottom: { style: "thin" },
-          right: { style: "thin" },
-        };
-        cell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "FFEFEFEF" },
-        };
-      });
+  //     // Add header row
+  //     const headerRow = worksheet.addRow(headers);
+  //     headerRow.eachCell((cell) => {
+  //       cell.font = { bold: true };
+  //       cell.alignment = {
+  //         horizontal: "center",
+  //         vertical: "middle",
+  //         wrapText: true,
+  //       };
+  //       cell.border = {
+  //         top: { style: "thin" },
+  //         left: { style: "thin" },
+  //         bottom: { style: "thin" },
+  //         right: { style: "thin" },
+  //       };
+  //       cell.fill = {
+  //         type: "pattern",
+  //         pattern: "solid",
+  //         fgColor: { argb: "FFEFEFEF" },
+  //       };
+  //     });
 
-      // Add data rows
-      excelData.forEach((row, index) => {
-        const r = worksheet.addRow(headers.map((h) => row[h]));
-        r.eachCell((cell) => {
-          cell.alignment = {
-            horizontal: "center",
-            vertical: "middle",
-          };
-          cell.border = {
-            top: { style: "thin" },
-            left: { style: "thin" },
-            bottom: { style: "thin" },
-            right: { style: "thin" },
-          };
-        });
+  //     // Add data rows
+  //     excelData.forEach((row, index) => {
+  //       const r = worksheet.addRow(headers.map((h) => row[h]));
+  //       r.eachCell((cell) => {
+  //         cell.alignment = {
+  //           horizontal: "center",
+  //           vertical: "middle",
+  //         };
+  //         cell.border = {
+  //           top: { style: "thin" },
+  //           left: { style: "thin" },
+  //           bottom: { style: "thin" },
+  //           right: { style: "thin" },
+  //         };
+  //       });
 
-        // Make totals row bold
-        if (index === excelData.length - 1) {
-          r.eachCell((cell) => {
-            cell.font = { bold: true };
-            cell.fill = {
-              type: "pattern",
-              pattern: "solid",
-              fgColor: { argb: "FFEFEFEF" },
-            };
-          });
-        }
-      });
+  //       // Make totals row bold
+  //       if (index === excelData.length - 1) {
+  //         r.eachCell((cell) => {
+  //           cell.font = { bold: true };
+  //           cell.fill = {
+  //             type: "pattern",
+  //             pattern: "solid",
+  //             fgColor: { argb: "FFEFEFEF" },
+  //           };
+  //         });
+  //       }
+  //     });
 
-      // Auto-size columns
-      headers.forEach((h, i) => {
-        let maxLen = h.length;
-        excelData.forEach((row) => {
-          const val = row[h];
-          if (val != null) {
-            const len = val.toString().length;
-            if (len > maxLen) maxLen = len;
-          }
-        });
-        worksheet.getColumn(i + 1).width = Math.max(
-          15,
-          Math.min(maxLen + 5, 50)
-        );
-      });
+  //     // Auto-size columns
+  //     headers.forEach((h, i) => {
+  //       let maxLen = h.length;
+  //       excelData.forEach((row) => {
+  //         const val = row[h];
+  //         if (val != null) {
+  //           const len = val.toString().length;
+  //           if (len > maxLen) maxLen = len;
+  //         }
+  //       });
+  //       worksheet.getColumn(i + 1).width = Math.max(
+  //         15,
+  //         Math.min(maxLen + 5, 50)
+  //       );
+  //     });
 
-      // Download Excel file
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      const fileName = `Receivable Summary Details`;
-      saveAs(blob, fileName);
+  //     // Download Excel file
+  //     const buffer = await workbook.xlsx.writeBuffer();
+  //     const blob = new Blob([buffer], {
+  //       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  //     });
+  //     const fileName = `Receivable Summary Details`;
+  //     saveAs(blob, fileName);
 
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Failed to download customer report:", error);
-      setIsLoading(false);
-    }
-  };
+  //     setIsLoading(false);
+  //   } catch (error) {
+  //     console.error("Failed to download customer report:", error);
+  //     setIsLoading(false);
+  //   }
+  // };
   const totalReceivable = reportList.reduce((sum, r) => {
     const totalAmount = Number(r.totalAmountOMR) || 0;
     const paidAmount = Number(r.paidOMR) || 0;
