@@ -420,9 +420,9 @@ const PettyCashReport = () => {
     const rowsData = filteredReports.map((item) => {
       return {
         "Employee Name": item?.employee?.name || "N/A",
-        "Total Petty": Number(item.totalPetty).toFixed(3),
-        "Used Petties": Number(item.usedPetty).toFixed(3),
-        "Balance Petties": Number(item.balancePetty).toFixed(3),
+        "Total Petty": Number(item.totalPetty).toFixed(2),
+        "Used Petties": Number(item.usedPetty).toFixed(2),
+        "Balance Petties": Number(item.balancePetty).toFixed(2),
       };
     });
 
@@ -727,9 +727,9 @@ const PettyCashReport = () => {
                 return {
                   id: index,
                   employee: item?.employee?.name || "N/A",
-                  totalPetty: Number(item.totalPetty).toFixed(3),
-                  usedPetties: Number(item.usedPetty).toFixed(3),
-                  balancePetties: Number(item.balancePetty).toFixed(3),
+                  totalPetty: Number(item.totalPetty).toFixed(2),
+                  usedPetties: Number(item.usedPetty).toFixed(2),
+                  balancePetties: Number(item.balancePetty).toFixed(2),
                   employeeId: item?.employee?._id || "",
                 };
               })
