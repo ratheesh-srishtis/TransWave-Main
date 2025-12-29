@@ -270,13 +270,6 @@ const ViewOperations = ({
           </div>
 
           <div className=" col-4 viewhead">
-            <span> Berth:</span>{" "}
-            <span className="viewans">
-              {pdaValues?.berth ? pdaValues?.berth : "N/A"}
-            </span>
-          </div>
-
-          <div className=" col-4 viewhead">
             <span> Cargo Capacity: </span>
             <span className="viewans">
               {pdaValues?.cargoCapacity ? pdaValues?.cargoCapacity : "N/A"}
