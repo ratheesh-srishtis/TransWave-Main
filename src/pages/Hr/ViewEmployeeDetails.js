@@ -127,7 +127,7 @@ const ViewEmployeeDetails = () => {
     console.log("Update Response:", response);
     if (response?.status == true) {
       setIsLoading(false);
-      setMessage("HR has approved your request to update profile details.");
+      setMessage("Employee details have been rejected");
       setOpenPopUp(true);
       fetchProfileDetails();
     } else {

@@ -145,7 +145,7 @@
   align-items: center;
 }
 .msgcontent {
-  width: 206px;
+  width: 153px;
   font-size: 12px;
   padding-right: 10px;
   color: #999;
@@ -503,8 +503,71 @@
 }
 
 .dept-logo {
-  width: 50px;
-  height: 50px;
+  width: 62px;
+  height: 62px;
   border-radius: 50%;
   padding: 12px;
+}
+
+.chatnewsty {
+  display: flex;
+  align-items: center;
+}
+
+.chat .chat-history .message {
+  color: #444;
+  padding: 55px 17px 5px 17px;
+  line-height: 21px;
+  font-size: 13px;
+  border-radius: 7px;
+  display: inline-block;
+  position: relative;
+}
+
+.activechat {
+  padding: 10px;
+  background-color: #f3f3f3;
+  border-radius: 8px;
+}
+
+.chattime {
+  font-size: 9px;
+  position: absolute;
+  right: 15px;
+  top: 37px;
+  color: #9a9a9a;
+}
+.chatname {
+  font-size: 11px;
+  position: absolute;
+  right: 16px;
+  top: 0px;
+  color: #9a9a9a;
+}
+.chatnameopp {
+  position: absolute;
+  font-size: 11px;
+  left: 3px;
+  top: 0px;
+  color: #9a9a9a;
+}
+.chatnameandtime {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chattimeopp {
+  position: absolute;
+  font-size: 9px;
+  left: 30px;
+  top: 38px;
+  color: #9a9a9a;
+}
+
+.chatspace {
+  margin-left: 4px;
+}
+.chatcomma {
+  margin-left: -2px;
 }
