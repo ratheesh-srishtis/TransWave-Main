@@ -128,8 +128,9 @@ const CustomerPayments = () => {
     setVoucherNumber(fetchedvoucherNumber);
   };
 
-  const loginResponse = JSON.parse(localStorage.getItem("loginResponse"));
-  const currentroleType = loginResponse.data?.userRole?.roleType;
+  const _storedLogin = localStorage.getItem("loginResponse");
+  const loginResponse = _storedLogin ? JSON.parse(_storedLogin) : null;
+  const currentroleType = loginResponse?.data?.userRole?.roleType || "";
 
   useEffect(() => {
     fetchVoucherNumber();
