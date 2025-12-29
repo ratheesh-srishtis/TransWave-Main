@@ -1,6 +1,8 @@
 // ResponsiveDialog.js
 import React, { useState, useEffect } from "react";
 import "../../css/reports/costcenterbreakup.css";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import {
   getCostCentreBreakupReport,
   getAllJobIds,
@@ -9,8 +11,7 @@ import {
 import { DataGrid } from "@mui/x-data-grid";
 import "react-datepicker/dist/react-datepicker.css";
 import Loader from "../Loader";
-import ExcelJS from "exceljs";
-import { saveAs } from "file-saver";
+
 const CostCenterBreakup = () => {
   const Group = require("../../assets/images/reporttttt.png");
   const [reportList, setReportList] = useState([]);
@@ -89,10 +90,17 @@ const CostCenterBreakup = () => {
   //   setSelectedJobNo(jobIdList[0]?._id);
   // }, [jobIdList]);
 
-  const totalCustomerAmount = services.reduce(
-    (sum, s) => sum + s.customerOMR + s.customerVAT,
-    0
-  );
+  // previous one before using credit note
+  // const totalCustomerAmount = services.reduce(
+  //   (sum, s) => sum + s.customerOMR + s.customerVAT,
+  //   0
+  // );
+
+  const totalCustomerAmount = services.reduce((sum, s) => {
+    const creditNote = s.creditNote || 0; // safety if undefined
+    return sum + s.customerOMR + s.customerVAT - creditNote;
+  }, 0);
+
   // const totalVendorAmount = services.reduce(
   //   (sum, s) => sum + s.vendorOMR + s.vendorVAT,
   //   0
@@ -116,7 +124,7 @@ const CostCenterBreakup = () => {
     }
     return sum + vendorTotal;
   }, 0);
-  const profitOrLoss = (totalCustomerAmount - totalVendorAmount).toFixed(2);
+  const profitOrLoss = (totalCustomerAmount - totalVendorAmount).toFixed(3);
   console.log(totalCustomerAmount, "totalCustomerAmount_checkamount");
   console.log(totalVendorAmount, "totalVendorAmount_checkamount");
 
@@ -140,7 +148,7 @@ const CostCenterBreakup = () => {
       sortable: false,
       renderCell: (params) =>
         params.value && !isNaN(params.value)
-          ? `AED ${Number(params.value).toFixed(2)}`
+          ? `OMR ${Number(params.value).toFixed(3)}`
           : "",
     },
     {
@@ -208,13 +216,190 @@ const CostCenterBreakup = () => {
         );
       },
     },
+    // {
+    //   field: "actions",
+    //   headerName: "Actions",
+    //   flex: 0.5,
+    //   sortable: false,
+    //   renderCell: (params) => (
+    //     <>
+    //     <button
+    //       className="btn btn-sm btn-info text-white"
+    //       onClick={() => downloadRowExcel(params.row)}
+    //       title="Download Excel"
+    //     >
+    //       <i className="bi bi-download"></i>
+    //     </button>
+    //     </>
+    //   ),
+    // },
   ];
+
+  const downloadRowExcel = async (rowData) => {
+    // Skip download for footer rows (Total Amount, Profit/Loss)
+    if (rowData.isFooter) {
+      return;
+    }
+
+    // Find the service data from the original services array
+    const serviceIndex = rows.findIndex((r) => r.id === rowData.id);
+    if (serviceIndex === -1 || serviceIndex >= services.length) return;
+
+    const service = services[serviceIndex];
+
+    // Prepare vendor data
+    const vendorNames = [
+      service?.vendorId?.vendorName,
+      service?.vendor2Id?.vendorName,
+      service?.vendor3Id?.vendorName,
+      service?.vendor4Id?.vendorName,
+    ].filter(Boolean);
+
+    const omrKeys = ["vendorOMR", "vendor2OMR", "vendor3OMR", "vendor4OMR"];
+    const vatKeys = ["vendorVAT", "vendor2VAT", "vendor3VAT", "vendor4VAT"];
+
+    const vendorAmounts = omrKeys
+      .map((omrKey, idx) => {
+        const omr =
+          typeof service[omrKey] === "number"
+            ? service[omrKey]
+            : parseFloat(service[omrKey]) || 0;
+        const vat =
+          typeof service[vatKeys[idx]] === "number"
+            ? service[vatKeys[idx]]
+            : parseFloat(service[vatKeys[idx]]) || 0;
+        if (vendorNames[idx]) {
+          return (omr + vat).toFixed(3);
+        }
+        return null;
+      })
+      .filter((v, idx) => vendorNames[idx]);
+
+    // Single row data with Invoice No always shown
+    const excelData = [
+      {
+        Sales: invoiceId ? `Invoice No : ${invoiceId}` : "Invoice No :",
+        "Customer Amount": `OMR ${(
+          service.customerOMR +
+          service.customerVAT -
+          service?.creditNote
+        ).toFixed(3)}`,
+        Purchase:
+          vendorNames.length > 1
+            ? vendorNames.map((name, idx) => `${idx + 1}. ${name}`).join("\n")
+            : vendorNames[0] || "",
+        "Vendor Amount":
+          vendorAmounts.length > 1
+            ? vendorAmounts
+                .map((amt, idx) => `${idx + 1}. OMR ${amt}`)
+                .join("\n")
+            : vendorAmounts[0]
+            ? `OMR ${vendorAmounts[0]}`
+            : "",
+      },
+    ];
+
+    const headers = Object.keys(excelData[0]);
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Cost Centre Breakup Details", {
+      properties: { defaultRowHeight: 18 },
+      pageSetup: { fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+    });
+
+    // Header
+    const headerRow = worksheet.addRow(headers);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.alignment = {
+        horizontal: "center",
+        vertical: "middle",
+        wrapText: true,
+      };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFEFEFEF" },
+      };
+    });
+
+    // Data row
+    const dataRow = worksheet.addRow(headers.map((h) => excelData[0][h]));
+
+    // Calculate height for Purchase and Vendor Amount columns
+    const purchaseContent = excelData[0]["Purchase"] || "";
+    const vendorAmountContent = excelData[0]["Vendor Amount"] || "";
+    const purchaseLines = purchaseContent.toString().split("\n").length;
+    const vendorAmountLines = vendorAmountContent.toString().split("\n").length;
+    const maxLines = Math.max(purchaseLines, vendorAmountLines);
+
+    // Set row height based on content
+    const calculatedHeight = Math.max(18, maxLines * 15);
+    dataRow.height = Math.min(calculatedHeight, 200);
+
+    dataRow.eachCell((cell) => {
+      cell.alignment = {
+        horizontal: "center",
+        vertical: "middle",
+        wrapText: true,
+      };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+    });
+
+    // Set column widths
+    const minWidth = 15;
+    const maxWidth = 60;
+    headers.forEach((h, i) => {
+      if (h === "Purchase" || h === "Vendor Amount") {
+        worksheet.getColumn(i + 1).width = 40;
+      } else if (h === "Sales") {
+        worksheet.getColumn(i + 1).width = 30; // Wider for "Invoice No :" text
+      } else {
+        let maxLen = (h || "").toString().length;
+        const val = excelData[0][h];
+        const len = val == null ? 0 : val.toString().length;
+        if (len > maxLen) maxLen = len;
+
+        const width = Math.max(minWidth, Math.min(maxWidth, maxLen + 2));
+        worksheet.getColumn(i + 1).width = width;
+      }
+    });
+
+    // Set view options
+    worksheet.views = [
+      {
+        state: "normal",
+        showGridLines: true,
+        showRowColHeaders: true,
+        rightToLeft: false,
+      },
+    ];
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    const fileName = `Cost Center Breakup.xlsx`;
+    saveAs(blob, fileName);
+  };
 
   // Add footer rows dynamically
   const rows = services.map((service, index) => ({
     id: service._id || index,
     invoiceDisplay: index === 0 ? `Invoice No : ${invoiceId}` : "", // Only show invoiceId in first row
-    customerAmount: service.customerOMR + service.customerVAT,
+    customerAmount:
+      service?.customerOMR + service?.customerVAT - service?.creditNote,
     vendorName: (() => {
       const vendorNames = [
         service?.vendorId?.vendorName,
@@ -255,7 +440,7 @@ const CostCenterBreakup = () => {
               : parseFloat(service[vatKeys[idx]]) || 0;
           // Show value even if 0, if vendor name exists
           if (vendorNames[idx]) {
-            return `AED ${(omr + vat).toFixed(2)}`;
+            return `OMR ${(omr + vat).toFixed(3)}`;
           }
           return null;
         })
@@ -277,7 +462,7 @@ const CostCenterBreakup = () => {
       invoiceDisplay: "Total Amount",
       customerAmount: totalCustomerAmount,
       vendorName: "Total Amount",
-      vendorAmount: totalVendorAmount,
+      vendorAmount: totalVendorAmount?.toFixed(3),
       isFooter: true,
     },
     {
@@ -299,6 +484,7 @@ const CostCenterBreakup = () => {
   const getPDF = async () => {
     let payload = {
       pdaId: selectedJobNo,
+      page: "costbreakup",
     };
     console.log(payload, "payload_getReport");
     try {
@@ -326,244 +512,97 @@ const CostCenterBreakup = () => {
     }
   };
 
-  // Create Excel for Cost Center Breakup
-  // const createExcel = () => {
-  //   if (!services || services.length === 0) return;
-  //   const excelData = services.map((service, index) => ({
-  //     Sales: index === 0 ? `Invoice No : ${invoiceId}` : "",
-  //     Amount: (service.customerOMR + service.customerVAT).toFixed(
-  //       2
-  //     ),
-  //     Purchase: (() => {
-  //       const vendorNames = [
-  //         service?.vendorId?.vendorName,
-  //         service?.vendor2Id?.vendorName,
-  //         service?.vendor3Id?.vendorName,
-  //         service?.vendor4Id?.vendorName,
-  //       ].filter(Boolean);
-  //       if (vendorNames.length > 1) {
-  //         return (
-  //           vendorNames.map((name, idx) => `${idx + 1}. ${name}`).join("\r\n") +
-  //           "\r\n"
-  //         );
-  //       } else if (vendorNames.length === 1) {
-  //         return vendorNames[0];
-  //       } else {
-  //         return "";
-  //       }
-  //     })(),
-  //     "Amount ": (() => {
-  //       // Array of vendor OMR and VAT keys
-  //       const omrKeys = ["vendorOMR", "vendor2OMR", "vendor3OMR", "vendor4OMR"];
-  //       const vatKeys = ["vendorVAT", "vendor2VAT", "vendor3VAT", "vendor4VAT"];
-  //       // Get vendor names for count
-  //       const vendorNames = [
-  //         service?.vendorId?.vendorName,
-  //         service?.vendor2Id?.vendorName,
-  //         service?.vendor3Id?.vendorName,
-  //         service?.vendor4Id?.vendorName,
-  //       ].filter(Boolean);
+  const createNewExcel = async () => {
+    if (!services || services.length === 0) return;
 
-  //       // Always show all amounts if there are multiple vendor names
-  //       const amounts = omrKeys
-  //         .map((omrKey, idx) => {
-  //           const omr =
-  //             typeof service[omrKey] === "number"
-  //               ? service[omrKey]
-  //               : parseFloat(service[omrKey]) || 0;
-  //           const vat =
-  //             typeof service[vatKeys[idx]] === "number"
-  //               ? service[vatKeys[idx]]
-  //               : parseFloat(service[vatKeys[idx]]) || 0;
-  //           // Show value even if 0, if vendor name exists
-  //           if (vendorNames[idx]) {
-  //             return `${brandConfig?.currencyName} ${(omr + vat).toFixed(
-  //               2
-  //             )}`;
-  //           }
-  //           return null;
-  //         })
-  //         .filter((v, idx) => vendorNames[idx]); // Only for slots with vendor name
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Cost Center Breakup Report", {
+      properties: { defaultRowHeight: 18 },
+      pageSetup: { fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+    });
 
-  //       if (amounts.length > 1) {
-  //         return amounts
-  //           .map((amt, idx) => `${idx + 1}. ${amt}`)
-  //           .join("\r\n\r\n");
-  //       } else if (amounts.length === 1) {
-  //         return amounts[0];
-  //       } else {
-  //         return "";
-  //       }
-  //     })(),
-  //   }));
-  //   // Add Total Amount row
-  //   excelData.push({
-  //     Sales: "Total Amount",
-  //     Amount: totalCustomerAmount.toFixed(
-  //       2
-  //     ),
-  //     Purchase: "Total Amount",
-  //     "Amount ": totalVendorAmount.toFixed(
-  //       2
-  //     ),
-  //   });
-  //   // Add Profit/Loss row
-  //   excelData.push({
-  //     Sales: "",
-  //     Amount: "",
-  //     Purchase: profitOrLoss >= 0 ? "Profit" : "Loss",
-  //     "Amount ": Number(profitOrLoss).toFixed(
-  //       2
-  //     ),
-  //   });
-  //   const XLSX = require("xlsx");
-  //   const worksheet = XLSX.utils.json_to_sheet(excelData);
-  //   worksheet["!cols"] = [
-  //     { wch: 25 }, // Sales
-  //     { wch: 15 }, // Amount
-  //     { wch: 100 }, // Purchase (wider for vendor list)
-  //     { wch: 10 }, // Amount
-  //   ];
+    // Define columns
+    worksheet.columns = [
+      { header: "Sales", key: "sales", width: 25 },
+      { header: "Amount", key: "customerAmount", width: 15 },
+      { header: "Purchase", key: "purchase", width: 40 },
+      { header: "Amount", key: "vendorAmount", width: 15 },
+    ];
 
-  //   // Set wrapText for the Purchase column
-  //   // Object.keys(worksheet).forEach((cell) => {
-  //   //   if (cell.startsWith("C") && worksheet[cell] && worksheet[cell].v) {
-  //   //     if (!worksheet[cell].s) worksheet[cell].s = {};
-  //   //     worksheet[cell].s.alignment = { wrapText: true };
-  //   //   }
-  //   // });
+    // Style header row
+    const headerRow = worksheet.getRow(1);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.alignment = {
+        horizontal: "center",
+        vertical: "middle",
+        wrapText: true,
+      };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFEFEFEF" },
+      };
+    });
 
-  //   const workbook = XLSX.utils.book_new();
-  //   XLSX.utils.book_append_sheet(workbook, worksheet, "CostCenterBreakup");
-  //   XLSX.writeFile(workbook, "Cost Center Breakup Report.xlsx");
-  // };
+    // Data rows
+    services.forEach((service, index) => {
+      const vendorNames = [
+        service?.vendorId?.vendorName,
+        service?.vendor2Id?.vendorName,
+        service?.vendor3Id?.vendorName,
+        service?.vendor4Id?.vendorName,
+      ].filter(Boolean);
 
-  // Create Excel using ExcelJS for Cost Center Breakup
+      const omrKeys = ["vendorOMR", "vendor2OMR", "vendor3OMR", "vendor4OMR"];
+      const vatKeys = ["vendorVAT", "vendor2VAT", "vendor3VAT", "vendor4VAT"];
 
-    const createNewExcel = async () => {
-      if (!services || services.length === 0) return;
-  
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet("Cost Center Breakup Report", {
-        properties: { defaultRowHeight: 18 },
-        pageSetup: { fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+      const vendorAmounts = omrKeys
+        .map((omrKey, idx) => {
+          const omr =
+            typeof service[omrKey] === "number"
+              ? service[omrKey]
+              : parseFloat(service[omrKey]) || 0;
+          const vat =
+            typeof service[vatKeys[idx]] === "number"
+              ? service[vatKeys[idx]]
+              : parseFloat(service[vatKeys[idx]]) || 0;
+          if (vendorNames[idx]) {
+            return `OMR ${(omr + vat).toFixed(3)}`;
+          }
+          return null;
+        })
+        .filter((v, idx) => vendorNames[idx]);
+
+      const vendorNamesDisplay =
+        vendorNames.length > 1
+          ? vendorNames.map((name, idx) => `${idx + 1}. ${name}`).join("\n")
+          : vendorNames[0] || "";
+
+      const vendorAmountsDisplay =
+        vendorAmounts.length > 1
+          ? vendorAmounts.map((amt, idx) => `${idx + 1}. ${amt}`).join("\n")
+          : vendorAmounts[0] || "";
+
+      const row = worksheet.addRow({
+        sales: index === 0 ? `Invoice No : ${invoiceId}` : "",
+        customerAmount: `OMR ${(
+          service.customerOMR +
+          service.customerVAT -
+          service.creditNote
+        ).toFixed(3)}`,
+        purchase: vendorNamesDisplay,
+        vendorAmount: vendorAmountsDisplay,
       });
-  
-      // Define columns
-      worksheet.columns = [
-        { header: "Sales", key: "sales", width: 25 },
-        { header: "Amount", key: "customerAmount", width: 15 },
-        { header: "Purchase", key: "purchase", width: 40 },
-        { header: "Amount", key: "vendorAmount", width: 15 },
-      ];
-  
-      // Style header row
-      const headerRow = worksheet.getRow(1);
-      headerRow.eachCell((cell) => {
-        cell.font = { bold: true };
-        cell.alignment = {
-          horizontal: "center",
-          vertical: "middle",
-          wrapText: true,
-        };
-        cell.border = {
-          top: { style: "thin" },
-          left: { style: "thin" },
-          bottom: { style: "thin" },
-          right: { style: "thin" },
-        };
-        cell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "FFEFEFEF" },
-        };
-      });
-  
-      // Data rows
-      services.forEach((service, index) => {
-        const vendorNames = [
-          service?.vendorId?.vendorName,
-          service?.vendor2Id?.vendorName,
-          service?.vendor3Id?.vendorName,
-          service?.vendor4Id?.vendorName,
-        ].filter(Boolean);
-  
-        const omrKeys = ["vendorOMR", "vendor2OMR", "vendor3OMR", "vendor4OMR"];
-        const vatKeys = ["vendorVAT", "vendor2VAT", "vendor3VAT", "vendor4VAT"];
-  
-        const vendorAmounts = omrKeys
-          .map((omrKey, idx) => {
-            const omr =
-              typeof service[omrKey] === "number"
-                ? service[omrKey]
-                : parseFloat(service[omrKey]) || 0;
-            const vat =
-              typeof service[vatKeys[idx]] === "number"
-                ? service[vatKeys[idx]]
-                : parseFloat(service[vatKeys[idx]]) || 0;
-            if (vendorNames[idx]) {
-              return `OMR ${(omr + vat).toFixed(2)}`;
-            }
-            return null;
-          })
-          .filter((v, idx) => vendorNames[idx]);
-  
-        const vendorNamesDisplay =
-          vendorNames.length > 1
-            ? vendorNames.map((name, idx) => `${idx + 1}. ${name}`).join("\n")
-            : vendorNames[0] || "";
-  
-        const vendorAmountsDisplay =
-          vendorAmounts.length > 1
-            ? vendorAmounts.map((amt, idx) => `${idx + 1}. ${amt}`).join("\n")
-            : vendorAmounts[0] || "";
-  
-        const row = worksheet.addRow({
-          sales: index === 0 ? `Invoice No : ${invoiceId}` : "",
-          customerAmount: `OMR ${(
-            service.customerOMR + service.customerVAT
-          ).toFixed(2)}`,
-          purchase: vendorNamesDisplay,
-          vendorAmount: vendorAmountsDisplay,
-        });
-  
-        // Center align + wrap for all cells
-        row.eachCell((cell) => {
-          cell.alignment = {
-            horizontal: "center",
-            vertical: "middle",
-            wrapText: true,
-          };
-          cell.border = {
-            top: { style: "thin" },
-            left: { style: "thin" },
-            bottom: { style: "thin" },
-            right: { style: "thin" },
-          };
-        });
-  
-        // Adjust row height based on multi-line content in Purchase / Vendor Amount
-        const purchaseLines = (vendorNamesDisplay || "")
-          .toString()
-          .split("\n").length;
-        const vendorAmountLines = (vendorAmountsDisplay || "")
-          .toString()
-          .split("\n").length;
-        const maxLines = Math.max(purchaseLines, vendorAmountLines);
-        if (maxLines > 1) {
-          row.height = Math.max(18, maxLines * 15);
-        }
-      });
-  
-      // Totals row
-      const totalRow = worksheet.addRow({
-        sales: "Total Amount",
-        customerAmount: `OMR ${totalCustomerAmount.toFixed(2)}`,
-        purchase: "Total Amount",
-        vendorAmount: `OMR ${totalVendorAmount.toFixed(2)}`,
-      });
-      totalRow.eachCell((cell) => {
-        cell.font = { bold: true };
+
+      // Center align + wrap for all cells
+      row.eachCell((cell) => {
         cell.alignment = {
           horizontal: "center",
           vertical: "middle",
@@ -576,82 +615,119 @@ const CostCenterBreakup = () => {
           right: { style: "thin" },
         };
       });
-  
-      // Profit/Loss row
-      const profitLossRow = worksheet.addRow({
-        sales: "",
-        customerAmount: "",
-        purchase: profitOrLoss >= 0 ? "Profit" : "Loss",
-        vendorAmount: `OMR ${Number(profitOrLoss).toFixed(2)}`,
-      });
-      profitLossRow.eachCell((cell, colNumber) => {
-        const isValueCell = colNumber === 3 || colNumber === 4;
-        cell.font = isValueCell ? { bold: true } : {};
-        cell.alignment = {
-          horizontal: "center",
-          vertical: "middle",
-          wrapText: true,
-        };
-        cell.border = {
-          top: { style: "thin" },
-          left: { style: "thin" },
-          bottom: { style: "thin" },
-          right: { style: "thin" },
-        };
-      });
-  
-      // Auto-size columns based on content (clamped)
-      const headers = worksheet.getRow(1).values.slice(1); // ExcelJS row.values is 1-based
-      const minWidth = 15;
-      const maxWidth = 60;
-  
-      headers.forEach((h, i) => {
-        let maxLen = (h || "").toString().length;
-  
-        worksheet.eachRow((row, rowNumber) => {
-          if (rowNumber === 1) return; // skip header counted
-          const val = row.getCell(i + 1).value;
-          const text =
-            val == null
-              ? ""
-              : typeof val === "object" && val.richText
-              ? val.richText.map((r) => r.text).join("")
-              : String(val);
-          if (text.length > maxLen) maxLen = text.length;
-        });
-  
-        const width = Math.max(minWidth, Math.min(maxWidth, maxLen + 2));
-        worksheet.getColumn(i + 1).width = width;
-      });
-  
-      // Nudge Sales and Purchase wider for readability
-      worksheet.getColumn(1).width = Math.max(
-        worksheet.getColumn(1).width || 0,
-        22
-      );
-      worksheet.getColumn(3).width = Math.max(
-        worksheet.getColumn(3).width || 0,
-        30
-      );
-  
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      saveAs(blob, "Cost Center Breakup Report.xlsx");
-    };
 
+      // Adjust row height based on multi-line content in Purchase / Vendor Amount
+      const purchaseLines = (vendorNamesDisplay || "")
+        .toString()
+        .split("\n").length;
+      const vendorAmountLines = (vendorAmountsDisplay || "")
+        .toString()
+        .split("\n").length;
+      const maxLines = Math.max(purchaseLines, vendorAmountLines);
+      if (maxLines > 1) {
+        row.height = Math.max(18, maxLines * 15);
+      }
+    });
+
+    // Totals row
+    const totalRow = worksheet.addRow({
+      sales: "Total Amount",
+      customerAmount: `OMR ${totalCustomerAmount.toFixed(3)}`,
+      purchase: "Total Amount",
+      vendorAmount: `OMR ${totalVendorAmount.toFixed(3)}`,
+    });
+    totalRow.eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.alignment = {
+        horizontal: "center",
+        vertical: "middle",
+        wrapText: true,
+      };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+    });
+
+    // Profit/Loss row
+    const profitLossRow = worksheet.addRow({
+      sales: "",
+      customerAmount: "",
+      purchase: profitOrLoss >= 0 ? "Profit" : "Loss",
+      vendorAmount: `OMR ${Number(profitOrLoss).toFixed(3)}`,
+    });
+    profitLossRow.eachCell((cell, colNumber) => {
+      const isValueCell = colNumber === 3 || colNumber === 4;
+      cell.font = isValueCell ? { bold: true } : {};
+      cell.alignment = {
+        horizontal: "center",
+        vertical: "middle",
+        wrapText: true,
+      };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+    });
+
+    // Auto-size columns based on content (clamped)
+    const headers = worksheet.getRow(1).values.slice(1); // ExcelJS row.values is 1-based
+    const minWidth = 15;
+    const maxWidth = 60;
+
+    headers.forEach((h, i) => {
+      let maxLen = (h || "").toString().length;
+
+      worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) return; // skip header counted
+        const val = row.getCell(i + 1).value;
+        const text =
+          val == null
+            ? ""
+            : typeof val === "object" && val.richText
+            ? val.richText.map((r) => r.text).join("")
+            : String(val);
+        if (text.length > maxLen) maxLen = text.length;
+      });
+
+      const width = Math.max(minWidth, Math.min(maxWidth, maxLen + 2));
+      worksheet.getColumn(i + 1).width = width;
+    });
+
+    // Nudge Sales and Purchase wider for readability
+    worksheet.getColumn(1).width = Math.max(
+      worksheet.getColumn(1).width || 0,
+      22
+    );
+    worksheet.getColumn(3).width = Math.max(
+      worksheet.getColumn(3).width || 0,
+      30
+    );
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    saveAs(blob, "Cost Center Breakup Report.xlsx");
+  };
   return (
     <>
-      <div className="p-2 ">
+      <div className="p-2 costcenter-breakup">
         <div className="row g-3 mt-3 mb-3">
           <div className=" col-md-3 col-12 d-flex align-items-center">
-            <label htmlFor="input" className="col-form-label costcenterinput">
+            <label
+              htmlFor="input"
+              className="col-form-label costcenterinput job-no-size"
+            >
               Job No:
             </label>
 
             <select
-              className="form-select vesselboxcostcenter"
+              className="form-select jobvcostcentre"
               aria-label="Small select example"
               name="jobNo"
               onChange={handleSelectChange}
@@ -670,7 +746,7 @@ const CostCenterBreakup = () => {
               <div className="col-md-3 col-12 d-flex align-items-center ">
                 <label
                   htmlFor="input"
-                  className=" col-3 col-form-label costcenterinput me-2"
+                  className=" col-3 col-form-label costcenterinput vessel-new-size"
                 >
                   Vessel Name:
                 </label>
@@ -692,7 +768,7 @@ const CostCenterBreakup = () => {
                 <div className=" col-md-3 col-12  d-flex align-items-center ">
                   <label
                     htmlFor="input"
-                    className=" col-2 form-label costcenterport me-2"
+                    className=" col-2 form-label costcenterport vessel-new-size"
                   >
                     Port Name:
                   </label>
@@ -734,82 +810,7 @@ const CostCenterBreakup = () => {
             <img src={Group}></img>
           </div>
         </div>
-        {/* {selectedJobNo && (
-          <>
-            <div className=" p-3">
-              <table className="table tablepay">
-                <thead className="">
-                  <tr className="createtable">
-                    <th className=" paytexthead marginpay">SALES </th>
-                    <th className="paytexthead marginpay ">AMOUNT</th>
-                    <th className="paytexthead marginpay">PURCHASE</th>
-                    <th className="paytexthead marginpay ">AMOUNT</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {services.map((service, index) => (
-                    <tr key={service._id}>
-                      <td className="paytexthead marginpay">
-                        {index === 0 ? invoiceId : ""}
-                      </td>
-                      <td className="paytexthead marginpay">
-                        OMR{" "}
-                        {(service.customerOMR + service.customerVAT).toFixed(2)}
-                      </td>
-                      <td className="paytexthead marginpay">
-                        {service.vendorId.vendorName}
-                      </td>
-                      <td className="paytexthead marginpay">
-                        OMR {(service.vendorOMR + service.vendorVAT).toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
-                  <tr className="bold-row">
-                    <td className="paytexthead marginpay resultpay">
-                      Total Customer Amount
-                    </td>
-                    <td className="paytexthead marginpay resultpay">
-                      OMR{" "}
-                      {services
-                        .reduce(
-                          (sum, s) => sum + s.customerOMR + s.customerVAT,
-                          0
-                        )
-                        .toFixed(2)}
-                    </td>
-                    <td className="paytexthead marginpay resultpay">
-                      Total Vendor Amount
-                    </td>
-                    <td className="paytexthead marginpay resultpay">
-                      OMR{" "}
-                      {services
-                        .reduce((sum, s) => sum + s.vendorOMR + s.vendorVAT, 0)
-                        .toFixed(2)}
-                    </td>
-                  </tr>
-                  <tr className="bold-row">
-                    <td className="text-center"></td>
-                    <td className="text-center"></td>
-                    <td
-                      className={`paytexthead marginpay resultpay ${
-                        profitOrLoss >= 0 ? "text-success" : "text-danger"
-                      }`}
-                    >
-                      {profitOrLoss >= 0 ? "Profit" : "Loss"}
-                    </td>
-                    <td
-                      className={`paytexthead marginpay resultpay ${
-                        profitOrLoss >= 0 ? "text-success" : "text-danger"
-                      }`}
-                    >
-                      OMR {profitOrLoss.toFixed(2)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </>
-        )} */}
+
         {selectedJobNo && (
           <>
             <DataGrid
@@ -826,36 +827,17 @@ const CostCenterBreakup = () => {
               )}
               autoHeight
               hideFooter={false} // Ensure footer is visible
-              pagination
-              paginationMode="client" // Enable client-side pagination
-              autoPageSize={false} // Prevents automatic page size
-              pageSizeOptions={[5, 10, 20, 50, 100]} // Defines available page sizes
-              initialState={{
-                pagination: {
-                  paginationModel: {
-                    pageSize: 10, // Default page size
-                    page: 0, // Default page index
-                  },
-                },
-              }}
               getRowClassName={(params) => {
-                console.log(params, "paramscvcv");
-                // if (params.row.isFooter) return "footer-row"; // Apply class for footer
-                if (params?.row?.vendorName === "Loss") return "loss-row"; // Apply class for loss row
-                if (params?.row?.vendorName === "Profit") return "profit-row"; // Apply class for profit row
-                return "";
+                // Assign all relevant classes for summary rows
+                let classNames = [];
+                if (params.row.isFooter) classNames.push("footer-row");
+                if (params?.row?.vendorName === "Loss")
+                  classNames.push("loss-row");
+                if (params?.row?.vendorName === "Profit")
+                  classNames.push("profit-row");
+                return classNames.join(" ");
               }}
-              getRowHeight={() => "auto"} // <-- Add this line for fixed row height
-              // ...existing code...
-              // getRowHeight={(params) => {
-              //   if (!params || !params.row) return 48; // Default height if row is undefined
-              //   if (params.row.isFooter) return 48;
-              //   const vendorLines = params.row.vendorName
-              //     ? params.row.vendorName.split("\n").length
-              //     : 1;
-              //   return Math.max(48, vendorLines * 28);
-              // }}
-              // ...existing code...
+              getRowHeight={() => "auto"}
               sx={{
                 "& .MuiDataGrid-root": {
                   border: "none",
@@ -878,7 +860,22 @@ const CostCenterBreakup = () => {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "left",
+                  fontSize: "14px !important",
+                  paddingTop: "8px !important",
+                  paddingBottom: "8px !important",
                 },
+                "& .MuiDataGrid-row": {
+                  // height: "auto !important",
+                  minHeight: "none !important",
+                  maxHeight: "none !important",
+                },
+
+                // Footer Row Styling
+                // "& .footer-row .MuiDataGrid-row": {
+                //  maxHeight: "auto !important",
+                //  minHeight: "auto !important",
+                //  height: "auto !important",
+                // },
                 // Footer Row Styling
                 "& .footer-row .MuiDataGrid-cell": {
                   fontWeight: "bold !important", // Make footer text bold
@@ -893,6 +890,18 @@ const CostCenterBreakup = () => {
                 "& .loss-row .MuiDataGrid-cell": {
                   color: "red !important",
                   fontWeight: "bold !important",
+                },
+                // Profit Row Styling (Green)
+                "& .profit-row .MuiDataGrid-row": {
+                  maxHeight: "110px !important",
+                  minHeight: "110px !important",
+                  height: "130px !important",
+                },
+                // Loss Row Styling (Red)
+                "& .loss-row .MuiDataGrid-row": {
+                  maxHeight: "110px !important",
+                  minHeight: "110px !important",
+                  height: "130px !important",
                 },
                 // ✅ Apply bold style **only** to "Total Customer Amount" & "Total Vendor Amount"
                 "& .bold-label": {

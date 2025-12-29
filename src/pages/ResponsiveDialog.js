@@ -1015,7 +1015,7 @@ const ResponsiveDialog = ({
         fullWidth
         maxWidth="lg"
       >
-        <div className="d-flex justify-content-between" >
+        <div className="d-flex justify-content-between">
           <DialogTitle>{isEditcharge ? "Update" : "Add"} Charge</DialogTitle>
           <div className="closeicon">
             <i className="bi bi-x-lg " onClick={onClose}></i>
@@ -1667,7 +1667,7 @@ const ResponsiveDialog = ({
                                         "N/A"}
                                     </div>
                                     <div className="mb-2">
-                                      <b>Amount (OMR):</b>{" "}
+                                      <b>Amount (AED):</b>{" "}
                                       {charge[omrKey]?.toFixed
                                         ? charge[omrKey].toFixed(2)
                                         : Number(charge[omrKey]).toFixed(2)}
@@ -1676,7 +1676,7 @@ const ResponsiveDialog = ({
                                       <b>VAT Amount:</b> {charge[vatKey]}
                                     </div>
                                     <div className="mb-2">
-                                      <b>Total (OMR):</b>{" "}
+                                      <b>Total (AED):</b>{" "}
                                       {(
                                         Number(charge[omrKey]) +
                                         Number(charge[vatKey])

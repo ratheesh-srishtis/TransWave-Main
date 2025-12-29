@@ -371,7 +371,7 @@ const CustomerPayments = () => {
     },
     {
       field: "discountAmount",
-      headerName: `Discount (OMR)`,
+      headerName: `Discount (AED)`,
       flex: 1,
       minWidth: 100,
     },
@@ -713,12 +713,12 @@ const CustomerPayments = () => {
           <div className=" d-flex">
             <div className="totalinvociecustomer">
               {" "}
-              Total Invoice Amount(OMR):
+              Total Invoice Amount(AED):
             </div>{" "}
             <div className="amountpayment"> {totalInvoiceAmount} </div>
           </div>
           <div className=" d-flex">
-            <div className="totalinvociecustomer"> Paid Amount(OMR):</div>{" "}
+            <div className="totalinvociecustomer"> Paid Amount(AED):</div>{" "}
             <div className="amountpayment"> {paidAmount} </div>
           </div>
           <div className=" d-flex">
@@ -726,7 +726,7 @@ const CustomerPayments = () => {
             <div className="amountpayment"> {discountAmount} </div>
           </div>
           <div className=" d-flex">
-            <div className="totalinvociecustomer"> Balance Amount(OMR):</div>{" "}
+            <div className="totalinvociecustomer"> Balance Amount(AED):</div>{" "}
             <div className="amountpayment"> {balanceAmount} </div>
           </div>
 

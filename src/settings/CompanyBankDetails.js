@@ -52,8 +52,8 @@ const CompanyBankDetails = () => {
     const requiredFields = [
       { field: "bankName", label: "Bank Name" },
       { field: "bankAddress", label: "Address" },
-      { field: "accountNumberOMR", label: "A/C Number (OMR)" },
-      { field: "ibanOMR", label: "IBAN (OMR)" },
+      { field: "accountNumberOMR", label: "A/C Number (AED)" },
+      { field: "ibanOMR", label: "IBAN (AED)" },
       { field: "accountNumberUSD", label: "A/C Number (USD)" },
       { field: "ibanUSD", label: "IBAN (USD)" },
       { field: "swiftCode", label: "SWIFT Code" },
@@ -150,7 +150,7 @@ const CompanyBankDetails = () => {
           <div className="row">
             <div className="form-group col-6">
               <label htmlFor="accountNumberOMR">
-                A/C Number (OMR)<span className="required"> * </span>
+                A/C Number (AED)<span className="required"> * </span>
               </label>
               <input
                 type="text"
@@ -166,7 +166,7 @@ const CompanyBankDetails = () => {
             </div>
             <div className="form-group col-6">
               <label htmlFor="ibanOMR">
-                IBAN (OMR)<span className="required"> * </span>
+                IBAN (AED)<span className="required"> * </span>
               </label>
               <input
                 type="text"

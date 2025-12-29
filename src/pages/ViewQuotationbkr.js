@@ -278,13 +278,6 @@ const ViewQuotation = ({
           </div>
 
           <div className=" col-4 viewhead">
-            <span> Berth : </span>{" "}
-            <span className="viewans">
-              {editData?.berth ? editData?.berth : "N/A"}
-            </span>
-          </div>
-
-          <div className=" col-4 viewhead">
             <span> Cargo Capacity : </span>
             <span className="viewans">
               {editData?.cargoCapacity ? editData?.cargoCapacity : "N/A"}
