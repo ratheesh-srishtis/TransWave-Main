@@ -112,7 +112,7 @@ const App = () => {
   return (
     <>
       <ErrorBoundary>
-        <Router basename="">
+        <Router basename="/project/transwave/">
           <MediaProvider>
             <AuthProvider>
               <Routes>
