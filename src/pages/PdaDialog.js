@@ -122,8 +122,8 @@ const PdaDialog = ({
 
   const formattedTotals = {
     quantity: totalValues?.quantity,
-    customerOMR: totalValues?.customerOMR?.toFixed(3),
-    customerVAT: totalValues?.customerVAT?.toFixed(3),
+    customerOMR: totalValues?.customerOMR?.toFixed(2),
+    customerVAT: totalValues?.customerVAT?.toFixed(2),
     customerTotalUSD: totalValues?.customerTotalUSD?.toFixed(2),
   };
 
@@ -416,19 +416,19 @@ const PdaDialog = ({
                       <td className="stylq">{charge?.quantity}</td>
 
                       <td className="stylq">
-                        {charge?.customerOMR?.toFixed(3)}
+                        {charge?.customerOMR?.toFixed(2)}
                       </td>
                       <td className="stylq">
-                        {charge?.customerVAT?.toFixed(3)}
+                        {charge?.customerVAT?.toFixed(2)}
                       </td>
                       <td className="stylq">
                         {(
                           parseFloat(charge?.customerOMR) +
                           parseFloat(charge?.customerVAT)
-                        )?.toFixed(3)}
+                        )?.toFixed(2)}
                       </td>
                       <td className="stylq">
-                        {charge?.customerTotalUSD?.toFixed(3)}
+                        {charge?.customerTotalUSD?.toFixed(2)}
                       </td>
                     </tr>
                     {charge?.remark && (
@@ -453,7 +453,7 @@ const PdaDialog = ({
                   {(
                     parseFloat(formattedTotals?.customerOMR) +
                     parseFloat(formattedTotals?.customerVAT)
-                  )?.toFixed(3)}
+                  )?.toFixed(2)}
                 </td>
                 <td className="stylt">{formattedTotals?.customerTotalUSD}</td>
               </tr>
@@ -493,7 +493,7 @@ const PdaDialog = ({
                         <td className="stylk">{index + 1}</td>
                         <td className="stylk">{item?.days}</td>
                         <td className="stylm">{item?.description}</td>
-                        <td className="stylq">{item?.chargeOMR?.toFixed(3)}</td>
+                        <td className="stylq">{item?.chargeOMR?.toFixed(2)}</td>
                         <td className="stylq">{item?.chargeUSD?.toFixed(2)}</td>
                       </tr>
                     ))}

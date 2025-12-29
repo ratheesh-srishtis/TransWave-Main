@@ -72,8 +72,8 @@ const ChargesTable = ({
 
   const formattedTotals = {
     quantity: totalValues?.quantity,
-    customerOMR: totalValues?.customerOMR.toFixed(3),
-    customerVAT: totalValues?.customerVAT.toFixed(3),
+    customerOMR: totalValues?.customerOMR.toFixed(2),
+    customerVAT: totalValues?.customerVAT.toFixed(2),
     customerTotalUSD: totalValues?.customerTotalUSD.toFixed(2),
   };
   const vendorTotalValues = chargesArray?.reduce(
@@ -90,8 +90,8 @@ const ChargesTable = ({
   // Format totals after calculations
   const formattedVendorTotals = {
     quantity: vendorTotalValues?.quantity,
-    vendorOMR: vendorTotalValues?.vendorOMR.toFixed(3),
-    vendorVAT: vendorTotalValues?.vendorVAT.toFixed(3),
+    vendorOMR: vendorTotalValues?.vendorOMR.toFixed(2),
+    vendorVAT: vendorTotalValues?.vendorVAT.toFixed(2),
     vendorTotalUSD: vendorTotalValues?.vendorTotalUSD.toFixed(2),
   };
 
@@ -372,13 +372,13 @@ const ChargesTable = ({
                               </td>
                               {from !== "view-operation" && (
                                 <>
-                                  <td>{charge.customerOMR.toFixed(3)}</td>
-                                  <td>{charge.customerVAT.toFixed(3)}</td>
+                                  <td>{charge.customerOMR.toFixed(2)}</td>
+                                  <td>{charge.customerVAT.toFixed(2)}</td>
                                   <td>
                                     {(
                                       parseFloat(charge.customerOMR) +
                                       parseFloat(charge.customerVAT)
-                                    ).toFixed(3)}
+                                    ).toFixed(2)}
                                   </td>
                                   <td>{charge.customerTotalUSD.toFixed(2)}</td>
 
@@ -441,7 +441,7 @@ const ChargesTable = ({
                               {(
                                 parseFloat(formattedTotals.customerOMR) +
                                 parseFloat(formattedTotals.customerVAT)
-                              ).toFixed(3)}
+                              ).toFixed(2)}
                             </td>
                             <td>{formattedTotals.customerTotalUSD}</td>
                             {isAction == true && (
@@ -1007,7 +1007,7 @@ const ChargesTable = ({
                                       totalOMR += val;
                                   });
                                 });
-                                return totalOMR.toFixed(3);
+                                return totalOMR.toFixed(2);
                               })()}
                             </td>
                             {/* Vendor VAT Total: sum all vendorVAT, vendor2VAT, vendor3VAT, vendor4VAT for all charges */}
@@ -1026,7 +1026,7 @@ const ChargesTable = ({
                                       totalVAT += val;
                                   });
                                 });
-                                return totalVAT.toFixed(3);
+                                return totalVAT.toFixed(2);
                               })()}
                             </td>
                             {/* Vendor Total OMR: sum all (vendorOMR + vendorVAT), (vendor2OMR + vendor2VAT), ... for all charges */}
@@ -1061,7 +1061,7 @@ const ChargesTable = ({
                                     if (sum !== 0) total += sum;
                                   });
                                 });
-                                return total.toFixed(3);
+                                return total.toFixed(2);
                               })()}
                             </td>
                             {/* Vendor Total USD: sum all vendorTotalUSD, vendor2TotalUSD, vendor3TotalUSD, vendor4TotalUSD for all charges */}
