@@ -259,7 +259,7 @@ const AddLeave = ({
               <div className="col-4 mb-3 align-items-start">
                 <div className="">
                   <label htmlFor="leaveTo" className="form-label">
-                    Leave To <span className="required"> * </span>:
+                    Leave Tos <span className="required"> * </span>:
                   </label>
                   <input
                     name="leaveTo"
