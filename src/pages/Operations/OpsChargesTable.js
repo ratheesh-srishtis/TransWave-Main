@@ -259,13 +259,13 @@ const OpsChargesTable = ({
                   {loginResponse?.data?.userRole?.roleType?.toLowerCase() !==
                     "operations" && (
                     <>
-                      <td>{charge.customerOMR.toFixed(3)}</td>
-                      <td>{charge.customerVAT.toFixed(3)}</td>
+                      <td>{charge.customerOMR.toFixed(2)}</td>
+                      <td>{charge.customerVAT.toFixed(2)}</td>
                       <td>
                         {(
                           parseFloat(charge.customerOMR) +
                           parseFloat(charge.customerVAT)
-                        ).toFixed(3)}
+                        ).toFixed(2)}
                       </td>
                       <td>{charge.customerTotalUSD.toFixed(2)}</td>
                     </>

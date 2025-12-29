@@ -150,14 +150,14 @@ const CustomerPayments = () => {
       const Listpayments = await getPayments(payload);
       console.log(Listpayments, "Listpayments");
       setCustomerpayment(Listpayments?.payments || []);
-      setInvoiceAmount((Listpayments?.totalInvoiceAmount || 0).toFixed(3));
-      setPaidAmount((Listpayments?.paidAmount || 0).toFixed(3));
-      setDiscountAmount((Listpayments?.discountAmountOMR || 0).toFixed(3));
+      setInvoiceAmount((Listpayments?.totalInvoiceAmount || 0).toFixed(2));
+      setPaidAmount((Listpayments?.paidAmount || 0).toFixed(2));
+      setDiscountAmount((Listpayments?.discountAmountOMR || 0).toFixed(2));
       const totalAmount = Listpayments?.totalInvoiceAmount || 0;
       const amountpaid = Listpayments?.paidAmount || 0;
       const discount = Listpayments?.discountAmountOMR || 0;
       const balance = totalAmount - amountpaid - discount;
-      setBalanceAmount(parseFloat(balance.toFixed(3)));
+      setBalanceAmount(parseFloat(balance.toFixed(2)));
       setIsLoading(false);
     } catch (error) {
       console.log("Error in Api", error);

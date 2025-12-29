@@ -351,7 +351,7 @@ const ViewCustomerVoucher = ({ open, onClose, getvoucher }) => {
                           <td className="voucherpartfour text-center">
                             {payment?.currency?.toUpperCase()}{" "}
                             {payment?.currency?.toUpperCase() === "OMR"
-                              ? Number(payment?.amount).toFixed(3)
+                              ? Number(payment?.amount).toFixed(2)
                               : payment?.currency?.toUpperCase() === "USD"
                               ? Number(payment?.amount).toFixed(2)
                               : payment?.currency?.toUpperCase() === "AED"
@@ -377,7 +377,7 @@ const ViewCustomerVoucher = ({ open, onClose, getvoucher }) => {
                     <td className="voucheramountrate text-center">
                       {customerVoucher?.currency?.toUpperCase()}{" "}
                       {customerVoucher?.currency === "omr"
-                        ? Number(customerVoucher?.totalOMR).toFixed(3)
+                        ? Number(customerVoucher?.totalOMR).toFixed(2)
                         : customerVoucher?.currency === "usd"
                         ? Number(customerVoucher?.totalOMR).toFixed(2)
                         : customerVoucher?.totalOMR}

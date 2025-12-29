@@ -124,7 +124,7 @@ const CostCenterBreakup = () => {
     }
     return sum + vendorTotal;
   }, 0);
-  const profitOrLoss = (totalCustomerAmount - totalVendorAmount).toFixed(3);
+  const profitOrLoss = (totalCustomerAmount - totalVendorAmount).toFixed(2);
   console.log(totalCustomerAmount, "totalCustomerAmount_checkamount");
   console.log(totalVendorAmount, "totalVendorAmount_checkamount");
 

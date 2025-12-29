@@ -344,7 +344,7 @@ const ViewVendorVoucher = ({ open, onClose, getvoucher }) => {
                           <td className="voucherpartfour text-center">
                             {payment?.currency?.toUpperCase()}{" "}
                             {payment?.currency?.toUpperCase() === "OMR"
-                              ? Number(payment?.amount).toFixed(3)
+                              ? Number(payment?.amount).toFixed(2)
                               : payment?.currency?.toUpperCase() === "USD"
                               ? Number(payment?.amount).toFixed(2)
                               : payment?.currency?.toUpperCase() == "AED"
@@ -395,7 +395,7 @@ const ViewVendorVoucher = ({ open, onClose, getvoucher }) => {
                     <td className="voucheramountrate text-center">
                       {vendorVoucher?.currency?.toUpperCase()}{" "}
                       {vendorVoucher?.currency === "OMR"
-                        ? Number(vendorVoucher?.totalOMR).toFixed(3)
+                        ? Number(vendorVoucher?.totalOMR).toFixed(2)
                         : vendorVoucher?.currency === "USD"
                         ? Number(vendorVoucher?.totalOMR).toFixed(2)
                         : vendorVoucher?.totalOMR}

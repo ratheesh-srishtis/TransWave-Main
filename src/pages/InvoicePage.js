@@ -390,16 +390,16 @@ const InvoicePage = ({
                     </td>
                     <td className="tdstylinvoice">{charge?.quantity}</td>
                     <td className="tdstylinvoice">
-                      {charge.customerOMR.toFixed(3)}
+                      {charge.customerOMR.toFixed(2)}
                     </td>
                     <td className="tdstylinvoice">
-                      {charge.customerVAT.toFixed(3)}
+                      {charge.customerVAT.toFixed(2)}
                     </td>
                     <td className="tdstylinvoice">
                       {(
                         parseFloat(charge.customerOMR) +
                         parseFloat(charge.customerVAT)
-                      ).toFixed(3)}
+                      ).toFixed(2)}
                     </td>
                     <td className="tdstylinvoice">
                       {charge.customerTotalUSD.toFixed(2)}
