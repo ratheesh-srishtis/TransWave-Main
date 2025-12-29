@@ -80,7 +80,6 @@ const BankSummaryReport = ({ employees }) => {
           >
             Payment Details
           </button>
-          
         </>
       ),
     },
@@ -173,9 +172,9 @@ const BankSummaryReport = ({ employees }) => {
 
         return {
           "Customer/Vendor/Employee Name": payee,
-          Amount: Number(item.amount || 0).toFixed(3),
+          Amount: Number(item.amount || 0).toFixed(2),
           Currency: item.currency ? item.currency.toUpperCase() : "-",
-          "Exchange Loss": item?.exchangeLoss?.toFixed(3) || "-",
+          "Exchange Loss": item?.exchangeLoss?.toFixed(2) || "-",
           "Payment Date": item.paymentDate
             ? new Date(item.paymentDate).toLocaleDateString("en-GB")
             : "-",
@@ -202,9 +201,9 @@ const BankSummaryReport = ({ employees }) => {
 
         return {
           "Customer/Vendor/Employee Name": payee,
-          Amount: Number(item.amount || 0).toFixed(3),
+          Amount: Number(item.amount || 0).toFixed(2),
           Currency: item.currency ? item.currency.toUpperCase() : "OMR",
-          "Exchange Loss": item?.exchangeLoss?.toFixed(3) || "0.000",
+          "Exchange Loss": item?.exchangeLoss?.toFixed(2) || "0.000",
           "Payment Date": item.paymentDate
             ? new Date(item.paymentDate).toLocaleDateString("en-GB")
             : "-",
@@ -709,23 +708,23 @@ const BankSummaryReport = ({ employees }) => {
       "Bank Name": item?.bank || "N/A",
       "Opening Balance":
         typeof item?.openingBalance === "number"
-          ? item.openingBalance.toFixed(3)
+          ? item.openingBalance.toFixed(2)
           : item?.openingBalance ?? "N/A",
       "Petty Amount":
         typeof item?.pettySum === "number"
-          ? item.pettySum.toFixed(3)
+          ? item.pettySum.toFixed(2)
           : item?.pettySum ?? "N/A",
       "Received Amount":
         typeof item?.customerReceived === "number"
-          ? item.customerReceived.toFixed(3)
+          ? item.customerReceived.toFixed(2)
           : item?.customerReceived ?? "N/A",
       "Paid Amount":
         typeof item?.vendorPaid === "number"
-          ? item.vendorPaid.toFixed(3)
+          ? item.vendorPaid.toFixed(2)
           : item?.vendorPaid ?? "N/A",
       "Balance Amount":
         typeof item?.bankBalanceAmount === "number"
-          ? item.bankBalanceAmount.toFixed(3)
+          ? item.bankBalanceAmount.toFixed(2)
           : item?.bankBalanceAmount ?? "N/A",
     }));
 

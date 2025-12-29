@@ -177,7 +177,7 @@ const ViewVoucher = ({ open, onClose, getvoucher }) => {
                       {amount !== undefined &&
                       amount !== null &&
                       !isNaN(Number(amount))
-                        ? Number(amount).toFixed(3)
+                        ? Number(amount).toFixed(2)
                         : "N/A"}
                     </td>
                   </tr>
@@ -221,7 +221,7 @@ const ViewVoucher = ({ open, onClose, getvoucher }) => {
                       {amount !== undefined &&
                       amount !== null &&
                       !isNaN(Number(amount))
-                        ? Number(amount).toFixed(3)
+                        ? Number(amount).toFixed(2)
                         : "N/A"}
                     </td>
                   </tr>
