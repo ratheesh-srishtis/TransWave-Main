@@ -93,8 +93,9 @@ const VendorPayments = () => {
   const [voucherNumber, setVoucherNumber] = useState(false);
   const location = useLocation();
   const { vendorId } = location.state || {};
-  const loginResponse = JSON.parse(localStorage.getItem("loginResponse"));
-  const currentroleType = loginResponse.data?.userRole?.roleType;
+  const _storedLogin = localStorage.getItem("loginResponse");
+  const loginResponse = _storedLogin ? JSON.parse(_storedLogin) : null;
+  const currentroleType = loginResponse?.data?.userRole?.roleType || "";
   const [viewopen, setviewOpen] = useState(false);
   const [isDirectVendorPayment, setIsDirectVendorPayment] = useState(false);
   const [EmployeeList, setEmployeeList] = useState([]);
