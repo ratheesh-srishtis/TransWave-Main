@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   getDashbordDetails,
   financeDashboardDetails,
-  //getInvoiceTotal,
+  // getInvoiceTotal,
 } from "../services/apiService";
 import { Oval } from "react-loader-spinner"; // Import a loader type from react-loader-spinner
 import { useAuth } from "../context/AuthContext";
@@ -46,9 +46,9 @@ const Dashboard = () => {
     };
     try {
       const dashboardDetails = await getDashbordDetails(data);
-      //const response = await getInvoiceTotal(data);
-      //console.log("invoiceTotal:", response?.total);
-      //setInvoiceTotal(response?.total);
+      // const response = await getInvoiceTotal(data);
+      // console.log("invoiceTotal:", response?.total);
+      // setInvoiceTotal(response?.total);
       console.log("dashboardDetails:", dashboardDetails);
       setCounts(dashboardDetails);
       setIsLoading(false);

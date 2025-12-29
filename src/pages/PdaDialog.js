@@ -83,7 +83,7 @@ const PdaDialog = ({
   };
 
   useEffect(() => {
-    console.log(pdaDetails, "pdaDetails");
+    console.log(pdaDetails, "pdaDetails_Dialog");
     console.log(pdaServices, "pdaServices");
     console.log(anchorageStayCharges, "anchorageStayCharges");
     console.log(marineCharge, "marineCharge");
@@ -122,8 +122,8 @@ const PdaDialog = ({
 
   const formattedTotals = {
     quantity: totalValues?.quantity,
-    customerOMR: totalValues?.customerOMR?.toFixed(2),
-    customerVAT: totalValues?.customerVAT?.toFixed(2),
+    customerOMR: totalValues?.customerOMR?.toFixed(3),
+    customerVAT: totalValues?.customerVAT?.toFixed(3),
     customerTotalUSD: totalValues?.customerTotalUSD?.toFixed(2),
   };
 
@@ -268,7 +268,7 @@ const PdaDialog = ({
           style: { width: "1700px" }, // Custom width
         }}
       >
-        <div className="d-flex justify-content-between" >
+        <div className="d-flex justify-content-between">
           <DialogTitle></DialogTitle>
           <div className="closeicon">
             <i className="bi bi-x-lg " onClick={onClose}></i>
@@ -416,19 +416,19 @@ const PdaDialog = ({
                       <td className="stylq">{charge?.quantity}</td>
 
                       <td className="stylq">
-                        {charge?.customerOMR?.toFixed(2)}
+                        {charge?.customerOMR?.toFixed(3)}
                       </td>
                       <td className="stylq">
-                        {charge?.customerVAT?.toFixed(2)}
+                        {charge?.customerVAT?.toFixed(3)}
                       </td>
                       <td className="stylq">
                         {(
                           parseFloat(charge?.customerOMR) +
                           parseFloat(charge?.customerVAT)
-                        )?.toFixed(2)}
+                        )?.toFixed(3)}
                       </td>
                       <td className="stylq">
-                        {charge?.customerTotalUSD?.toFixed(2)}
+                        {charge?.customerTotalUSD?.toFixed(3)}
                       </td>
                     </tr>
                     {charge?.remark && (
@@ -453,7 +453,7 @@ const PdaDialog = ({
                   {(
                     parseFloat(formattedTotals?.customerOMR) +
                     parseFloat(formattedTotals?.customerVAT)
-                  )?.toFixed(2)}
+                  )?.toFixed(3)}
                 </td>
                 <td className="stylt">{formattedTotals?.customerTotalUSD}</td>
               </tr>
@@ -462,12 +462,9 @@ const PdaDialog = ({
           <div>
             <div className="col-1 note">Note</div>
             <div className="subnote">
-              **“Effective from 16th April 2021, 5% of VAT will applicable as
-              per new Government regulation in the Sultanate of Oman."
-              <br />
-              ***Denotes estimated charges and actual as per port bills <br />
-              ****Agency fess does not include Immarsat calls or telexes. If
-              necessary will be charged out of costs
+              {/* {companyBankDetails?.anchorageStayRemark}
+              <br /> */}
+              {companyBankDetails?.quotationPDFNotes} <br />
             </div>
           </div>
 
@@ -496,15 +493,14 @@ const PdaDialog = ({
                         <td className="stylk">{index + 1}</td>
                         <td className="stylk">{item?.days}</td>
                         <td className="stylm">{item?.description}</td>
-                        <td className="stylq">{item?.chargeOMR?.toFixed(2)}</td>
+                        <td className="stylq">{item?.chargeOMR?.toFixed(3)}</td>
                         <td className="stylq">{item?.chargeUSD?.toFixed(2)}</td>
                       </tr>
                     ))}
 
                     <tr>
                       <td colSpan="6" className="styln">
-                        Vessels waiting at anchorage due non-availability of
-                        berth shall not be charged anchorage fees.
+                        {companyBankDetails?.anchorageStayRemark}
                       </td>
                     </tr>
                   </tbody>
@@ -555,8 +551,7 @@ const PdaDialog = ({
 
                     <tr>
                       <td colSpan="6" className="styln">
-                        Vessels waiting at anchorage due non-availability of
-                        berth shall not be charged anchorage fees.
+                        {companyBankDetails?.anchorageStayRemark}
                       </td>
                     </tr>
                   </tbody>
@@ -574,8 +569,8 @@ const PdaDialog = ({
               <br /> TRANS OCEAN MARITIME SERVICES LLC
               <br /> {companyBankDetails?.bankName}
               <br /> {companyBankDetails?.bankAddress}
-              <br /> A/C NUMBER:- {companyBankDetails?.accountNumberOMR} (OMR)
-              <br /> IBAN:- {companyBankDetails?.ibanOMR} (OMR)
+              <br /> A/C NUMBER:- {companyBankDetails?.accountNumberOMR} (AED)
+              <br /> IBAN:- {companyBankDetails?.ibanOMR} (AED)
               <br /> A/C NUMBER:-{companyBankDetails?.accountNumberUSD} (USD)
               <br /> IBAN:- {companyBankDetails?.ibanUSD} (USD)
               <br /> SWIFT CODE: - {companyBankDetails?.swiftCode}

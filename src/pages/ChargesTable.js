@@ -277,7 +277,7 @@ const ChargesTable = ({
                               : "tableheadcolor"
                           }
                         >
-                          Amount (OMR)
+                          Amount (AED)
                         </th>
                         <th
                           className={
@@ -528,7 +528,7 @@ const ChargesTable = ({
                               : "tableheadcolor"
                           }
                         >
-                          Amount (OMR)
+                          Amount (AED)
                         </th>
                         <th
                           className={

@@ -558,7 +558,7 @@ const AddCustomerPayment = ({
                       className="form-label"
                     >
                       {" "}
-                      Total Paid Amount(OMR):
+                      Total Paid Amount(AED):
                     </label>
                   ) : (
                     <label
@@ -566,7 +566,7 @@ const AddCustomerPayment = ({
                       className="form-label"
                     >
                       {" "}
-                      Balance Dues(OMR):
+                      Balance Dues(AED):
                     </label>
                   )}
                   <input
@@ -791,7 +791,7 @@ const AddCustomerPayment = ({
                 <div className="col-6 mb-3 align-items-start">
                   <div className="">
                     <label htmlFor="discountAmount" className="form-label">
-                      Discount (OMR)
+                      Discount (AED)
                     </label>
                     <input
                       name="discountAmount"

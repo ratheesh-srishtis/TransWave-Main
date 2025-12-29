@@ -620,11 +620,11 @@ const VendorPayments = () => {
 
         <div className="paymeamount">
           <div className=" d-flex">
-            <div className="totalinvocie"> Total Invoice Amount(OMR):</div>{" "}
+            <div className="totalinvocie"> Total Invoice Amount(AED):</div>{" "}
             <div className="amountpayment"> {totalInvoiceAmount} </div>
           </div>
           <div className=" d-flex">
-            <div className="totalinvocie"> Paid Amount(OMR):</div>{" "}
+            <div className="totalinvocie"> Paid Amount(AED):</div>{" "}
             <div className="amountpayment"> {paidAmount} </div>
           </div>
           <div className=" d-flex">
@@ -632,7 +632,7 @@ const VendorPayments = () => {
             <div className="amountpayment"> {discountAmount} </div>
           </div>
           <div className=" d-flex">
-            <div className="totalinvocie"> Balance Amount(OMR):</div>{" "}
+            <div className="totalinvocie"> Balance Amount(AED):</div>{" "}
             <div className="amountpayment"> {balanceAmount} </div>
           </div>
           {/*<div className=" ">
