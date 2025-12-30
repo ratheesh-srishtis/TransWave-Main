@@ -148,7 +148,7 @@ const CostCenterBreakup = () => {
       sortable: false,
       renderCell: (params) =>
         params.value && !isNaN(params.value)
-          ? `OMR ${Number(params.value).toFixed(3)}`
+          ? `OMR ${Number(params.value).toFixed(2)}`
           : "",
     },
     {
@@ -269,7 +269,7 @@ const CostCenterBreakup = () => {
             ? service[vatKeys[idx]]
             : parseFloat(service[vatKeys[idx]]) || 0;
         if (vendorNames[idx]) {
-          return (omr + vat).toFixed(3);
+          return (omr + vat).toFixed(2);
         }
         return null;
       })
@@ -283,7 +283,7 @@ const CostCenterBreakup = () => {
           service.customerOMR +
           service.customerVAT -
           service?.creditNote
-        ).toFixed(3)}`,
+        ).toFixed(2)}`,
         Purchase:
           vendorNames.length > 1
             ? vendorNames.map((name, idx) => `${idx + 1}. ${name}`).join("\n")
@@ -440,7 +440,7 @@ const CostCenterBreakup = () => {
               : parseFloat(service[vatKeys[idx]]) || 0;
           // Show value even if 0, if vendor name exists
           if (vendorNames[idx]) {
-            return `OMR ${(omr + vat).toFixed(3)}`;
+            return `OMR ${(omr + vat).toFixed(2)}`;
           }
           return null;
         })
@@ -462,7 +462,7 @@ const CostCenterBreakup = () => {
       invoiceDisplay: "Total Amount",
       customerAmount: totalCustomerAmount,
       vendorName: "Total Amount",
-      vendorAmount: totalVendorAmount?.toFixed(3),
+      vendorAmount: totalVendorAmount?.toFixed(2),
       isFooter: true,
     },
     {
@@ -574,7 +574,7 @@ const CostCenterBreakup = () => {
               ? service[vatKeys[idx]]
               : parseFloat(service[vatKeys[idx]]) || 0;
           if (vendorNames[idx]) {
-            return `OMR ${(omr + vat).toFixed(3)}`;
+            return `OMR ${(omr + vat).toFixed(2)}`;
           }
           return null;
         })
@@ -596,7 +596,7 @@ const CostCenterBreakup = () => {
           service.customerOMR +
           service.customerVAT -
           service.creditNote
-        ).toFixed(3)}`,
+        ).toFixed(2)}`,
         purchase: vendorNamesDisplay,
         vendorAmount: vendorAmountsDisplay,
       });
@@ -632,9 +632,9 @@ const CostCenterBreakup = () => {
     // Totals row
     const totalRow = worksheet.addRow({
       sales: "Total Amount",
-      customerAmount: `OMR ${totalCustomerAmount.toFixed(3)}`,
+      customerAmount: `OMR ${totalCustomerAmount.toFixed(2)}`,
       purchase: "Total Amount",
-      vendorAmount: `OMR ${totalVendorAmount.toFixed(3)}`,
+      vendorAmount: `OMR ${totalVendorAmount.toFixed(2)}`,
     });
     totalRow.eachCell((cell) => {
       cell.font = { bold: true };
@@ -656,7 +656,7 @@ const CostCenterBreakup = () => {
       sales: "",
       customerAmount: "",
       purchase: profitOrLoss >= 0 ? "Profit" : "Loss",
-      vendorAmount: `OMR ${Number(profitOrLoss).toFixed(3)}`,
+      vendorAmount: `OMR ${Number(profitOrLoss).toFixed(2)}`,
     });
     profitLossRow.eachCell((cell, colNumber) => {
       const isValueCell = colNumber === 3 || colNumber === 4;

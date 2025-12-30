@@ -249,7 +249,7 @@ const ResponsiveDialog = ({
       setCreditNote(value);
       setIsUserInput(false);
       console.log(originalCustomerAmount, "originalCustomerAmount");
-      setCustomerAmount((originalCustomerAmount - value)?.toFixed(3)); // adjust from original
+      setCustomerAmount((originalCustomerAmount - value)?.toFixed(2)); // adjust from original
     }
   };
 
@@ -705,7 +705,7 @@ const ResponsiveDialog = ({
       setCustomerTotalUSD(customer_total_usd.toFixed(2));
     }
     let total = Number(customerAmount) + Number(customerVatAmount);
-    setCustomerTotalOmr(total.toFixed(3));
+    setCustomerTotalOmr(total.toFixed(2));
   }, [customerAmount, customerVatAmount, isUserInput]);
 
   // Reset the user input flag whenever the value is updated programmatically
@@ -725,7 +725,7 @@ const ResponsiveDialog = ({
       setVendorTotalUSD(vendor_total_usd.toFixed(2));
     }
     let total = Number(vendorAmount) + Number(vendorVatAmount);
-    setVendorTotalOmr(total.toFixed(3));
+    setVendorTotalOmr(total.toFixed(2));
   }, [vendorAmount, vendorVatAmount, isVendorUserInput]);
 
   // useEffect(() => {
@@ -1550,7 +1550,7 @@ const ResponsiveDialog = ({
                                 Amount ({brandConfig?.currencyName}):
                               </span>
                               <span className="subvalue">
-                                {charge.customerOMR.toFixed(3)}
+                                {charge.customerOMR.toFixed(2)}
                               </span>
                             </div>
                             <div className="omr col-6">
@@ -1558,20 +1558,20 @@ const ResponsiveDialog = ({
                                 Amount ({brandConfig?.currencyName}):
                               </span>
                               <span className="subvalue">
-                                {charge.vendorOMR.toFixed(3)}
+                                {charge.vendorOMR.toFixed(2)}
                               </span>
                             </div>
 
                             <div className="vat col-6 table_seperation">
                               <span className="marinehead">VAT Amount:</span>
                               <span className="subvalue">
-                                {charge.customerVAT.toFixed(3)}
+                                {charge.customerVAT.toFixed(2)}
                               </span>
                             </div>
                             <div className="vat col-6">
                               <span className="marinehead">VAT Amount:</span>
                               <span className="subvalue">
-                                {charge.vendorVAT.toFixed(3)}
+                                {charge.vendorVAT.toFixed(2)}
                               </span>
                             </div>
 
@@ -1583,7 +1583,7 @@ const ResponsiveDialog = ({
                                 {(
                                   Number(charge.customerOMR) +
                                   Number(charge.customerVAT)
-                                ).toFixed(3)}
+                                ).toFixed(2)}
                               </span>
                             </div>
                             <div className="omr col-6">
@@ -1594,7 +1594,7 @@ const ResponsiveDialog = ({
                                 {(
                                   Number(charge.vendorOMR) +
                                   Number(charge.vendorVAT)
-                                ).toFixed(3)}
+                                ).toFixed(2)}
                               </span>
                             </div>
 
