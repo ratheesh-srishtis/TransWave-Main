@@ -243,7 +243,7 @@ const Payments = () => {
           <div className="col-lg-6 col-md-6 col-sm-12">
             <div className="mb-3">
               {/* {permissions.includes("receivables") && (
-                
+               
               )} */}
               <>
                 <label
@@ -272,6 +272,9 @@ const Payments = () => {
           </div>
           <div className="col-lg-6 col-md-6 col-sm-12">
             <div className="mb-3">
+              {/* {permissions.includes("payables") && (
+            
+              )} */}
               <>
                 <label
                   htmlFor="exampleFormControlInput1"
@@ -295,9 +298,6 @@ const Payments = () => {
                   />
                 </div>
               </>
-              {/* {permissions.includes("payables") && (
-              
-              )} */}
             </div>
           </div>
         </div>
@@ -347,7 +347,7 @@ const Payments = () => {
           <div className="col-lg-6 col-md-6 col-sm-12">
             <div className="mb-3">
               {/* {permissions.includes("employee petty") && (
-                
+               
               )} */}
               <>
                 <label
