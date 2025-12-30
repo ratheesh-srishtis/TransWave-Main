@@ -624,7 +624,6 @@ const AddCustomerPayment = ({
                     value={formData.currency}
                   >
                     <option value="">Choose Currency </option>
-                    <option value={"omr"}>OMR </option>
                     <option value="usd">USD </option>
                     <option value="aed">AED </option>
                   </select>
