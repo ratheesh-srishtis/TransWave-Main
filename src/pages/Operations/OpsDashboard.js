@@ -5,6 +5,7 @@ import { getAllJobs, deleteQuotation } from "../../services/apiService";
 import Loader from "../Loader";
 import Swal from "sweetalert2";
 import PopUp from "../PopUp";
+import { useAuth } from "../../context/AuthContext";
 const OpsDashboard = () => {
   const Group = require("../../assets/images/hugeicons_new-job.png");
   const [jobsList, setJobsList] = useState([]); // Loader state
@@ -16,14 +17,48 @@ const OpsDashboard = () => {
   const [isLoading, setIsLoading] = useState(false); // Loader state
   const [openPopUp, setOpenPopUp] = useState(false);
   const [message, setMessage] = useState("");
+  const { loginResponse } = useAuth();
+  console.log(loginResponse, "loginResponse_OpsList");
   const fetchAllJObs = async (type, status, searchValue) => {
     setSelectedTab(type);
     try {
       setIsLoading(true);
+      // let userData = {
+      //   filter: type, // Always include the filter
+      //   statusFilter: status, // Include statusFilter if selectedStatus has a value
+      //   searchKey: searchValue, // Include searchKey if searchTerm has a value
+      // };
       let userData = {
-        filter: type, // Always include the filter
-        statusFilter: status, // Include statusFilter if selectedStatus has a value
-        searchKey: searchValue, // Include searchKey if searchTerm has a value
+        filter: type,
+        assignedEmployee: (() => {
+          // First check: if roleType is not "operations", return ""
+          if (
+            loginResponse?.data?.userRole?.roleType?.toLowerCase() !==
+            "operations"
+          ) {
+            return "";
+          }
+
+          // If roleType is "operations", check designationType
+          const designationType =
+            loginResponse?.data?.userRole?.role?.designationType?.toLowerCase();
+
+          // If designationType is "operationsmanager" or "operationshead", return ""
+          if (
+            ["operationsmanager", "operationshead"].includes(designationType)
+          ) {
+            return "";
+          }
+
+          // If designationType is empty (""), return the user ID
+          // Note: If you meant roleType instead of _id, you can change this line
+          if (!designationType || designationType === "") {
+            return loginResponse?.data?._id;
+          }
+
+          // Default fallback
+          return "";
+        })(),
       };
       const quotations = await getAllJobs(userData);
       console.log("Quotations:", quotations);

@@ -44,6 +44,7 @@
 
   .dashboard_cards {
     margin-bottom: 15px;
+    cursor: pointer;
   }
 
   /* .header--wrapper {
@@ -94,6 +95,7 @@
 @media (min-width: 992px) and (max-width: 1199.98px) {
   .dashboard_cards {
     padding: 10px;
+    cursor: pointer;
   }
 
   .img-size {

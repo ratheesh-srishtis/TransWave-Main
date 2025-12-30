@@ -367,7 +367,7 @@ const PettyCashReport = () => {
     try {
       const response = await getPettyCashReport(payload);
       setIsLoading(false); // Hide loader
-      setReportList(response?.result);
+      setReportList(response?.pettyData);
       console.log("getPettyCashReport", response);
     } catch (error) {
       console.error("Failed to fetch quotations:", error);
