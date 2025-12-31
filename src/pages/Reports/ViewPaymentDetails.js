@@ -282,7 +282,7 @@ const ViewPaymentDetails = ({ open, onClose, selectedRow }) => {
                   amount: p.amount,
                   currency: p.currency ? p.currency.toUpperCase() : "-",
                   exchangeLoss: p.exchangeLoss
-                    ? p.exchangeLoss.toFixed(3)
+                    ? p.exchangeLoss.toFixed(2)
                     : "0.000",
                   modeofPayment: p.modeofPayment,
                   paymentDate: p.paymentDate

@@ -1778,6 +1778,8 @@ const CreatePDA = ({
                           paddingBottom: "5px",
                           paddingTop: "5px",
                           textAlign: "center",
+                          width: "40px",
+                          marginLeft: "5px"
                         }}
                         className="form-control vessel-voyage voyageblock timespace"
                         id="etaHours"
@@ -1792,6 +1794,8 @@ const CreatePDA = ({
                           paddingBottom: "5px",
                           paddingTop: "5px",
                           textAlign: "center",
+                          width: "40px",
+                          marginLeft: "5px"
                         }}
                         className="form-control vessel-voyage voyageblock timespace"
                         id="etaMinutes"
@@ -1856,6 +1860,8 @@ const CreatePDA = ({
                           paddingBottom: "5px",
                           paddingTop: "5px",
                           textAlign: "center",
+                          width: "40px",
+                          marginLeft: "5px"
                         }}
                         className="form-control vessel-voyage voyageblock timespace"
                         id="etdHours"
@@ -1870,6 +1876,8 @@ const CreatePDA = ({
                           paddingBottom: "5px",
                           paddingTop: "5px",
                           textAlign: "center",
+                          width: "40px",
+                          marginLeft: "5px"
                         }}
                         className="form-control vessel-voyage voyageblock timespace"
                         id="etdMinutes"
@@ -1896,7 +1904,7 @@ const CreatePDA = ({
                 )}
               </div>
 
-              <div className="col-lg-2 col-md-6 col-sm-12 nrt mb-3">
+              <div className="col-lg-2 col-md-6 col-sm-12 nrt mb-3" style={{ marginLeft: "5px" }}>
                 <label
                   htmlFor="exampleFormControlInput1"
                   className="form-label"
@@ -1904,7 +1912,7 @@ const CreatePDA = ({
                   Cargo Capacity:<span className="required"> * </span>
                 </label>
                 <input
-                  type="text"
+                  type="text" style={{ marginLeft: "5px" }}
                   name="cargoCapacity"
                   className="form-control vessel-voyage voyageblock"
                   id="exampleFormControlInput1"

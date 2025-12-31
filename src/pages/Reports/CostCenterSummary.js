@@ -126,7 +126,7 @@ const CostCenterSummary = ({ ports, customers }) => {
         }
         return sum + vendorTotal;
       }, 0);
-      const profitOrLoss = (totalCustomerAmount - totalVendorAmount).toFixed(3);
+      const profitOrLoss = (totalCustomerAmount - totalVendorAmount).toFixed(2);
       createNewExcel(
         response?.pdaServices,
         response?.pda?.invoiceId,
@@ -208,7 +208,7 @@ const CostCenterSummary = ({ ports, customers }) => {
               ? service[vatKeys[idx]]
               : parseFloat(service[vatKeys[idx]]) || 0;
           if (vendorNames[idx]) {
-            return `OMR ${(omr + vat).toFixed(3)}`;
+            return `OMR ${(omr + vat).toFixed(2)}`;
           }
           return null;
         })
@@ -228,7 +228,7 @@ const CostCenterSummary = ({ ports, customers }) => {
         sales: index === 0 ? `Invoice No : ${invoiceId}` : "",
         customerAmount: `OMR ${(
           service.customerOMR + service.customerVAT
-        ).toFixed(3)}`,
+        ).toFixed(2)}`,
         purchase: vendorNamesDisplay,
         vendorAmount: vendorAmountsDisplay,
       });
@@ -264,9 +264,9 @@ const CostCenterSummary = ({ ports, customers }) => {
     // Totals row
     const totalRow = worksheet.addRow({
       sales: "Total Amount",
-      customerAmount: `OMR ${totalCustomerAmount.toFixed(3)}`,
+      customerAmount: `OMR ${totalCustomerAmount.toFixed(2)}`,
       purchase: "Total Amount",
-      vendorAmount: `OMR ${totalVendorAmount.toFixed(3)}`,
+      vendorAmount: `OMR ${totalVendorAmount.toFixed(2)}`,
     });
     totalRow.eachCell((cell) => {
       cell.font = { bold: true };
@@ -288,7 +288,7 @@ const CostCenterSummary = ({ ports, customers }) => {
       sales: "",
       customerAmount: "",
       purchase: profitOrLoss >= 0 ? "Profit" : "Loss",
-      vendorAmount: `OMR ${Number(profitOrLoss).toFixed(3)}`,
+      vendorAmount: `OMR ${Number(profitOrLoss).toFixed(2)}`,
     });
     profitLossRow.eachCell((cell, colNumber) => {
       const isValueCell = colNumber === 3 || colNumber === 4;
@@ -550,12 +550,12 @@ const CostCenterSummary = ({ ports, customers }) => {
     // Prepare rows for Excel
     const rowsData = reportList.map((item) => ({
       "Job No": item?.jobId || "N/A",
-      Sales: typeof item?.sales === "number" ? item.sales.toFixed(3) : "N/A",
+      Sales: typeof item?.sales === "number" ? item.sales.toFixed(2) : "N/A",
       Purchase:
-        typeof item?.purchase === "number" ? item.purchase.toFixed(3) : "N/A",
+        typeof item?.purchase === "number" ? item.purchase.toFixed(2) : "N/A",
       "Profit (or Loss)":
         typeof item?.sales === "number" && typeof item?.purchase === "number"
-          ? (item.sales - item.purchase).toFixed(3)
+          ? (item.sales - item.purchase).toFixed(2)
           : "N/A",
     }));
 
@@ -822,11 +822,11 @@ const CostCenterSummary = ({ ports, customers }) => {
                       ? reportList?.map((item, index) => ({
                           id: index, // Ensure each row has a unique id
                           jobId: item?.jobId,
-                          sales: item?.sales.toFixed(3) || "N/A", // Ensure employee is a string
-                          purchase: item.purchase.toFixed(3) ?? "N/A",
+                          sales: item?.sales.toFixed(2) || "N/A", // Ensure employee is a string
+                          purchase: item.purchase.toFixed(2) ?? "N/A",
                           profitOrLoss:
                             item?.sales && item?.purchase
-                              ? (item.sales - item.purchase).toFixed(3)
+                              ? (item.sales - item.purchase).toFixed()
                               : "N/A",
                           pdaId: item?._id,
                         }))

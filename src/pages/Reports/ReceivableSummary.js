@@ -224,7 +224,7 @@ const ReceivableSummary = () => {
     const customer = report.customer.length > 0 ? report.customer[0] : null;
     let totalAmount = Number(report.totalAmountOMR) || 0;
     let paidAmount = Number(report.paidOMR) || 0;
-    const amountOMR = (totalAmount - paidAmount).toFixed(3);
+    const amountOMR = (totalAmount - paidAmount).toFixed(2);
     const remark = customer ? customer.reportRemark : "";
     const remarkDate =
       remark && customer?.remarkDate
@@ -616,7 +616,7 @@ const ReceivableSummary = () => {
       const amountOMR =
         typeof report.totalAmountOMR === "number" &&
         typeof report.paidOMR === "number"
-          ? (report.totalAmountOMR - report.paidOMR).toFixed(3)
+          ? (report.totalAmountOMR - report.paidOMR).toFixed(2)
           : "0.000";
       const remark = customer ? customer.reportRemark : "";
       const remarkDate =

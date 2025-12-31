@@ -203,6 +203,7 @@ const PettyCashReport = () => {
         "Total Petty": usedPetties ?? "N/A",
         "Used Petties": item.totalPetty,
         "Balance Petties": balancePetties,
+
       };
     });
     // Add totals row
@@ -401,6 +402,7 @@ const PettyCashReport = () => {
                   totalPetty: usedPetties ?? "N/A",
                   usedPetties: item.totalPetty,
                   balancePetties: balancePetties,
+
                 };
               })
             : []
