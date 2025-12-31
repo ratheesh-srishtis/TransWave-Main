@@ -49,20 +49,20 @@ const Sidebar = () => {
   ];
   const handleNavigation = (menuItem) => {
     console.log(menuItem, "menuItem");
-  if (menuArr.includes(menuItem)) {
-    setShowSubmenu(false);
-    setActiveSubMenu("");
-  } else {
-    setShowSubmenu((prev) => !prev);
-    if (menuItem != "settings") setActiveSubMenu(menuItem);
-  }
-  
-  // Only set active menu for settings submenu items, let useEffect handle route-based activation
-  if (!menuArr.includes(menuItem)) {
-    setActiveMenu(menuItem);
-  }
-  
-  console.log(menuItem, "handleNavigation");
+    if (menuArr.includes(menuItem)) {
+      setShowSubmenu(false);
+      setActiveSubMenu("");
+    } else {
+      setShowSubmenu((prev) => !prev);
+      if (menuItem != "settings") setActiveSubMenu(menuItem);
+    }
+
+    // Only set active menu for settings submenu items, let useEffect handle route-based activation
+    if (!menuArr.includes(menuItem)) {
+      setActiveMenu(menuItem);
+    }
+
+    console.log(menuItem, "handleNavigation");
 
     switch (menuItem) {
       case "dashboard":
@@ -183,44 +183,48 @@ const Sidebar = () => {
     setCurrentPath(formattedPath);
     console.log(formattedPath, "formatted_path"); // Output: /jobs
 
-      // Map route paths to menu keys
-  const routeToMenuMap = {
-    '/dashboard': 'dashboard',
-    '/quotations': 'quotations', 
-    '/jobs': 'jobs',
-    '/payments': 'payments',
-    '/soa': 'soa',
-    '/profile': 'profile',
-    '/leave': 'leave',
-    '/employee': 'employee',
-    '/leavereports': 'leave reports',
-    '/reports': 'report',
-    '/general-documents': 'General Documents',
-    '/update-employee-info': 'Update Employee Info',
-    '/leave-requests': 'Leave Requests'
-  };
+    // Map route paths to menu keys
+    const routeToMenuMap = {
+      "/dashboard": "dashboard",
+      "/quotations": "quotations",
+      "/jobs": "jobs",
+      "/payments": "payments",
+      "/soa": "soa",
+      "/profile": "profile",
+      "/leave": "leave",
+      "/employee": "employee",
+      "/leavereports": "leave reports",
+      "/reports": "report",
+      "/general-documents": "General Documents",
+      "/update-employee-info": "Update Employee Info",
+      "/leave-requests": "Leave Requests",
+    };
 
+    // Set active menu based on current route
+    const currentRoute = formattedPath;
+    const menuKey = routeToMenuMap[currentRoute];
 
-     // Set active menu based on current route
-  const currentRoute = formattedPath;
-  const menuKey = routeToMenuMap[currentRoute];
-  
-  if (menuKey) {
-    setActiveMenu(menuKey);
-    // If it's a settings route, also handle submenu
-    if (currentRoute.includes('-settings') || currentRoute.includes('anchorage-locations') || 
-        currentRoute.includes('password-requests') || currentRoute.includes('anchorage-stay-charges') || 
-        currentRoute.includes('aed-conversion-rate') || currentRoute.includes('company-bank-info') || 
-        currentRoute.includes('media-settings')) {
-      setActiveMenu('settings');
-      setActiveSubMenu(finalPart);
-      setShowSubmenu(true);
+    if (menuKey) {
+      setActiveMenu(menuKey);
+      // If it's a settings route, also handle submenu
+      if (
+        currentRoute.includes("-settings") ||
+        currentRoute.includes("anchorage-locations") ||
+        currentRoute.includes("password-requests") ||
+        currentRoute.includes("anchorage-stay-charges") ||
+        currentRoute.includes("aed-conversion-rate") ||
+        currentRoute.includes("company-bank-info") ||
+        currentRoute.includes("media-settings")
+      ) {
+        setActiveMenu("settings");
+        setActiveSubMenu(finalPart);
+        setShowSubmenu(true);
+      }
     }
-  }
 
-  if (formattedPath === "/chats") {
-    setActiveMenu("");
-  }
+    if (formattedPath === "/chats") {
+      setActiveMenu("");
+    }
   }, [location.pathname]); // Run effect whenever path changes
 
   // useEffect(() => {

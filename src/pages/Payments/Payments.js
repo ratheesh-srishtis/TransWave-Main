@@ -242,62 +242,60 @@ const Payments = () => {
         <div className="row ">
           <div className="col-lg-6 col-md-6 col-sm-12">
             <div className="mb-3">
-              {/* {permissions.includes("receivables") && (
-               
-              )} */}
-              <>
-                <label
-                  htmlFor="exampleFormControlInput1"
-                  className="form-label customerpayment"
-                >
-                  Customer Payments:
-                </label>
-                <div className="vessel-select">
-                  <Select
-                    options={customerOptions}
-                    onChange={handleCustomerSelectChange}
-                    value={customerOptions.find(
-                      (opt) => opt.value === formData.customers
-                    )}
-                    placeholder="Search Customer Name"
-                    isClearable
-                    isSearchable
-                    styles={customSelectStyles}
-                    className="paymentcustomer"
-                    classNamePrefix="react-select"
-                  />
-                </div>
-              </>
+              {permissions.includes("receivables") && (
+                <>
+                  <label
+                    htmlFor="exampleFormControlInput1"
+                    className="form-label customerpayment"
+                  >
+                    Customer Payments:
+                  </label>
+                  <div className="vessel-select">
+                    <Select
+                      options={customerOptions}
+                      onChange={handleCustomerSelectChange}
+                      value={customerOptions.find(
+                        (opt) => opt.value === formData.customers
+                      )}
+                      placeholder="Search Customer Name"
+                      isClearable
+                      isSearchable
+                      styles={customSelectStyles}
+                      className="paymentcustomer"
+                      classNamePrefix="react-select"
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
           <div className="col-lg-6 col-md-6 col-sm-12">
             <div className="mb-3">
-              {/* {permissions.includes("payables") && (
-            
-              )} */}
-              <>
-                <label
-                  htmlFor="exampleFormControlInput1"
-                  className="form-label customerpayment"
-                >
-                  Vendor Payments:
-                </label>
-                <div className="vessel-select">
-                  <Select
-                    options={vendorOptions}
-                    onChange={handleVendorSelectChange}
-                    value={vendorOptions.find(
-                      (opt) => opt.value === formData.vendors
-                    )}
-                    placeholder="Search Vendor Name"
-                    isClearable
-                    isSearchable
-                    styles={customSelectStyles}
-                    className="paymentcustomer"
-                    classNamePrefix="react-select"
-                  />
-                </div>
-              </>
+              {permissions.includes("payables") && (
+                <>
+                  <label
+                    htmlFor="exampleFormControlInput1"
+                    className="form-label customerpayment"
+                  >
+                    Vendor Payments:
+                  </label>
+                  <div className="vessel-select">
+                    <Select
+                      options={vendorOptions}
+                      onChange={handleVendorSelectChange}
+                      value={vendorOptions.find(
+                        (opt) => opt.value === formData.vendors
+                      )}
+                      placeholder="Search Vendor Name"
+                      isClearable
+                      isSearchable
+                      styles={customSelectStyles}
+                      className="paymentcustomer"
+                      classNamePrefix="react-select"
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -307,18 +305,16 @@ const Payments = () => {
         <div className="row ">
           <div className="col-lg-6 col-md-6 col-sm-12">
             <div className="mb-3">
-              {/* {permissions.includes("petty") && (
-                
-              )} */}
-              <>
-                <label
-                  htmlFor="exampleFormControlInput1"
-                  className="form-label customerpayment"
-                >
-                  Petty Cash Payments:
-                </label>
-                <div className="vessel-select ">
-                  {/* <select
+              {permissions.includes("petty") && (
+                <>
+                  <label
+                    htmlFor="exampleFormControlInput1"
+                    className="form-label customerpayment"
+                  >
+                    Petty Cash Payments:
+                  </label>
+                  <div className="vessel-select ">
+                    {/* <select
                       name="voucher"
                       onChange={handleChange}
                       value={formData.voucher}
@@ -331,47 +327,47 @@ const Payments = () => {
                         </option>
                       ))}
                     </select> */}
-                  <button
-                    className="btn btna submit-button mt-2"
-                    onClick={() => {
-                      viewPettyCashPayment();
-                    }}
-                  >
-                    View Petty Cash Payments
-                  </button>
-                </div>
-              </>
+                    <button
+                      className="btn btna submit-button mt-2"
+                      onClick={() => {
+                        viewPettyCashPayment();
+                      }}
+                    >
+                      View Petty Cash Payments
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
           <div className="col-lg-6 col-md-6 col-sm-12">
             <div className="mb-3">
-              {/* {permissions.includes("employee petty") && (
-               
-              )} */}
-              <>
-                <label
-                  htmlFor="exampleFormControlInput1"
-                  className="form-label customerpayment"
-                >
-                  Employee Petty Payments:
-                </label>
-                <div className="vessel-select">
-                  <Select
-                    options={employeeOptions}
-                    onChange={handleEmployeeSelectChange}
-                    value={employeeOptions.find(
-                      (opt) => opt.value === formData.finaceEmp
-                    )}
-                    placeholder="Search Employee Name"
-                    isClearable
-                    isSearchable
-                    styles={customSelectStyles}
-                    className="paymentcustomer"
-                    classNamePrefix="react-select"
-                  />
-                </div>
-              </>
+              {permissions.includes("employee petty") && (
+                <>
+                  <label
+                    htmlFor="exampleFormControlInput1"
+                    className="form-label customerpayment"
+                  >
+                    Employee Petty Payments:
+                  </label>
+                  <div className="vessel-select">
+                    <Select
+                      options={employeeOptions}
+                      onChange={handleEmployeeSelectChange}
+                      value={employeeOptions.find(
+                        (opt) => opt.value === formData.finaceEmp
+                      )}
+                      placeholder="Search Employee Name"
+                      isClearable
+                      isSearchable
+                      styles={customSelectStyles}
+                      className="paymentcustomer"
+                      classNamePrefix="react-select"
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
