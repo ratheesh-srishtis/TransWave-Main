@@ -279,7 +279,7 @@ const Login = () => {
           </p>
         </div>
         <div className="d-flex justify-content-center loginpageversion">
-          Version: 0.024
+          Version: 0.025
         </div>
       </div>
 
