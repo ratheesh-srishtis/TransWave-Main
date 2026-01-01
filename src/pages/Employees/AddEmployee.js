@@ -1571,6 +1571,7 @@ const AddEmployee = () => {
                     name="passportdetail_expiry"
                     onChange={handleChange}
                     value={formData.passportdetail_expiry}
+                    min={new Date().toISOString().split("T")[0]}
                   />
                 </div>
                 <div className="col-5">
