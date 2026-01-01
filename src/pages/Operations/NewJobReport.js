@@ -255,6 +255,10 @@ const NewJobReport = ({ ports, loginResponse }) => {
     return matchesSearchTerm && matchesStatus && matchesPort;
   });
 
+  useEffect(() => {
+    console.log(filteredQuotations, "filteredQuotations");
+  }, [filteredQuotations]);
+
   const columns = [
     {
       field: "JobId",
@@ -674,7 +678,7 @@ const NewJobReport = ({ ports, loginResponse }) => {
           ?.map((job) => job.service?.[0]?.serviceName || "N/A")
           ?.join(", ") || "N/A",
       "Port Name": item.portId?.[0]?.portName || "N/A",
-      "Ops By": item.assignedEmployee?.[0]?.name || "N/A",
+      "Ops By": item.assignedEmployeeName?.[0]?.name || "N/A",
       Status:
         item.pdaStatus === 5
           ? "Customer Approved"

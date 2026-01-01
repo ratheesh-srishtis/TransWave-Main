@@ -65,6 +65,28 @@ const PettyCashReport = () => {
     </Box>
   );
 
+  const [dateRange, setDateRange] = useState([null, null]);
+  const [startDate, endDate] = dateRange;
+
+  const [formattedStart, setFormattedStart] = useState("");
+  const [formattedEnd, setFormattedEnd] = useState("");
+
+  // Format to YYYY-MM-DD (in local time)
+  const formatDate = (date) => {
+    if (!date) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // months are 0-based
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+  useEffect(() => {
+    setFormattedStart(formatDate(startDate));
+    setFormattedEnd(formatDate(endDate));
+
+    console.log("Formatted Start:", formatDate(startDate));
+    console.log("Formatted End:", formatDate(endDate));
+  }, [startDate, endDate]);
+
   const handleSelectChange = (event) => {
     const { name, value } = event.target;
     switch (name) {
@@ -123,17 +145,33 @@ const PettyCashReport = () => {
   const handleMonthChange = (event) => {
     const newMonth = event.target.value;
     setSelectedMonth(newMonth);
+    setPaymentDate("");
+    setFormattedStart("");
+    setFormattedEnd("");
+    setDateRange([null, null]);
   };
 
   const handleYearChange = (event) => {
     const newYear = parseInt(event.target.value, 10);
     console.log(newYear, "newYear_handleYearChange");
     setSelectedYear(newYear);
+    setPaymentDate("");
+    setFormattedStart("");
+    setFormattedEnd("");
+    setDateRange([null, null]);
   };
 
   const handleFilterTypeChange = (event) => {
     const newFilterType = event.target.value;
+    if (newFilterType == "year") {
+      setSelectedYear(new Date().getFullYear());
+    } else if (newFilterType == "month") {
+      setSelectedMonth((new Date().getMonth() + 1).toString());
+    }
     setFilterType(newFilterType);
+    setPaymentDate("");
+    setFormattedStart("");
+    setDateRange([null, null]);
   };
 
   const getReport = async () => {
@@ -203,7 +241,6 @@ const PettyCashReport = () => {
         "Total Petty": usedPetties ?? "N/A",
         "Used Petties": item.totalPetty,
         "Balance Petties": balancePetties,
-
       };
     });
     // Add totals row
@@ -399,10 +436,9 @@ const PettyCashReport = () => {
                 return {
                   id: index,
                   employee: item?.employee?.[0]?.name || "N/A",
-                  totalPetty: usedPetties ?? "N/A",
-                  usedPetties: item.totalPetty,
-                  balancePetties: balancePetties,
-
+                  totalPetty: usedPetties?.toFixed(2) ?? "N/A",
+                  usedPetties: item.totalPetty?.toFixed(2),
+                  balancePetties: balancePetties?.toFixed(2),
                 };
               })
             : []
