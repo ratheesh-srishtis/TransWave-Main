@@ -214,10 +214,10 @@ const ViewVoucher = ({ open, onClose, getvoucher }) => {
                   </tr>
                   <tr>
                     <td className="voucherprinting">
-                      {getWordRepresentation(amount, "OMR")}
+                      {getWordRepresentation(amount, "AED")}
                     </td>
                     <td className="voucheramountrate text-center">
-                      OMR{" "}
+                      AED{" "}
                       {amount !== undefined &&
                       amount !== null &&
                       !isNaN(Number(amount))
