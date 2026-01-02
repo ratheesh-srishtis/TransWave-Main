@@ -25,6 +25,21 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const menuToRoute = (menu) => {
+    if (!menu) return "/";
+
+    return (
+      "/" +
+      menu
+        .toLowerCase()
+        .trim()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "")
+    );
+  };
+
   const login = async (username, password, rememberMe) => {
     console.log(rememberMe, "rememberMe");
     setLoading(true);
@@ -41,10 +56,14 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem("transocean_token", response.token);
           localStorage.setItem("loginResponse", JSON.stringify(response)); // Save response to localStorage
           const sidemenu = response?.permission || [];
+          console.log(sidemenu, "sidemenu");
           setMessage("Logged in successfully!");
           setOpenPopUp(true);
           setIsAuthenticated(true);
-          navigate("/" + sidemenu[0]);
+          if (sidemenu.length > 0) {
+            navigate(menuToRoute(sidemenu[0]));
+          }
+          // navigate("/" + sidemenu[0]);
         } else {
           setMessage("Login failed. Please try again");
           setOpenPopUp(true);
